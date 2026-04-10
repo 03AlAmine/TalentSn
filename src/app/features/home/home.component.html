@@ -1,0 +1,285 @@
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  HERO SECTION                                                   -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="landing-hero">
+  <div class="hero-bg-animation">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  
+  <div class="hero-inner">
+    <!-- Texte gauche -->
+    <div class="hero-left">
+      <div class="hero-kicker">
+        <span class="pulse-dot"></span>
+        Blockchain Polygon · IA Prédictive · Afrique de l'Ouest
+      </div>
+      <h1 class="hero-h1">
+        Le recrutement<br>
+        <em>sans fraude</em>,<br>
+        c'est maintenant.
+      </h1>
+      <p class="hero-p">
+        TalentSn certifie chaque diplôme sur la blockchain et utilise l'IA
+        pour matcher les meilleurs talents — plus vite, plus juste, plus fiable.
+      </p>
+      <div class="hero-actions">
+        <button class="btn-primary" routerLink="/register">
+          <i class="fas fa-rocket"></i>
+          Créer mon profil gratuit
+        </button>
+       
+      </div>
+      
+      <div class="hero-trust">
+        <div class="trust-badge">
+          <i class="fas fa-shield-alt"></i>
+          <span>Certifié ISO 27001</span>
+        </div>
+        <div class="trust-badge">
+          <i class="fas fa-lock"></i>
+          <span>Blockchain Polygon</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Carte droite — profils IA -->
+    <div class="hero-card">
+      <div class="hero-card-label">
+        <i class="fas fa-brain"></i>
+        Profils du jour — triés par IA
+        <span class="live-badge">LIVE</span>
+      </div>
+
+      <div class="profiles-container">
+        <div class="profile-row" *ngFor="let profile of topProfiles; let i = index" 
+             [style.animation-delay]="i * 0.1 + 's'"
+             (mouseenter)="onProfileHover(profile)"
+             (mouseleave)="onProfileLeave()">
+          <div class="av" [ngStyle]="{ background: profile.bg, color: profile.color }">
+            {{ profile.initials }}
+          </div>
+          <div class="profile-info">
+            <div class="profile-name">{{ profile.name }}</div>
+            <div class="profile-role">{{ profile.role }}</div>
+            <div class="profile-verified">
+              <i class="fas fa-certificate"></i>
+              Diplôme certifié blockchain
+            </div>
+          </div>
+          <div class="score-badge">
+            <svg class="score-ring" viewBox="0 0 36 36">
+              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
+                    fill="none" 
+                    [attr.stroke]="profile.score >= 90 ? '#1EC28B' : profile.score >= 80 ? '#F59E0B' : '#EF4444'"
+                    stroke-width="3"
+                    stroke-dasharray="100"
+                    [attr.stroke-dashoffset]="100 - profile.score"/>
+            </svg>
+            <span class="score-value">{{ profile.score }}<span class="percent">%</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-card" [class.active]="hoveredProfile">
+        <div class="ai-dot">
+          <span class="pulse"></span>
+        </div>
+        <div class="ai-text">
+          <strong>IA Coach :</strong> 
+          <span class="ai-message">{{ aiMessage }}</span>
+        </div>
+      </div>
+      
+      <div class="hero-card-footer">
+        <div class="stat-chip">
+          <i class="fas fa-chart-line"></i>
+          <span>Taux de matching moyen : <strong>87%</strong></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  STATS BAR — Compteur animé                                     -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat-item" *ngFor="let stat of stats; let i = index">
+      <div class="stat-num">
+        <span class="counter" [attr.data-target]="stat.rawValue">{{ stat.displayValue }}</span>
+        <span class="stat-suffix" *ngIf="stat.suffix">{{ stat.suffix }}</span>
+      </div>
+      <div class="stat-lbl">{{ stat.label }}</div>
+      <div class="stat-trend" *ngIf="stat.trend">
+        <i [class]="stat.trendIcon"></i>
+        <span>{{ stat.trend }}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  FEATURES SECTION                                               -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="features-section">
+  <div class="section-header">
+    <div class="section-eyebrow">
+      <span class="eyebrow-line"></span>
+      Pourquoi TalentSn
+    </div>
+    <h2 class="section-title">Conçu pour le <span class="gradient-text">marché africain</span></h2>
+    <p class="section-sub">Confiance technologique, efficacité IA, souveraineté des données</p>
+  </div>
+
+  <div class="features-grid">
+    <div class="feat-card" *ngFor="let feat of features; let i = index">
+      <div class="feat-icon" [ngClass]="feat.iconColor">
+        <i [class]="feat.iconClass"></i>
+      </div>
+      <h3>{{ feat.title }}</h3>
+      <p>{{ feat.description }}</p>
+      <div class="feat-hover-effect"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  TESTIMONIALS SECTION                                           -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="testimonials-section">
+  <div class="testimonials-inner">
+    <div class="section-header text-center">
+      <div class="section-eyebrow">Ils nous font confiance</div>
+      <h2 class="section-title">+300 entreprises <span class="gradient-text">innovantes</span></h2>
+    </div>
+    
+    <div class="testimonials-grid">
+      <div class="testimonial-card" *ngFor="let testimonial of testimonials; let i = index">
+        <div class="quote-icon">
+          <i class="fas fa-quote-left"></i>
+        </div>
+        <p class="testimonial-text">{{ testimonial.text }}</p>
+        <div class="testimonial-author">
+          <div class="author-avatar" [style.background]="testimonial.avatarBg">
+            {{ testimonial.authorInitials }}
+          </div>
+          <div class="author-info">
+            <div class="author-name">{{ testimonial.authorName }}</div>
+            <div class="author-title">{{ testimonial.authorTitle }}</div>
+          </div>
+        </div>
+        <div class="rating">
+          <i class="fas fa-star" *ngFor="let star of [1,2,3,4,5]"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  CTA SECTION FINALE                                             -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="cta-section">
+  <div class="cta-particles"></div>
+  <div class="cta-inner">
+    <h2 class="cta-title">Prêt à révolutionner votre <span class="gradient-text">recrutement</span> ?</h2>
+    <p class="cta-sub">Rejoignez les 10 000+ professionnels qui font confiance à TalentSn.</p>
+    <div class="cta-actions">
+      <button class="btn-primary btn-large" routerLink="/register">
+        <i class="fas fa-user-plus"></i>
+        Créer un compte gratuit
+        <span class="btn-badge">Gratuit</span>
+      </button>
+      <button class="btn-ghost btn-large" routerLink="/login">
+        <i class="fas fa-arrow-right-to-bracket"></i>
+        Se connecter
+      </button>
+    </div>
+    <div class="cta-note">
+      <i class="fas fa-check-circle"></i>
+      Aucune carte bancaire requise
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  FOOTER                                                         -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo">
+          <span class="logo-icon">⚡</span>
+          Talent<span class="logo-highlight">Sn</span>
+        </div>
+        <p>Sécurisez vos recrutements grâce à la blockchain et l'IA. L'avenir du travail commence ici.</p>
+        <div class="newsletter">
+          <p class="newsletter-title">Newsletter</p>
+          <div class="newsletter-form">
+            <input type="email" placeholder="Votre email" class="newsletter-input">
+            <button class="newsletter-btn">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="footer-col">
+        <h4><i class="fas fa-cube"></i> Plateforme</h4>
+        <ul class="footer-links">
+          <li><a href="#"><i class="fas fa-chevron-right"></i> Comment ça marche</a></li>
+          <li><a href="#"><i class="fas fa-chevron-right"></i> Pour les recruteurs</a></li>
+          <li><a href="#"><i class="fas fa-chevron-right"></i> Talents certifiés</a></li>
+          <li><a href="#"><i class="fas fa-chevron-right"></i> Tarifs</a></li>
+          <li><a href="#"><i class="fas fa-chevron-right"></i> API Développeurs</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-col">
+        <h4><i class="fas fa-chart-line"></i> Ressources</h4>
+        <ul class="footer-links">
+          <li><a href="#"><i class="fas fa-chevron-right"></i> Blog & IA insights</a></li>
+          <li><a href="#"><i class="fas fa-chevron-right"></i> Études de cas</a></li>
+          <li><a href="#"><i class="fas fa-chevron-right"></i> Webinaires</a></li>
+          <li><a href="#"><i class="fas fa-chevron-right"></i> Support technique</a></li>
+          <li><a href="#"><i class="fas fa-chevron-right"></i> Centre d'aide</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-col">
+        <h4><i class="fas fa-gavel"></i> Légal</h4>
+        <ul class="footer-links">
+          <li><a href="#"><i class="fas fa-shield"></i> Confidentialité</a></li>
+          <li><a href="#"><i class="fas fa-file-contract"></i> Conditions d'utilisation</a></li>
+          <li><a href="#"><i class="fas fa-database"></i> Souveraineté des données</a></li>
+          <li><a href="#"><i class="fas fa-cookie-bite"></i> Cookies</a></li>
+        </ul>
+        <div class="contact-info">
+          <a href="#" class="contact-email">
+            <i class="fas fa-envelope"></i> hello&#64;talentsn.com
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <div class="social-icons">
+        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-discord"></i></a>
+      </div>
+      <p>© 2025 TalentSn — Recrutement décentralisé & IA. Tous droits réservés.</p>
+      <div class="legal-links">
+        <a href="#">Mentions légales</a>
+        <a href="#">Accessibilité</a>
+        <a href="#">Plan du site</a>
+      </div>
+    </div>
+  </div>
+</footer>
