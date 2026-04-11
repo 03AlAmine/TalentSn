@@ -1,0 +1,309 @@
+<div class="onboarding-wrap">
+  <div class="onboarding-inner">
+    <div class="onboarding-header">
+      <div class="onboarding-logo">Talent<span>Sn</span></div>
+      <h1 class="onboarding-title">Construisez votre <em>profil IA</em></h1>
+      <p class="onboarding-sub">L'IA va générer votre CV complet à partir de vos informations</p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar-wrap">
+      <div class="progress-steps">
+        <div class="progress-step" [class.active]="currentStep === 1" [class.done]="currentStep > 1">
+          <div class="progress-dot">{{ currentStep > 1 ? '✓' : '1' }}</div>
+          <div class="progress-label">Expériences</div>
+        </div>
+        <div class="progress-step" [class.active]="currentStep === 2" [class.done]="currentStep > 2">
+          <div class="progress-dot">{{ currentStep > 2 ? '✓' : '2' }}</div>
+          <div class="progress-label">Formation</div>
+        </div>
+        <div class="progress-step" [class.active]="currentStep === 3" [class.done]="currentStep > 3">
+          <div class="progress-dot">{{ currentStep > 3 ? '✓' : '3' }}</div>
+          <div class="progress-label">Compétences</div>
+        </div>
+        <div class="progress-step" [class.active]="currentStep === 4" [class.done]="currentStep > 4">
+          <div class="progress-dot">{{ currentStep > 4 ? '✓' : '4' }}</div>
+          <div class="progress-label">Langues & Plus</div>
+        </div>
+        <div class="progress-step" [class.active]="currentStep === 5" [class.done]="currentStep > 5">
+          <div class="progress-dot">{{ currentStep > 5 ? '✓' : '5' }}</div>
+          <div class="progress-label">Génération IA</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 1: EXPÉRIENCES -->
+    <div class="ob-step" *ngIf="currentStep === 1">
+      <div class="ob-card">
+        <h2 class="ob-card-title">Vos expériences professionnelles</h2>
+        <p class="ob-card-sub">Ajoutez vos postes du plus récent au plus ancien. L'IA rédigera les descriptions pour vous.</p>
+
+        <div id="exp-list">
+          <div class="exp-entry" *ngFor="let exp of experiences; let i = index">
+            <div class="exp-entry-header">
+              <div class="exp-entry-num">Expérience {{ i + 1 }}</div>
+              <button class="exp-remove" (click)="removeExperience(i)" *ngIf="experiences.length > 1">✕</button>
+            </div>
+            <div class="form-grid cols2">
+              <div class="form-field">
+                <label>Poste occupé</label>
+                <input [(ngModel)]="exp.title" placeholder="Ex : Développeuse Full Stack Senior" class="form-input">
+              </div>
+              <div class="form-field">
+                <label>Entreprise</label>
+                <input [(ngModel)]="exp.company" placeholder="Ex : Orange Sénégal" class="form-input">
+              </div>
+            </div>
+            <div class="form-grid cols2">
+              <div class="form-field">
+                <label>Date de début</label>
+                <input type="month" [(ngModel)]="exp.startDate" class="form-input">
+              </div>
+              <div class="form-field">
+                <label>Date de fin</label>
+                <input type="month" [(ngModel)]="exp.endDate" class="form-input">
+                <div class="checkbox-group">
+                  <input type="checkbox" [(ngModel)]="exp.isCurrent" id="current{{i}}">
+                  <label for="current{{i}}">Poste actuel</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-grid cols1">
+              <div class="form-field">
+                <label>Ville / Pays</label>
+                <input [(ngModel)]="exp.location" placeholder="Dakar, Sénégal" class="form-input">
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Décrivez vos missions principales <span>(l'IA va les optimiser)</span></label>
+              <textarea [(ngModel)]="exp.description" rows="4" placeholder="Ex : J'ai développé des applications Angular pour 150 000 utilisateurs, géré une équipe de 4 développeurs, réduit le temps de chargement de 25%..." class="form-input"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <button class="add-entry-btn" (click)="addExperience()">+ Ajouter une autre expérience</button>
+      </div>
+
+      <div class="ob-nav">
+        <button class="btn-ob-back" (click)="previousStep()">← Retour</button>
+        <button class="btn-ob-next" (click)="nextStep()">Suivant — Formation →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: FORMATION -->
+    <div class="ob-step" *ngIf="currentStep === 2">
+      <div class="ob-card">
+        <h2 class="ob-card-title">Votre formation académique</h2>
+        <p class="ob-card-sub">Diplômes, universités, grandes écoles — du plus récent au plus ancien.</p>
+
+        <div id="edu-list">
+          <div class="exp-entry" *ngFor="let edu of educations; let i = index">
+            <div class="exp-entry-header">
+              <div class="exp-entry-num">Formation {{ i + 1 }}</div>
+              <button class="exp-remove" (click)="removeEducation(i)" *ngIf="educations.length > 1">✕</button>
+            </div>
+            <div class="form-grid cols2">
+              <div class="form-field">
+                <label>Diplôme obtenu</label>
+                <input [(ngModel)]="edu.degree" placeholder="Ex : Licence Informatique" class="form-input">
+              </div>
+              <div class="form-field">
+                <label>Établissement</label>
+                <input [(ngModel)]="edu.institution" placeholder="Ex : Université Cheikh Anta Diop" class="form-input">
+              </div>
+            </div>
+            <div class="form-grid cols2">
+              <div class="form-field">
+                <label>Année de début</label>
+                <input type="number" [(ngModel)]="edu.startYear" placeholder="2019" class="form-input">
+              </div>
+              <div class="form-field">
+                <label>Année de fin</label>
+                <input type="number" [(ngModel)]="edu.endYear" placeholder="2022" class="form-input">
+              </div>
+            </div>
+            <div class="form-grid cols1">
+              <div class="form-field">
+                <label>Ville / Pays</label>
+                <input [(ngModel)]="edu.location" placeholder="Dakar, Sénégal" class="form-input">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="add-entry-btn" (click)="addEducation()">+ Ajouter une autre formation</button>
+      </div>
+
+      <div class="ob-card" style="margin-top: 16px;">
+        <h2 class="ob-card-title" style="font-size: 18px;">Certifications & formations courtes</h2>
+        <p class="ob-card-sub">Certifications professionnelles, bootcamps, MOOCs importants.</p>
+
+        <div id="cert-list">
+          <div class="cert-entry" *ngFor="let cert of certifications; let i = index">
+            <div class="exp-entry-header">
+              <div class="exp-entry-num">Certification {{ i + 1 }}</div>
+              <button class="exp-remove" (click)="removeCertification(i)" *ngIf="certifications.length > 1">✕</button>
+            </div>
+            <div class="form-grid cols2">
+              <div class="form-field">
+                <label>Nom de la certification</label>
+                <input [(ngModel)]="cert.name" placeholder="Ex : AWS Certified Developer" class="form-input">
+              </div>
+              <div class="form-field">
+                <label>Organisme émetteur</label>
+                <input [(ngModel)]="cert.issuer" placeholder="Ex : Amazon Web Services" class="form-input">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="add-entry-btn" (click)="addCertification()">+ Ajouter une certification</button>
+      </div>
+
+      <div class="ob-nav">
+        <button class="btn-ob-back" (click)="previousStep()">← Expériences</button>
+        <button class="btn-ob-next" (click)="nextStep()">Suivant — Compétences →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: COMPÉTENCES -->
+    <div class="ob-step" *ngIf="currentStep === 3">
+      <div class="ob-card">
+        <h2 class="ob-card-title">Vos compétences techniques</h2>
+        <p class="ob-card-sub">Tapez une compétence et appuyez sur Entrée pour l'ajouter. Ou cliquez sur les suggestions.</p>
+
+        <div class="form-field" style="margin-bottom: 20px;">
+          <label>Compétences techniques</label>
+          <div class="skills-input-wrap">
+            <span class="skill-tag" *ngFor="let skill of technicalSkills; let i = index">
+              {{ skill }}
+              <button (click)="removeTechnicalSkill(i)">×</button>
+            </span>
+            <input #techInput placeholder="Ajoutez une compétence..." (keyup.enter)="addTechnicalSkill(techInput.value); techInput.value = ''">
+          </div>
+          <div class="skill-suggestions">
+            <button class="skill-sug" *ngFor="let sug of techSuggestions" (click)="addTechnicalSkill(sug)">{{ sug }}</button>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Soft skills</label>
+          <div class="skills-input-wrap">
+            <span class="skill-tag" *ngFor="let skill of softSkills; let i = index">
+              {{ skill }}
+              <button (click)="removeSoftSkill(i)">×</button>
+            </span>
+            <input #softInput placeholder="Ex : Leadership, Communication..." (keyup.enter)="addSoftSkill(softInput.value); softInput.value = ''">
+          </div>
+          <div class="skill-suggestions">
+            <button class="skill-sug" *ngFor="let sug of softSuggestions" (click)="addSoftSkill(sug)">{{ sug }}</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ob-nav">
+        <button class="btn-ob-back" (click)="previousStep()">← Formation</button>
+        <button class="btn-ob-next" (click)="nextStep()">Suivant — Langues →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: LANGUES & PLUS -->
+    <div class="ob-step" *ngIf="currentStep === 4">
+      <div class="ob-card">
+        <h2 class="ob-card-title">Langues parlées</h2>
+        <p class="ob-card-sub">Précisez votre niveau pour chaque langue.</p>
+
+        <div id="lang-list">
+          <div class="lang-row" *ngFor="let lang of languages; let i = index">
+            <input [(ngModel)]="lang.name" placeholder="Ex : Français" class="form-input">
+            <select [(ngModel)]="lang.level" class="form-select">
+              <option value="maternelle">Langue maternelle</option>
+              <option value="courant">Courant (C1/C2)</option>
+              <option value="intermediaire">Intermédiaire (B1/B2)</option>
+              <option value="debutant">Débutant (A1/A2)</option>
+            </select>
+            <button class="exp-remove" (click)="removeLanguage(i)" *ngIf="languages.length > 1">✕</button>
+          </div>
+        </div>
+
+        <button class="add-entry-btn" (click)="addLanguage()">+ Ajouter une langue</button>
+      </div>
+
+      <div class="ob-card" style="margin-top: 16px;">
+        <h2 class="ob-card-title" style="font-size: 18px;">Informations complémentaires</h2>
+        <p class="ob-card-sub">Ces éléments enrichissent votre profil et votre score IA.</p>
+
+        <div class="form-grid cols1">
+          <div class="form-field">
+            <label>Résumé professionnel <span>(optionnel — l'IA peut le générer)</span></label>
+            <textarea [(ngModel)]="additionalInfo.summary" rows="4" placeholder="En quelques lignes, décrivez qui vous êtes professionnellement. Sinon, laissez vide et l'IA le créera pour vous..." class="form-input"></textarea>
+          </div>
+        </div>
+
+        <div class="form-grid cols2">
+          <div class="form-field">
+            <label>Lien GitHub / Portfolio</label>
+            <input [(ngModel)]="additionalInfo.github" placeholder="https://github.com/votre-profil" class="form-input">
+          </div>
+          <div class="form-field">
+            <label>LinkedIn</label>
+            <input [(ngModel)]="additionalInfo.linkedin" placeholder="https://linkedin.com/in/votre-profil" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-grid cols2">
+          <div class="form-field">
+            <label>Type de contrat recherché</label>
+            <select [(ngModel)]="additionalInfo.contractType" class="form-input">
+              <option>CDI</option><option>CDD</option><option>Freelance</option><option>Stage</option><option>Alternance</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Disponibilité</label>
+            <select [(ngModel)]="additionalInfo.availability" class="form-input">
+              <option>Immédiate</option><option>Dans 1 mois</option><option>Dans 2-3 mois</option><option>À définir</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="ob-nav">
+        <button class="btn-ob-back" (click)="previousStep()">← Compétences</button>
+        <button class="btn-ob-generate" (click)="generateCV()">
+          <span>✦</span> Générer mon CV avec l'IA
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 5: GÉNÉRATION IA -->
+    <div class="ob-step" *ngIf="currentStep === 5">
+      <div class="generating-overlay active">
+        <div class="gen-spinner"></div>
+        <div class="gen-title">L'IA génère votre CV...</div>
+        <div class="gen-sub">Cela prend environ 10 secondes</div>
+        <div class="gen-steps">
+          <div class="gen-step" [class.done]="genStep >= 1" [class.doing]="genStep === 1">
+            <div class="gcheck">{{ genStep > 1 ? '✓' : '' }}</div>
+            <span>Analyse de vos expériences</span>
+          </div>
+          <div class="gen-step" [class.done]="genStep >= 2" [class.doing]="genStep === 2">
+            <div class="gcheck">{{ genStep > 2 ? '✓' : '' }}</div>
+            <span>Rédaction des bullet points IA</span>
+          </div>
+          <div class="gen-step" [class.done]="genStep >= 3" [class.doing]="genStep === 3">
+            <div class="gcheck">{{ genStep > 3 ? '✓' : '' }}</div>
+            <span>Optimisation ATS & mots-clés</span>
+          </div>
+          <div class="gen-step" [class.done]="genStep >= 4" [class.doing]="genStep === 4">
+            <div class="gcheck">{{ genStep > 4 ? '✓' : '' }}</div>
+            <span>Calcul du score de matching</span>
+          </div>
+          <div class="gen-step" [class.done]="genStep >= 5" [class.doing]="genStep === 5">
+            <div class="gcheck">{{ genStep > 5 ? '✓' : '' }}</div>
+            <span>Finalisation du profil</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

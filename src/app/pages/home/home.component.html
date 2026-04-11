@@ -105,11 +105,14 @@
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <!--  STATS BAR — Compteur animé                                     -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  STATS BAR — Compteur animé                                     -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
 <section class="stats-bar">
   <div class="stats-inner">
     <div class="stat-item" *ngFor="let stat of stats; let i = index">
       <div class="stat-num">
-        <span class="counter" [attr.data-target]="stat.rawValue">{{ stat.displayValue }}</span>
+        <span class="counter" [attr.data-target]="stat.targetValue">{{ stat.displayValue }}</span>
         <span class="stat-suffix" *ngIf="stat.suffix">{{ stat.suffix }}</span>
       </div>
       <div class="stat-lbl">{{ stat.label }}</div>

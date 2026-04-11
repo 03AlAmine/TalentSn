@@ -1,0 +1,75 @@
+.dashboard-container {
+  min-height: calc(100vh - 62px);
+  background: var(--paper);
+  padding: 60px 40px;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.dashboard-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--black);
+  margin-bottom: 12px;
+}
+
+.dashboard-header p {
+  font-size: 16px;
+  color: var(--muted);
+}
+
+.dashboard-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.info-card {
+  background: var(--surface);
+  border-radius: 24px;
+  padding: 32px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  border: 1px solid rgba(0,0,0,0.06);
+  margin-bottom: 32px;
+}
+
+.info-icon {
+  font-size: 48px;
+  color: var(--green);
+}
+
+.info-text h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.info-text p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.logout-btn {
+  background: var(--dark);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 50px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: var(--dark2);
+  transform: translateY(-1px);
+}
