@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { CvUploadComponent } from '../cv-upload/cv-upload.component';
+import { ExtractedProfile } from '../../services/cv-parser.service';
 
 interface Experience {
   title: string;
@@ -43,13 +45,15 @@ interface AdditionalInfo {
 @Component({
   selector: 'app-onboarding',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CvUploadComponent],
   templateUrl: './onboarding.component.html',
   styleUrls: ['./onboarding.component.css']
 })
 export class OnboardingComponent {
-  currentStep: number = 1;
+  // Step 0 = upload CV / Step 1–5 = formulaire
+  currentStep: number = 0;
   genStep: number = 0;
+  cvFilled: boolean = false; // true si l'upload CV a pré-rempli les données
 
   experiences: Experience[] = [
     {
@@ -74,13 +78,10 @@ export class OnboardingComponent {
   ];
 
   certifications: Certification[] = [
-    {
-      name: '',
-      issuer: ''
-    }
+    { name: '', issuer: '' }
   ];
 
-  technicalSkills: string[] = ['Angular', 'React', 'Node.js'];
+  technicalSkills: string[] = [];
   softSkills: string[] = [];
 
   techSuggestions: string[] = ['TypeScript', 'Python', 'Firebase', 'PostgreSQL', 'Docker', 'AWS', 'Git', 'MongoDB'];
@@ -104,6 +105,87 @@ export class OnboardingComponent {
     private router: Router
   ) {}
 
+  // ──────────────────────────────────────────
+  // GESTION UPLOAD CV (Step 0)
+  // ──────────────────────────────────────────
+
+  /**
+   * Appelé quand le composant cv-upload émet un profil extrait
+   */
+  onProfileExtracted(profile: ExtractedProfile): void {
+    this.cvFilled = true;
+
+    // ── Expériences
+    if (profile.experiences.length > 0 && profile.experiences[0].title) {
+      this.experiences = profile.experiences.map(exp => ({
+        title: exp.title || '',
+        company: exp.company || '',
+        startDate: exp.startDate || '',
+        endDate: exp.endDate || '',
+        isCurrent: exp.isCurrent || false,
+        location: exp.location || '',
+        description: exp.description || ''
+      }));
+    }
+
+    // ── Formations
+    if (profile.educations.length > 0 && profile.educations[0].degree) {
+      this.educations = profile.educations.map(edu => ({
+        degree: edu.degree || '',
+        institution: edu.institution || '',
+        startYear: edu.startYear || 0,
+        endYear: edu.endYear || 0,
+        location: edu.location || ''
+      }));
+    }
+
+    // ── Compétences
+    if (profile.technicalSkills.length > 0) {
+      this.technicalSkills = [...profile.technicalSkills];
+    }
+    if (profile.softSkills.length > 0) {
+      this.softSkills = [...profile.softSkills];
+    }
+
+    // ── Langues
+    if (profile.languages.length > 0) {
+      this.languages = profile.languages.map(l => ({
+        name: l.name,
+        level: l.level
+      }));
+    }
+
+    // ── Certifications
+    if (profile.certifications.length > 0 && profile.certifications[0].name) {
+      this.certifications = profile.certifications.map(c => ({
+        name: c.name,
+        issuer: c.issuer
+      }));
+    }
+
+    // ── Informations complémentaires
+    if (profile.summary) this.additionalInfo.summary = profile.summary;
+    if (profile.github) this.additionalInfo.github = profile.github;
+    if (profile.linkedin) this.additionalInfo.linkedin = profile.linkedin;
+
+    // Passer directement à l'étape 1 avec les données pré-remplies
+    this.currentStep = 1;
+    window.scrollTo(0, 0);
+  }
+
+  /**
+   * Appelé si l'utilisateur veut remplir le formulaire manuellement
+   */
+  onSkipUpload(): void {
+    this.cvFilled = false;
+    this.currentStep = 1;
+    window.scrollTo(0, 0);
+  }
+
+  // ──────────────────────────────────────────
+  // NAVIGATION ENTRE ÉTAPES
+  // ──────────────────────────────────────────
+
   nextStep(): void {
     if (this.currentStep < 5) {
       this.currentStep++;
@@ -114,19 +196,20 @@ export class OnboardingComponent {
   previousStep(): void {
     if (this.currentStep > 1) {
       this.currentStep--;
-      window.scrollTo(0, 0);
+    } else if (this.currentStep === 1) {
+      this.currentStep = 0; // Retour à l'upload CV
     }
+    window.scrollTo(0, 0);
   }
+
+  // ──────────────────────────────────────────
+  // GESTION DES EXPÉRIENCES
+  // ──────────────────────────────────────────
 
   addExperience(): void {
     this.experiences.push({
-      title: '',
-      company: '',
-      startDate: '',
-      endDate: '',
-      isCurrent: false,
-      location: '',
-      description: ''
+      title: '', company: '', startDate: '', endDate: '',
+      isCurrent: false, location: '', description: ''
     });
   }
 
@@ -136,13 +219,13 @@ export class OnboardingComponent {
     }
   }
 
+  // ──────────────────────────────────────────
+  // GESTION DES FORMATIONS
+  // ──────────────────────────────────────────
+
   addEducation(): void {
     this.educations.push({
-      degree: '',
-      institution: '',
-      startYear: 0,
-      endYear: 0,
-      location: ''
+      degree: '', institution: '', startYear: 0, endYear: 0, location: ''
     });
   }
 
@@ -151,6 +234,10 @@ export class OnboardingComponent {
       this.educations.splice(index, 1);
     }
   }
+
+  // ──────────────────────────────────────────
+  // GESTION DES CERTIFICATIONS
+  // ──────────────────────────────────────────
 
   addCertification(): void {
     this.certifications.push({ name: '', issuer: '' });
@@ -161,6 +248,10 @@ export class OnboardingComponent {
       this.certifications.splice(index, 1);
     }
   }
+
+  // ──────────────────────────────────────────
+  // GESTION DES COMPÉTENCES
+  // ──────────────────────────────────────────
 
   addTechnicalSkill(skill: string): void {
     if (skill.trim() && !this.technicalSkills.includes(skill.trim())) {
@@ -182,6 +273,10 @@ export class OnboardingComponent {
     this.softSkills.splice(index, 1);
   }
 
+  // ──────────────────────────────────────────
+  // GESTION DES LANGUES
+  // ──────────────────────────────────────────
+
   addLanguage(): void {
     this.languages.push({ name: '', level: 'courant' });
   }
@@ -192,20 +287,20 @@ export class OnboardingComponent {
     }
   }
 
+  // ──────────────────────────────────────────
+  // GÉNÉRATION IA & SAUVEGARDE
+  // ──────────────────────────────────────────
+
   async generateCV(): Promise<void> {
     this.currentStep = 5;
     window.scrollTo(0, 0);
 
-    // Simuler la génération IA étape par étape
     for (let i = 1; i <= 5; i++) {
       this.genStep = i;
       await this.delay(1500);
     }
 
-    // Sauvegarder toutes les données dans Firebase
     await this.saveProfileData();
-    
-    // Rediriger vers le dashboard candidat
     this.router.navigate(['/candidate/dashboard']);
   }
 
@@ -224,10 +319,10 @@ export class OnboardingComponent {
         softSkills: this.softSkills,
         languages: this.languages,
         additionalInfo: this.additionalInfo,
+        cvAutoFilled: this.cvFilled,
         onboardingCompleted: true,
         completedAt: new Date()
       };
-      
       await this.authService.updateUserData(user.uid, profileData as any);
     }
   }

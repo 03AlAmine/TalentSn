@@ -6,8 +6,64 @@
       <p class="onboarding-sub">L'IA va générer votre CV complet à partir de vos informations</p>
     </div>
 
-    <!-- Progress Bar -->
-    <div class="progress-bar-wrap">
+    <!-- ════════════════════════════════════════════════════
+         STEP 0 : UPLOAD CV (Nouvelle étape intelligente)
+    ════════════════════════════════════════════════════ -->
+    <div class="ob-step ob-step-upload" *ngIf="currentStep === 0">
+
+      <!-- Badge "Nouveau" -->
+      <div class="upload-intro">
+        <div class="upload-badge">✨ Nouveau — Inscription en 30 secondes</div>
+        <h2 class="upload-headline">
+          Importez votre CV et laissez l'IA remplir votre profil automatiquement
+        </h2>
+        <p class="upload-desc">
+          Notre moteur d'analyse détecte vos expériences, formations, compétences et coordonnées
+          directement depuis votre document — sans aucune saisie manuelle.
+        </p>
+
+        <!-- 3 avantages clés -->
+        <div class="upload-benefits">
+          <div class="benefit-item">
+            <span class="benefit-icon">⚡</span>
+            <div>
+              <div class="benefit-title">30 secondes</div>
+              <div class="benefit-sub">au lieu de 15 minutes</div>
+            </div>
+          </div>
+          <div class="benefit-item">
+            <span class="benefit-icon">🔒</span>
+            <div>
+              <div class="benefit-title">100% local</div>
+              <div class="benefit-sub">document jamais envoyé</div>
+            </div>
+          </div>
+          <div class="benefit-item">
+            <span class="benefit-icon">✅</span>
+            <div>
+              <div class="benefit-title">Vous vérifiez</div>
+              <div class="benefit-sub">avant de valider</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Composant d'upload -->
+      <app-cv-upload
+        (profileExtracted)="onProfileExtracted($event)"
+        (skipUpload)="onSkipUpload()">
+      </app-cv-upload>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════
+         PROGRESS BAR (visible steps 1 à 5)
+    ════════════════════════════════════════════════════ -->
+    <div class="progress-bar-wrap" *ngIf="currentStep >= 1">
+      <!-- Bannière "Pré-rempli par IA" si CV uploadé -->
+      <div class="cv-prefilled-banner" *ngIf="cvFilled">
+        🤖 Profil pré-rempli automatiquement depuis votre CV — vérifiez et complétez si besoin
+      </div>
+
       <div class="progress-steps">
         <div class="progress-step" [class.active]="currentStep === 1" [class.done]="currentStep > 1">
           <div class="progress-dot">{{ currentStep > 1 ? '✓' : '1' }}</div>
@@ -32,11 +88,16 @@
       </div>
     </div>
 
-    <!-- STEP 1: EXPÉRIENCES -->
+    <!-- ════════════════════════════════════════════════════
+         STEP 1 : EXPÉRIENCES
+    ════════════════════════════════════════════════════ -->
     <div class="ob-step" *ngIf="currentStep === 1">
       <div class="ob-card">
         <h2 class="ob-card-title">Vos expériences professionnelles</h2>
-        <p class="ob-card-sub">Ajoutez vos postes du plus récent au plus ancien. L'IA rédigera les descriptions pour vous.</p>
+        <p class="ob-card-sub">
+          Ajoutez vos postes du plus récent au plus ancien. L'IA rédigera les descriptions pour vous.
+          <span class="prefill-tag" *ngIf="cvFilled">✨ Pré-rempli depuis votre CV</span>
+        </p>
 
         <div id="exp-list">
           <div class="exp-entry" *ngFor="let exp of experiences; let i = index">
@@ -47,7 +108,7 @@
             <div class="form-grid cols2">
               <div class="form-field">
                 <label>Poste occupé</label>
-                <input [(ngModel)]="exp.title" placeholder="Ex : Développeuse Full Stack Senior" class="form-input">
+                <input [(ngModel)]="exp.title" placeholder="Ex : Développeur Full Stack Senior" class="form-input">
               </div>
               <div class="form-field">
                 <label>Entreprise</label>
@@ -61,7 +122,7 @@
               </div>
               <div class="form-field">
                 <label>Date de fin</label>
-                <input type="month" [(ngModel)]="exp.endDate" class="form-input">
+                <input type="month" [(ngModel)]="exp.endDate" class="form-input" [disabled]="exp.isCurrent">
                 <div class="checkbox-group">
                   <input type="checkbox" [(ngModel)]="exp.isCurrent" id="current{{i}}">
                   <label for="current{{i}}">Poste actuel</label>
@@ -76,7 +137,7 @@
             </div>
             <div class="form-field">
               <label>Décrivez vos missions principales <span>(l'IA va les optimiser)</span></label>
-              <textarea [(ngModel)]="exp.description" rows="4" placeholder="Ex : J'ai développé des applications Angular pour 150 000 utilisateurs, géré une équipe de 4 développeurs, réduit le temps de chargement de 25%..." class="form-input"></textarea>
+              <textarea [(ngModel)]="exp.description" rows="4" placeholder="Ex : J'ai développé des applications Angular pour 150 000 utilisateurs, géré une équipe de 4 développeurs..." class="form-input"></textarea>
             </div>
           </div>
         </div>
@@ -90,11 +151,16 @@
       </div>
     </div>
 
-    <!-- STEP 2: FORMATION -->
+    <!-- ════════════════════════════════════════════════════
+         STEP 2 : FORMATION
+    ════════════════════════════════════════════════════ -->
     <div class="ob-step" *ngIf="currentStep === 2">
       <div class="ob-card">
         <h2 class="ob-card-title">Votre formation académique</h2>
-        <p class="ob-card-sub">Diplômes, universités, grandes écoles — du plus récent au plus ancien.</p>
+        <p class="ob-card-sub">
+          Diplômes, universités, grandes écoles — du plus récent au plus ancien.
+          <span class="prefill-tag" *ngIf="cvFilled">✨ Pré-rempli depuis votre CV</span>
+        </p>
 
         <div id="edu-list">
           <div class="exp-entry" *ngFor="let edu of educations; let i = index">
@@ -136,7 +202,10 @@
 
       <div class="ob-card" style="margin-top: 16px;">
         <h2 class="ob-card-title" style="font-size: 18px;">Certifications & formations courtes</h2>
-        <p class="ob-card-sub">Certifications professionnelles, bootcamps, MOOCs importants.</p>
+        <p class="ob-card-sub">
+          Certifications professionnelles, bootcamps, MOOCs importants.
+          <span class="prefill-tag" *ngIf="cvFilled && certifications[0]?.name">✨ Pré-rempli</span>
+        </p>
 
         <div id="cert-list">
           <div class="cert-entry" *ngFor="let cert of certifications; let i = index">
@@ -166,11 +235,16 @@
       </div>
     </div>
 
-    <!-- STEP 3: COMPÉTENCES -->
+    <!-- ════════════════════════════════════════════════════
+         STEP 3 : COMPÉTENCES
+    ════════════════════════════════════════════════════ -->
     <div class="ob-step" *ngIf="currentStep === 3">
       <div class="ob-card">
         <h2 class="ob-card-title">Vos compétences techniques</h2>
-        <p class="ob-card-sub">Tapez une compétence et appuyez sur Entrée pour l'ajouter. Ou cliquez sur les suggestions.</p>
+        <p class="ob-card-sub">
+          Tapez une compétence et appuyez sur Entrée. Ou cliquez sur les suggestions.
+          <span class="prefill-tag" *ngIf="cvFilled && technicalSkills.length > 0">✨ {{ technicalSkills.length }} compétences détectées</span>
+        </p>
 
         <div class="form-field" style="margin-bottom: 20px;">
           <label>Compétences techniques</label>
@@ -207,19 +281,26 @@
       </div>
     </div>
 
-    <!-- STEP 4: LANGUES & PLUS -->
+    <!-- ════════════════════════════════════════════════════
+         STEP 4 : LANGUES & PLUS
+    ════════════════════════════════════════════════════ -->
     <div class="ob-step" *ngIf="currentStep === 4">
       <div class="ob-card">
         <h2 class="ob-card-title">Langues parlées</h2>
-        <p class="ob-card-sub">Précisez votre niveau pour chaque langue.</p>
+        <p class="ob-card-sub">
+          Précisez votre niveau pour chaque langue.
+          <span class="prefill-tag" *ngIf="cvFilled">✨ Pré-rempli depuis votre CV</span>
+        </p>
 
         <div id="lang-list">
           <div class="lang-row" *ngFor="let lang of languages; let i = index">
             <input [(ngModel)]="lang.name" placeholder="Ex : Français" class="form-input">
             <select [(ngModel)]="lang.level" class="form-select">
               <option value="maternelle">Langue maternelle</option>
+              <option value="bilingue">Bilingue</option>
               <option value="courant">Courant (C1/C2)</option>
-              <option value="intermediaire">Intermédiaire (B1/B2)</option>
+              <option value="avancé">Avancé (B2)</option>
+              <option value="intermediaire">Intermédiaire (B1)</option>
               <option value="debutant">Débutant (A1/A2)</option>
             </select>
             <button class="exp-remove" (click)="removeLanguage(i)" *ngIf="languages.length > 1">✕</button>
@@ -275,7 +356,9 @@
       </div>
     </div>
 
-    <!-- STEP 5: GÉNÉRATION IA -->
+    <!-- ════════════════════════════════════════════════════
+         STEP 5 : GÉNÉRATION IA
+    ════════════════════════════════════════════════════ -->
     <div class="ob-step" *ngIf="currentStep === 5">
       <div class="generating-overlay active">
         <div class="gen-spinner"></div>
@@ -305,5 +388,6 @@
         </div>
       </div>
     </div>
+
   </div>
 </div>

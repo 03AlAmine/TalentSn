@@ -5,7 +5,7 @@ import { HomeComponent } from './pages/home/home.component';  // ← Changement 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HomeComponent],
+  imports: [RouterOutlet],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
