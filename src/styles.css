@@ -1,1 +1,43 @@
-/* You can add global styles to this file, and also import other style files */
+/* Reset CSS moderne */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse 80% 50% at 20% 40%, #0B1A14, #050608 80%);
+  font-family: 'Inter', 'Space Grotesk', sans-serif;
+  overflow-x: hidden;
+}
+
+/* ⭐ SOLUTION SIMPLE : Tous les composants Angular occupent tout l'espace ⭐ */
+app-root,
+app-home,
+app-login,
+app-register,
+app-onboarding,
+app-candidate-dashboard,
+app-recruiter-dashboard {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Ou version plus simple qui capture tous les composants */
+/* [class*="app-"] {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+} */
+
+/* Le reste de votre CSS... */

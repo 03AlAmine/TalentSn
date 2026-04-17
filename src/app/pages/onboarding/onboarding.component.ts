@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { CvUploadComponent } from '../cv-upload/cv-upload.component';
+import { CvUploadComponent } from '../cv/cv-upload/cv-upload.component';
 import { ExtractedProfile } from '../../services/cv-parser.service';
 
 interface Experience {
@@ -47,7 +47,7 @@ interface AdditionalInfo {
   standalone: true,
   imports: [CommonModule, FormsModule, CvUploadComponent],
   templateUrl: './onboarding.component.html',
-  styleUrls: ['./onboarding.component.css']
+  styleUrls: ['./onboarding.component.css'],
 })
 export class OnboardingComponent {
   // Step 0 = upload CV / Step 1–5 = formulaire
@@ -63,8 +63,8 @@ export class OnboardingComponent {
       endDate: '',
       isCurrent: false,
       location: '',
-      description: ''
-    }
+      description: '',
+    },
   ];
 
   educations: Education[] = [
@@ -73,23 +73,36 @@ export class OnboardingComponent {
       institution: '',
       startYear: 0,
       endYear: 0,
-      location: ''
-    }
+      location: '',
+    },
   ];
 
-  certifications: Certification[] = [
-    { name: '', issuer: '' }
-  ];
+  certifications: Certification[] = [{ name: '', issuer: '' }];
 
   technicalSkills: string[] = [];
   softSkills: string[] = [];
 
-  techSuggestions: string[] = ['TypeScript', 'Python', 'Firebase', 'PostgreSQL', 'Docker', 'AWS', 'Git', 'MongoDB'];
-  softSuggestions: string[] = ['Leadership', 'Travail en équipe', 'Gestion de projet', 'Communication', 'Autonomie'];
+  techSuggestions: string[] = [
+    'TypeScript',
+    'Python',
+    'Firebase',
+    'PostgreSQL',
+    'Docker',
+    'AWS',
+    'Git',
+    'MongoDB',
+  ];
+  softSuggestions: string[] = [
+    'Leadership',
+    'Travail en équipe',
+    'Gestion de projet',
+    'Communication',
+    'Autonomie',
+  ];
 
   languages: Language[] = [
     { name: 'Français', level: 'maternelle' },
-    { name: 'Anglais', level: 'courant' }
+    { name: 'Anglais', level: 'courant' },
   ];
 
   additionalInfo: AdditionalInfo = {
@@ -97,12 +110,12 @@ export class OnboardingComponent {
     github: '',
     linkedin: '',
     contractType: 'CDI',
-    availability: 'Immédiate'
+    availability: 'Immédiate',
   };
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
   ) {}
 
   // ──────────────────────────────────────────
@@ -117,25 +130,25 @@ export class OnboardingComponent {
 
     // ── Expériences
     if (profile.experiences.length > 0 && profile.experiences[0].title) {
-      this.experiences = profile.experiences.map(exp => ({
+      this.experiences = profile.experiences.map((exp) => ({
         title: exp.title || '',
         company: exp.company || '',
         startDate: exp.startDate || '',
         endDate: exp.endDate || '',
         isCurrent: exp.isCurrent || false,
         location: exp.location || '',
-        description: exp.description || ''
+        description: exp.description || '',
       }));
     }
 
     // ── Formations
     if (profile.educations.length > 0 && profile.educations[0].degree) {
-      this.educations = profile.educations.map(edu => ({
+      this.educations = profile.educations.map((edu) => ({
         degree: edu.degree || '',
         institution: edu.institution || '',
         startYear: edu.startYear || 0,
         endYear: edu.endYear || 0,
-        location: edu.location || ''
+        location: edu.location || '',
       }));
     }
 
@@ -149,17 +162,17 @@ export class OnboardingComponent {
 
     // ── Langues
     if (profile.languages.length > 0) {
-      this.languages = profile.languages.map(l => ({
+      this.languages = profile.languages.map((l) => ({
         name: l.name,
-        level: l.level
+        level: l.level,
       }));
     }
 
     // ── Certifications
     if (profile.certifications.length > 0 && profile.certifications[0].name) {
-      this.certifications = profile.certifications.map(c => ({
+      this.certifications = profile.certifications.map((c) => ({
         name: c.name,
-        issuer: c.issuer
+        issuer: c.issuer,
       }));
     }
 
@@ -208,8 +221,13 @@ export class OnboardingComponent {
 
   addExperience(): void {
     this.experiences.push({
-      title: '', company: '', startDate: '', endDate: '',
-      isCurrent: false, location: '', description: ''
+      title: '',
+      company: '',
+      startDate: '',
+      endDate: '',
+      isCurrent: false,
+      location: '',
+      description: '',
     });
   }
 
@@ -225,7 +243,11 @@ export class OnboardingComponent {
 
   addEducation(): void {
     this.educations.push({
-      degree: '', institution: '', startYear: 0, endYear: 0, location: ''
+      degree: '',
+      institution: '',
+      startYear: 0,
+      endYear: 0,
+      location: '',
     });
   }
 
@@ -305,7 +327,7 @@ export class OnboardingComponent {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private async saveProfileData(): Promise<void> {
@@ -321,7 +343,7 @@ export class OnboardingComponent {
         additionalInfo: this.additionalInfo,
         cvAutoFilled: this.cvFilled,
         onboardingCompleted: true,
-        completedAt: new Date()
+        completedAt: new Date(),
       };
       await this.authService.updateUserData(user.uid, profileData as any);
     }

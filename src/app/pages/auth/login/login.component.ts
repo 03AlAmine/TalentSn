@@ -2,14 +2,14 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.css'],
 })
 export class LoginComponent {
   email: string = '';
@@ -20,7 +20,7 @@ export class LoginComponent {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
   ) {}
 
   async onLogin(): Promise<void> {
@@ -35,7 +35,7 @@ export class LoginComponent {
     try {
       const user = await this.authService.login(this.email, this.password);
       const userData = await this.authService.getUserData(user.uid);
-      
+
       if (userData) {
         if (userData.role === 'candidate') {
           this.router.navigate(['/candidate/dashboard']);
@@ -72,7 +72,7 @@ export class LoginComponent {
     try {
       const user = await this.authService.loginWithGoogle();
       const userData = await this.authService.getUserData(user.uid);
-      
+
       if (userData) {
         if (userData.role === 'candidate') {
           this.router.navigate(['/candidate/dashboard']);

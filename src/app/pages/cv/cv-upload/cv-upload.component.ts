@@ -1,14 +1,10 @@
-import {
-  Component,
-  Output,
-  EventEmitter
-} from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   CvParserService,
   ExtractedProfile,
-  ParseProgress
-} from '../../services/cv-parser.service';
+  ParseProgress,
+} from '../../../services/cv-parser.service';
 
 export type UploadMode = 'idle' | 'dragging' | 'processing' | 'done' | 'error';
 
@@ -17,7 +13,7 @@ export type UploadMode = 'idle' | 'dragging' | 'processing' | 'done' | 'error';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './cv-upload.component.html',
-  styleUrls: ['./cv-upload.component.css']
+  styleUrls: ['./cv-upload.component.css'],
 })
 export class CvUploadComponent {
   @Output() profileExtracted = new EventEmitter<ExtractedProfile>();
@@ -35,10 +31,18 @@ export class CvUploadComponent {
   // GETTERS (remplacent les computed signals)
   // ──────────────────────────────────────────
 
-  get isDragging(): boolean   { return this.mode === 'dragging';   }
-  get isProcessing(): boolean { return this.mode === 'processing'; }
-  get isDone(): boolean       { return this.mode === 'done';       }
-  get isError(): boolean      { return this.mode === 'error';      }
+  get isDragging(): boolean {
+    return this.mode === 'dragging';
+  }
+  get isProcessing(): boolean {
+    return this.mode === 'processing';
+  }
+  get isDone(): boolean {
+    return this.mode === 'done';
+  }
+  get isError(): boolean {
+    return this.mode === 'error';
+  }
 
   // ──────────────────────────────────────────
   // DRAG & DROP
@@ -85,10 +89,19 @@ export class CvUploadComponent {
   // ──────────────────────────────────────────
 
   private async processFile(file: File): Promise<void> {
-    const allowed = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const allowed = [
+      'application/pdf',
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+    ];
     const maxSize = 10 * 1024 * 1024; // 10 MB
 
-    if (!allowed.includes(file.type) && !file.name.match(/\.(pdf|jpg|jpeg|png|webp)$/i)) {
+    if (
+      !allowed.includes(file.type) &&
+      !file.name.match(/\.(pdf|jpg|jpeg|png|webp)$/i)
+    ) {
       this.errorMsg = 'Format non supporté. Utilisez PDF, JPG ou PNG.';
       this.mode = 'error';
       return;
@@ -105,13 +118,15 @@ export class CvUploadComponent {
     this.errorMsg = '';
 
     try {
-      const profile = await this.cvParser.parseFile(file, (p: ParseProgress) => {
-        this.progress = { ...p }; // spread pour forcer la détection de changement
-      });
+      const profile = await this.cvParser.parseFile(
+        file,
+        (p: ParseProgress) => {
+          this.progress = { ...p }; // spread pour forcer la détection de changement
+        },
+      );
 
       this.extractedProfile = profile;
       this.mode = 'done';
-
     } catch (err: any) {
       console.error('CV parsing error:', err);
       this.errorMsg = err.message || "Erreur lors de l'analyse du document.";

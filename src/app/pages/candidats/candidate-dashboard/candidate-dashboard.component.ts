@@ -1,16 +1,16 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
-  selector: 'app-recruiter-dashboard',
+  selector: 'app-candidate-dashboard',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './recruiter-dashboard.component.html',
-  styleUrls: ['./recruiter-dashboard.component.css']
+  templateUrl: './candidate-dashboard.component.html',
+  styleUrls: ['./candidate-dashboard.component.css']
 })
-export class RecruiterDashboardComponent {
+export class CandidateDashboardComponent {
   constructor(
     private authService: AuthService,
     private router: Router
