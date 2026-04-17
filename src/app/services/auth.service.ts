@@ -1,23 +1,26 @@
 import { Injectable, inject } from '@angular/core';
-import { 
-  Auth, 
-  createUserWithEmailAndPassword, 
+import {
+  Auth,
+  user,
+  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  User,
   updateProfile,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  User
 } from '@angular/fire/auth';
-import { 
-  Firestore, 
-  doc, 
-  setDoc, 
+import {
+  Firestore,
+  doc,
+  docData,
+  setDoc,
   getDoc,
   updateDoc
 } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, from, of } from 'rxjs';
+import { switchMap, tap, catchError } from 'rxjs/operators';
 
 export interface UserData {
   uid: string;
@@ -48,26 +51,35 @@ export class AuthService {
   private auth = inject(Auth);
   private firestore = inject(Firestore);
   private router = inject(Router);
-  
+
+  // Observable Firebase natif pour l'utilisateur (gère automatiquement les changements)
+  public authUser$ = user(this.auth);
+
+  // Observable des données utilisateur depuis Firestore
+  public userData$: Observable<UserData | null> = this.authUser$.pipe(
+    switchMap(user => {
+      if (!user) return of(null);
+      const userDocRef = doc(this.firestore, 'users', user.uid);
+      return docData(userDocRef) as Observable<UserData | null>;
+    })
+  );
+
+  // Pour garder la compatibilité avec ton code existant
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
-  
+
   private userDataSubject = new BehaviorSubject<UserData | null>(null);
-  public userData$ = this.userDataSubject.asObservable();
+  public legacyUserData$ = this.userDataSubject.asObservable();
 
   constructor() {
-    this.auth.onAuthStateChanged(async (user) => {
+    // S'abonner à l'observable Firebase pour maintenir la compatibilité
+    this.authUser$.subscribe(user => {
       this.currentUserSubject.next(user);
-      if (user) {
-        try {
-          const userData = await this.getUserData(user.uid);
-          this.userDataSubject.next(userData);
-        } catch (error) {
-          console.error('Error getting user data:', error);
-        }
-      } else {
-        this.userDataSubject.next(null);
-      }
+    });
+
+    // S'abonner aux données utilisateur
+    this.userData$.subscribe(userData => {
+      this.userDataSubject.next(userData);
     });
   }
 
@@ -83,19 +95,19 @@ export class AuthService {
     educationLevel: string;
     experienceYears: string;
     sector: string;
-  }): Promise<User> {
+  }): Promise<any> {
     // 1. Créer l'utilisateur dans Auth
     const userCredential = await createUserWithEmailAndPassword(
-      this.auth, 
-      data.email, 
+      this.auth,
+      data.email,
       data.password
     );
-    
+
     // 2. Mettre à jour le profil
     await updateProfile(userCredential.user, {
       displayName: `${data.firstName} ${data.lastName}`
     });
-    
+
     // 3. Créer le document dans Firestore
     const userData: UserData = {
       uid: userCredential.user.uid,
@@ -112,13 +124,9 @@ export class AuthService {
       sector: data.sector,
       createdAt: new Date()
     };
-    
-    // Attendre que Firestore soit prêt
-    await this.ensureFirestoreConnection();
-    
+
     await setDoc(doc(this.firestore, 'users', userCredential.user.uid), userData);
-    this.userDataSubject.next(userData);
-    
+
     return userCredential.user;
   }
 
@@ -136,17 +144,17 @@ export class AuthService {
     country: string;
     website: string;
     ninea: string;
-  }): Promise<User> {
+  }): Promise<any> {
     const userCredential = await createUserWithEmailAndPassword(
-      this.auth, 
-      data.email, 
+      this.auth,
+      data.email,
       data.password
     );
-    
+
     await updateProfile(userCredential.user, {
       displayName: `${data.firstName} ${data.lastName}`
     });
-    
+
     const userData: UserData = {
       uid: userCredential.user.uid,
       email: data.email,
@@ -164,36 +172,27 @@ export class AuthService {
       ninea: data.ninea,
       createdAt: new Date()
     };
-    
-    await this.ensureFirestoreConnection();
+
     await setDoc(doc(this.firestore, 'users', userCredential.user.uid), userData);
-    this.userDataSubject.next(userData);
-    
+
     return userCredential.user;
   }
 
-  private async ensureFirestoreConnection(): Promise<void> {
-    // Petit délai pour s'assurer que Firestore est prêt
-    await new Promise(resolve => setTimeout(resolve, 500));
-  }
-
-  async login(email: string, password: string): Promise<User> {
+  async login(email: string, password: string): Promise<any> {
     const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
-    await this.ensureFirestoreConnection();
-    const userData = await this.getUserData(userCredential.user.uid);
-    this.userDataSubject.next(userData);
     return userCredential.user;
   }
 
-  async loginWithGoogle(): Promise<User> {
+  async loginWithGoogle(): Promise<any> {
     const provider = new GoogleAuthProvider();
     const userCredential = await signInWithPopup(this.auth, provider);
     const user = userCredential.user;
-    
-    await this.ensureFirestoreConnection();
+
+    // Vérifier si l'utilisateur existe dans Firestore
     const userDoc = await getDoc(doc(this.firestore, 'users', user.uid));
-    
+
     if (!userDoc.exists()) {
+      // Créer un profil par défaut pour les nouveaux utilisateurs Google
       const userData: UserData = {
         uid: user.uid,
         email: user.email!,
@@ -203,11 +202,8 @@ export class AuthService {
         createdAt: new Date()
       };
       await setDoc(doc(this.firestore, 'users', user.uid), userData);
-      this.userDataSubject.next(userData);
-    } else {
-      this.userDataSubject.next(userDoc.data() as UserData);
     }
-    
+
     return user;
   }
 
@@ -224,21 +220,42 @@ export class AuthService {
 
   async updateUserData(uid: string, data: Partial<UserData>): Promise<void> {
     await updateDoc(doc(this.firestore, 'users', uid), data);
-    const updated = await this.getUserData(uid);
-    this.userDataSubject.next(updated);
   }
 
   async logout(): Promise<void> {
     await signOut(this.auth);
-    this.userDataSubject.next(null);
     this.router.navigate(['/']);
   }
 
-  getCurrentUser(): User | null {
+  getCurrentUser(): any | null {
     return this.auth.currentUser;
   }
 
   isAuthenticated(): boolean {
     return this.auth.currentUser !== null;
+  }
+
+  // Méthode utilitaire pour obtenir le rôle de l'utilisateur courant
+  async getCurrentUserRole(): Promise<'candidate' | 'recruiter' | null> {
+    const user = this.auth.currentUser;
+    if (!user) return null;
+
+    const userData = await this.getUserData(user.uid);
+    return userData?.role || null;
+  }
+
+  // Redirection basée sur le rôle après connexion
+  async redirectAfterLogin(): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user) return;
+
+    const userData = await this.getUserData(user.uid);
+    if (userData?.role === 'candidate') {
+      this.router.navigate(['/candidate/dashboard']);
+    } else if (userData?.role === 'recruiter') {
+      this.router.navigate(['/recruiter/dashboard']);
+    } else {
+      this.router.navigate(['/onboarding']);
+    }
   }
 }

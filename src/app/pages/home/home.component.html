@@ -1,4 +1,29 @@
 <!-- home.component.html -->
+<!-- À ajouter AVANT le section class="landing-hero" dans home.component.html -->
+<nav class="navbar" [class.scrolled]="isScrolled">
+  <div class="navbar-container">
+    <div class="navbar-brand" routerLink="/">
+      <div class="logo-icon">⚡</div>
+      <span class="logo-text">Talent<span class="logo-highlight">Sn</span></span>
+    </div>
+
+    <div class="navbar-actions">
+      <button class="nav-btn-login" routerLink="/login">
+        <i class="fas fa-arrow-right-to-bracket"></i>
+        Se connecter
+      </button>
+      <button class="nav-btn-register" routerLink="/register">
+        <i class="fas fa-user-plus"></i>
+        S'inscrire
+        <span class="free-badge">Gratuit</span>
+      </button>
+      <button class="mobile-toggle" (click)="toggleMobileMenu()">
+        <i class="fas" [class.fa-bars]="!mobileMenuOpen" [class.fa-times]="mobileMenuOpen"></i>
+      </button>
+    </div>
+  </div>
+</nav>
+
 <section class="landing-hero">
   <div class="hero-bg-animation">
     <div class="orb orb-1"></div>

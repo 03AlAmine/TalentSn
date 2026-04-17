@@ -1,38 +1,5 @@
 /* home.component.css */
 /* ═══════════════════════════════════════════════════════════════════ */
-/* VARIABLES & GLOBAL STYLES                                          */
-/* ═══════════════════════════════════════════════════════════════════ */
-
-:root {
-  --primary: #1EC28B;
-  --primary-dark: #0F8B5E;
-  --primary-light: #6EE7B7;
-  --secondary: #8B5CF6;
-  --dark: #0A0A0F;
-  --dark-2: #14161F;
-  --dark-3: #1A1C2E;
-  --gray: #5A5A72;
-  --gray-light: #A0A0C0;
-  --white: #FFFFFF;
-  --success: #10B981;
-  --warning: #F59E0B;
-  --error: #EF4444;
-  --gradient-1: linear-gradient(135deg, #1EC28B, #6EE7B7);
-  --gradient-2: linear-gradient(135deg, #8B5CF6, #3B82F6);
-  --gradient-3: linear-gradient(135deg, #F59E0B, #EF4444);
-  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-/* ═══════════════════════════════════════════════════════════════════ */
 /* KEYFRAMES ANIMATIONS                                               */
 /* ═══════════════════════════════════════════════════════════════════ */
 
@@ -117,6 +84,154 @@
   }
 }
 
+
+/* À ajouter dans home.component.css */
+/* ═══════════════════════════════════════════════════════════════════ */
+/* NAVBAR FIXE                                                         */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 16px 32px;
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(30, 194, 139, 0.15);
+  transition: all 0.3s ease;
+}
+
+.navbar.scrolled {
+  padding: 12px 32px;
+  background: rgba(5, 6, 8, 0.95);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.logo-icon {
+  font-size: 28px;
+  background: linear-gradient(135deg, #1EC28B, #6EE7B7);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.logo-text {
+  color: white;
+}
+
+.logo-highlight {
+  color: #1EC28B;
+}
+
+.navbar-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.nav-btn-login {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 10px 20px;
+  border-radius: 40px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-btn-login:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #1EC28B;
+  transform: translateY(-2px);
+}
+
+.nav-btn-register {
+  background: linear-gradient(135deg, #1EC28B, #0F8B5E);
+  border: none;
+  color: white;
+  padding: 10px 24px;
+  border-radius: 40px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(30, 194, 139, 0.3);
+}
+
+.nav-btn-register:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(30, 194, 139, 0.4);
+  background: linear-gradient(135deg, #32E0A5, #1EC28B);
+}
+
+.free-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.mobile-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 12px 20px;
+  }
+  .navbar-actions {
+    gap: 8px;
+  }
+
+  .nav-btn-login, .nav-btn-register {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .mobile-toggle {
+    display: block;
+  }
+
+  .free-badge {
+    display: none;
+  }
+}
 /* ═══════════════════════════════════════════════════════════════════ */
 /* HERO SECTION                                                       */
 /* ═══════════════════════════════════════════════════════════════════ */
@@ -264,8 +379,8 @@
 
 .gradient-text {
   background: linear-gradient(120deg, #1EC28B, #6EE7B7, #8B5CF6);
-  background-clip: text;
   -webkit-background-clip: text;
+  background-clip: text;
   color: transparent;
   position: relative;
   display: inline-block;

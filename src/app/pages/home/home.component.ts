@@ -1,5 +1,12 @@
 // home.component.ts
-import { Component, OnInit, OnDestroy, HostListener, Inject, PLATFORM_ID } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  HostListener,
+  Inject,
+  PLATFORM_ID,
+} from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -8,10 +15,9 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  styleUrls: ['./home.component.css'],
 })
 export class HomeComponent implements OnInit, OnDestroy {
-
   // Profils améliorés avec plus de données
   topProfiles = [
     {
@@ -23,7 +29,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       color: '#1EC28B',
       skills: ['Angular', 'React', 'Node.js', 'Blockchain'],
       verified: true,
-      isHovered: false
+      isHovered: false,
     },
     {
       initials: 'MK',
@@ -34,7 +40,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       color: '#7FA8F5',
       skills: ['Agile', 'Scrum', 'Jira', 'Leadership'],
       verified: true,
-      isHovered: false
+      isHovered: false,
     },
     {
       initials: 'AD',
@@ -45,7 +51,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       color: '#F59E0B',
       skills: ['Python', 'SQL', 'Power BI', 'Tableau'],
       verified: true,
-      isHovered: false
+      isHovered: false,
     },
     {
       initials: 'BS',
@@ -56,8 +62,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       color: '#A78BFA',
       skills: ['Figma', 'Adobe XD', 'User Research', 'Prototyping'],
       verified: true,
-      isHovered: false
-    }
+      isHovered: false,
+    },
   ];
 
   // Statistiques avec valeurs plus réalistes
@@ -71,7 +77,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       trend: '+24% ce mois',
       trendIcon: 'fas fa-arrow-up',
       trendColor: '#1EC28B',
-      icon: 'fas fa-user-check'
+      icon: 'fas fa-user-check',
     },
     {
       currentValue: 0,
@@ -82,7 +88,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       trend: 'Confiance totale',
       trendIcon: 'fas fa-shield-alt',
       trendColor: '#1EC28B',
-      icon: 'fas fa-shield-virus'
+      icon: 'fas fa-shield-virus',
     },
     {
       currentValue: 0,
@@ -93,7 +99,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       trend: '-15% vs 2024',
       trendIcon: 'fas fa-arrow-down',
       trendColor: '#F59E0B',
-      icon: 'fas fa-clock'
+      icon: 'fas fa-clock',
     },
     {
       currentValue: 0,
@@ -104,8 +110,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       trend: '+12 nouvelles ce mois',
       trendIcon: 'fas fa-building',
       trendColor: '#1EC28B',
-      icon: 'fas fa-building'
-    }
+      icon: 'fas fa-building',
+    },
   ];
 
   features = [
@@ -113,89 +119,96 @@ export class HomeComponent implements OnInit, OnDestroy {
       iconClass: 'fas fa-link',
       iconColor: 'g',
       title: 'Blockchain Polygon',
-      description: 'Chaque diplôme est haché et enregistré sur Polygon. Vérification instantanée par QR code — les faux CV deviennent techniquement impossibles.',
+      description:
+        'Chaque diplôme est haché et enregistré sur Polygon. Vérification instantanée par QR code — les faux CV deviennent techniquement impossibles.',
       stats: '10k+ diplômes certifiés',
-      isHovered: false
+      isHovered: false,
     },
     {
       iconClass: 'fas fa-chart-line',
       iconColor: 'b',
       title: 'IA Prédictive',
-      description: 'Score à 4 dimensions : technique, expérience, soft skills, fit culturel. L\'IA prédit la probabilité de succès sur chaque poste.',
+      description:
+        "Score à 4 dimensions : technique, expérience, soft skills, fit culturel. L'IA prédit la probabilité de succès sur chaque poste.",
       stats: '92% de précision',
-      isHovered: false
+      isHovered: false,
     },
     {
       iconClass: 'fas fa-file-alt',
       iconColor: 'a',
       title: 'CV Assisté par IA',
-      description: 'Décrivez votre parcours en français. L\'IA génère un CV ATS-optimisé, exportable PDF et partageable en ligne.',
+      description:
+        "Décrivez votre parcours en français. L'IA génère un CV ATS-optimisé, exportable PDF et partageable en ligne.",
       stats: 'ATS Score +45%',
-      isHovered: false
+      isHovered: false,
     },
     {
       iconClass: 'fas fa-columns',
       iconColor: 'g',
       title: 'Pipeline Kanban',
-      description: 'Gérez toutes vos candidatures visuellement. Notes collaboratives, analytics et relances automatiques intégrés.',
+      description:
+        'Gérez toutes vos candidatures visuellement. Notes collaboratives, analytics et relances automatiques intégrés.',
       stats: 'Temps réduit de 60%',
-      isHovered: false
+      isHovered: false,
     },
     {
       iconClass: 'fas fa-eye-slash',
       iconColor: 'b',
-      title: 'Recrutement à l\'Aveugle',
-      description: 'Anonymisation automatique (nom, photo, âge) pour un premier tri 100% objectif et sans biais inconscients.',
+      title: "Recrutement à l'Aveugle",
+      description:
+        'Anonymisation automatique (nom, photo, âge) pour un premier tri 100% objectif et sans biais inconscients.',
       stats: 'Diversité +35%',
-      isHovered: false
+      isHovered: false,
     },
     {
       iconClass: 'fas fa-database',
       iconColor: 'a',
       title: 'Souveraineté des données',
-      description: 'Le candidat contrôle ses données. Partage via smart contract avec expiration et révocation automatique.',
+      description:
+        'Le candidat contrôle ses données. Partage via smart contract avec expiration et révocation automatique.',
       stats: 'RGPD compliant',
-      isHovered: false
-    }
+      isHovered: false,
+    },
   ];
 
   testimonials = [
     {
-      text: "Grâce à TalentSn, nous avons réduit notre temps de recrutement de 60%. La vérification blockchain des diplômes est une révolution pour notre secteur bancaire.",
-      authorName: "Sophie Mendy",
-      authorTitle: "DRH, Orange Sénégal",
-      authorInitials: "SM",
-      avatarBg: "linear-gradient(135deg, #1EC28B, #0F8B5E)",
-      rating: 5
+      text: 'Grâce à TalentSn, nous avons réduit notre temps de recrutement de 60%. La vérification blockchain des diplômes est une révolution pour notre secteur bancaire.',
+      authorName: 'Sophie Mendy',
+      authorTitle: 'DRH, Orange Sénégal',
+      authorInitials: 'SM',
+      avatarBg: 'linear-gradient(135deg, #1EC28B, #0F8B5E)',
+      rating: 5,
     },
     {
       text: "L'IA prédictive nous a permis de trouver des profils rares que nous n'aurions jamais repérés autrement. Un outil indispensable pour notre croissance.",
-      authorName: "Ibrahim Touré",
-      authorTitle: "CTO, Wave Sénégal",
-      authorInitials: "IT",
-      avatarBg: "linear-gradient(135deg, #F59E0B, #D97706)",
-      rating: 5
+      authorName: 'Ibrahim Touré',
+      authorTitle: 'CTO, Wave Sénégal',
+      authorInitials: 'IT',
+      avatarBg: 'linear-gradient(135deg, #F59E0B, #D97706)',
+      rating: 5,
     },
     {
-      text: "La transparence et la sécurité blockchain rassurent aussi bien les recruteurs que les candidats. TalentSn est un véritable game changer en Afrique.",
-      authorName: "Aïcha Diallo",
-      authorTitle: "Fondatrice, Dakar Dev Hub",
-      authorInitials: "AD",
-      avatarBg: "linear-gradient(135deg, #3B82F6, #2563EB)",
-      rating: 5
+      text: 'La transparence et la sécurité blockchain rassurent aussi bien les recruteurs que les candidats. TalentSn est un véritable game changer en Afrique.',
+      authorName: 'Aïcha Diallo',
+      authorTitle: 'Fondatrice, Dakar Dev Hub',
+      authorInitials: 'AD',
+      avatarBg: 'linear-gradient(135deg, #3B82F6, #2563EB)',
+      rating: 5,
     },
     {
-      text: "Nous recrutons désormais 3 fois plus vite. La qualité des candidats certifiés blockchain est exceptionnelle.",
-      authorName: "Mamadou Diop",
-      authorTitle: "CEO, Sonatel Academy",
-      authorInitials: "MD",
-      avatarBg: "linear-gradient(135deg, #8B5CF6, #7C3AED)",
-      rating: 5
-    }
+      text: 'Nous recrutons désormais 3 fois plus vite. La qualité des candidats certifiés blockchain est exceptionnelle.',
+      authorName: 'Mamadou Diop',
+      authorTitle: 'CEO, Sonatel Academy',
+      authorInitials: 'MD',
+      avatarBg: 'linear-gradient(135deg, #8B5CF6, #7C3AED)',
+      rating: 5,
+    },
   ];
 
   hoveredProfile: any = null;
-  aiMessage: string = "✨ Fatou correspond à 94% à votre offre Angular — compétences blockchain rares sur le marché. Contactez-la rapidement !";
+  aiMessage: string =
+    '✨ Fatou correspond à 94% à votre offre Angular — compétences blockchain rares sur le marché. Contactez-la rapidement !';
   currentTime: string = '';
   private statsAnimated: boolean = false;
   private observer: IntersectionObserver | null = null;
@@ -233,28 +246,39 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.currentTime = now.toLocaleTimeString('fr-FR', {
       hour: '2-digit',
       minute: '2-digit',
-      second: '2-digit'
+      second: '2-digit',
     });
   }
+
+  mobileMenuOpen: boolean = false;
+  isScrolled: boolean = false;
 
   @HostListener('window:scroll', [])
   onWindowScroll(): void {
     if (this.isBrowser) {
       this.checkStatsInView();
+      // Pour la navbar scrolled
+      this.isScrolled = window.scrollY > 50;
     }
   }
 
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
   setupScrollObserver(): void {
     if (!this.isBrowser) return;
 
-    this.observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && !this.statsAnimated) {
-          this.statsAnimated = true;
-          this.animateCounters();
-        }
-      });
-    }, { threshold: 0.2 });
+    this.observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !this.statsAnimated) {
+            this.statsAnimated = true;
+            this.animateCounters();
+          }
+        });
+      },
+      { threshold: 0.2 },
+    );
 
     const statsSection = document.querySelector('.stats-bar');
     if (statsSection) {
@@ -267,7 +291,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       const statsSection = document.querySelector('.stats-bar');
       if (statsSection) {
         const rect = statsSection.getBoundingClientRect();
-        const isVisible = rect.top < window.innerHeight - 100 && rect.bottom > 0;
+        const isVisible =
+          rect.top < window.innerHeight - 100 && rect.bottom > 0;
         if (isVisible) {
           this.statsAnimated = true;
           this.animateCounters();
@@ -299,7 +324,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       if (progress < 1) {
         this.animationFrameId = requestAnimationFrame(animate);
       } else {
-        this.stats.forEach(stat => {
+        this.stats.forEach((stat) => {
           if (stat.suffix === '%') {
             stat.displayValue = stat.targetValue.toFixed(1);
           } else {
@@ -319,7 +344,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       `${profile.name} correspond à ${profile.score}% avec vos critères. Compétences clés : ${profile.skills.slice(0, 3).join(', ')}`,
       `🎯 Profil exceptionnel ! ${profile.name} a été recommandé par notre IA pour 3 offres premium cette semaine.`,
       `⭐ ${profile.name} fait partie du top 5% des talents sur le marché ouest-africain.`,
-      `💡 Notre IA prédit un taux de succès de ${profile.score}% pour ${profile.name} sur ce poste.`
+      `💡 Notre IA prédit un taux de succès de ${profile.score}% pour ${profile.name} sur ce poste.`,
     ];
 
     this.aiMessage = messages[Math.floor(Math.random() * messages.length)];
@@ -334,10 +359,10 @@ export class HomeComponent implements OnInit, OnDestroy {
       "🎯 Nouveau profil blockchain certifié : +156 diplômes vérifiés aujourd'hui",
       "⚡ L'IA a matché 2,345 candidats avec des offres premium cette semaine",
       "📊 +845 entreprises nous font confiance en Afrique de l'Ouest",
-      "🔗 Vérification instantanée des diplômes sur Polygon — 0% fraude",
-      "💼 15,000+ talents certifiés prêts à être recrutés",
+      '🔗 Vérification instantanée des diplômes sur Polygon — 0% fraude',
+      '💼 15,000+ talents certifiés prêts à être recrutés',
       "🚀 Réduction de 51% du temps de recrutement grâce à l'IA",
-      "💎 92% des recruteurs recommandent TalentSn à leurs pairs"
+      '💎 92% des recruteurs recommandent TalentSn à leurs pairs',
     ];
 
     let index = 0;
