@@ -1,0 +1,266 @@
+<div class="cv-page" *ngIf="!isLoading; else loadTpl">
+
+  <!-- TOASTS -->
+  <div class="toast success" *ngIf="showSaveToast">✅ Modifications sauvegardées</div>
+  <div class="toast success" *ngIf="showShareToast">📋 Lien copié !</div>
+
+  <!-- TOP BAR -->
+  <div class="cv-toolbar no-print" *ngIf="!isSharedView">
+    <button class="btn-back" (click)="goBack()">← Retour</button>
+    <div class="toolbar-center">
+      <div class="theme-picker">
+        <span class="theme-picker-label">Thème :</span>
+        <button *ngFor="let t of themes" class="theme-dot"
+                [style.background]="t.color"
+                [class.active]="cvData?.theme===t.id"
+                [title]="t.label"
+                (click)="changeTheme(t.id)"></button>
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <button class="btn-share" (click)="copyShareLink()">🔗 Partager</button>
+      <button class="btn-export" (click)="exportPdf()" [disabled]="isExporting">
+        <span *ngIf="!isExporting">⬇ Exporter PDF</span>
+        <span *ngIf="isExporting">Export…</span>
+      </button>
+      <button class="btn-edit" (click)="toggleEdit()" *ngIf="!isEditing">✏️ Modifier</button>
+      <button class="btn-save" (click)="saveChanges()" *ngIf="isEditing" [disabled]="isSaving">
+        {{ isSaving ? 'Sauvegarde…' : '💾 Sauvegarder' }}
+      </button>
+      <button class="btn-cancel" (click)="toggleEdit()" *ngIf="isEditing">✕ Annuler</button>
+    </div>
+  </div>
+
+  <!-- ══ CV DOCUMENT ══ -->
+  <div class="cv-document" id="cv-to-print" *ngIf="cvData; else noCvTpl">
+
+    <!-- HEADER -->
+    <div class="cv-header" [class]="'theme-'+cvData.theme">
+
+      <!-- Colonne gauche du header: photo -->
+      <div class="cv-header-photo-col">
+        <div class="cv-photo-wrap"
+             [class.clickable]="!isSharedView"
+             (click)="triggerPhotoUpload()"
+             [title]="isSharedView ? '' : 'Changer la photo'">
+
+          <img *ngIf="userData?.photoURL && !isUploadingPhoto"
+               [src]="userData?.photoURL"
+               class="cv-photo" alt="Photo profil">
+
+          <div *ngIf="!userData?.photoURL && !isUploadingPhoto"
+               class="cv-photo-placeholder">
+            {{ userData?.firstName?.charAt(0) }}{{ userData?.lastName?.charAt(0) }}
+          </div>
+
+          <div *ngIf="isUploadingPhoto" class="cv-photo-uploading">
+            <div class="upload-spinner"></div>
+          </div>
+
+          <!-- Overlay "changer photo" au hover -->
+          <div class="cv-photo-overlay" *ngIf="!isSharedView">
+            <span>📷</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Colonne droite du header: infos -->
+      <div class="cv-header-info">
+        <h1 class="cv-name">{{ fullName }}</h1>
+        <div class="cv-title-pro">{{ userData?.title }}</div>
+
+        <div class="cv-contacts">
+          <span *ngIf="userData?.email">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+            {{ userData?.email }}
+          </span>
+          <span *ngIf="userData?.phone">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.0 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.72 6.72l1.28-1.28a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+            {{ userData?.phone }}
+          </span>
+          <span *ngIf="location">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {{ location }}
+          </span>
+          <a *ngIf="linkedinUrl" [href]="linkedinUrl" target="_blank" class="cv-contact-link">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+            {{ linkedinHandle || 'LinkedIn' }}
+          </a>
+          <a *ngIf="githubUrl" [href]="githubUrl" target="_blank" class="cv-contact-link">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
+            {{ githubHandle || 'GitHub' }}
+          </a>
+        </div>
+      </div>
+
+    </div><!-- fin header -->
+
+    <!-- BODY -->
+    <div class="cv-body">
+
+      <!-- COL GAUCHE -->
+      <div class="cv-col-left">
+
+        <!-- COMPÉTENCES TECH -->
+        <div class="cv-section">
+          <div class="cv-section-title" [class]="'accent-'+cvData.theme">
+            <span class="section-icon">⚙️</span> Compétences techniques
+          </div>
+          <div *ngIf="!isEditing" class="skills-wrap">
+            <span class="skill-pill" [class]="'pill-'+cvData.theme" *ngFor="let s of cvData.technicalSkills">{{ s }}</span>
+            <span *ngIf="!cvData.technicalSkills?.length" class="empty-field">Aucune compétence renseignée</span>
+          </div>
+          <div *ngIf="isEditing" class="edit-skills-wrap">
+            <div class="edit-skill-tags">
+              <span class="edit-tag" *ngFor="let s of editTechSkills; let i=index">
+                {{ s }}<button (click)="removeTechSkill(i)">×</button>
+              </span>
+            </div>
+            <div class="edit-skill-input">
+              <input [(ngModel)]="newTechSkill" placeholder="Ajouter…" (keyup.enter)="addTechSkill()">
+              <button (click)="addTechSkill()">+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SOFT SKILLS -->
+        <div class="cv-section">
+          <div class="cv-section-title" [class]="'accent-'+cvData.theme">
+            <span class="section-icon">🤝</span> Soft skills
+          </div>
+          <div *ngIf="!isEditing" class="skills-wrap">
+            <span class="skill-pill soft" *ngFor="let s of cvData.softSkills">{{ s }}</span>
+            <span *ngIf="!cvData.softSkills?.length" class="empty-field">Aucun soft skill</span>
+          </div>
+          <div *ngIf="isEditing" class="edit-skills-wrap">
+            <div class="edit-skill-tags">
+              <span class="edit-tag soft" *ngFor="let s of editSoftSkills; let i=index">
+                {{ s }}<button (click)="removeSoftSkill(i)">×</button>
+              </span>
+            </div>
+            <div class="edit-skill-input">
+              <input [(ngModel)]="newSoftSkill" placeholder="Ajouter…" (keyup.enter)="addSoftSkill()">
+              <button (click)="addSoftSkill()">+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- LANGUES -->
+        <div class="cv-section" *ngIf="cvData.languages?.length">
+          <div class="cv-section-title" [class]="'accent-'+cvData.theme">
+            <span class="section-icon">🌍</span> Langues
+          </div>
+          <div *ngFor="let lang of cvData.languages" class="lang-item">
+            <span class="lang-name">{{ lang.name }}</span>
+            <span class="lang-badge">{{ lang.level }}</span>
+          </div>
+        </div>
+
+        <!-- CERTIFICATIONS -->
+        <div class="cv-section" *ngIf="cvData.certifications?.length && cvData.certifications[0]?.name">
+          <div class="cv-section-title" [class]="'accent-'+cvData.theme">
+            <span class="section-icon">🏆</span> Certifications
+          </div>
+          <div *ngFor="let cert of cvData.certifications" class="cert-item">
+            <div class="cert-name">{{ cert.name }}</div>
+            <div class="cert-issuer">{{ cert.issuer }}</div>
+          </div>
+        </div>
+
+        <!-- INFOS PRATIQUES -->
+        <div class="cv-section">
+          <div class="cv-section-title" [class]="'accent-'+cvData.theme">
+            <span class="section-icon">📋</span> Informations
+          </div>
+          <div class="info-line" *ngIf="cvData.additionalInfo?.contractType">
+            <span class="info-label">Contrat</span>
+            <span class="info-val">{{ cvData.additionalInfo.contractType }}</span>
+          </div>
+          <div class="info-line" *ngIf="cvData.additionalInfo?.availability">
+            <span class="info-label">Disponibilité</span>
+            <span class="info-val">{{ cvData.additionalInfo.availability }}</span>
+          </div>
+        </div>
+
+      </div><!-- fin col gauche -->
+
+      <!-- COL DROITE -->
+      <div class="cv-col-right">
+
+        <!-- RÉSUMÉ -->
+        <div class="cv-section" *ngIf="cvData.summary || isEditing">
+          <div class="cv-section-title" [class]="'accent-'+cvData.theme">
+            <span class="section-icon">👤</span> Profil professionnel
+          </div>
+          <p *ngIf="!isEditing" class="cv-summary">{{ cvData.summary }}</p>
+          <textarea *ngIf="isEditing" [(ngModel)]="editSummary" class="edit-textarea" rows="5" placeholder="Rédigez votre résumé…"></textarea>
+        </div>
+
+        <!-- EXPÉRIENCES -->
+        <div class="cv-section" *ngIf="cvData.experiences?.length">
+          <div class="cv-section-title" [class]="'accent-'+cvData.theme">
+            <span class="section-icon">💼</span> Expériences professionnelles
+          </div>
+          <div *ngFor="let exp of cvData.experiences; let last=last" class="exp-block" [class.exp-last]="last">
+            <div class="exp-timeline-dot" [class]="'dot-'+cvData.theme"></div>
+            <div class="exp-content">
+              <div class="exp-header">
+                <div class="exp-title-company">
+                  <div class="exp-job-title">{{ exp.title }}</div>
+                  <div class="exp-company">
+                    {{ exp.company }}
+                    <span *ngIf="exp.location" class="exp-loc"> · {{ exp.location }}</span>
+                  </div>
+                </div>
+                <div class="exp-dates-badge">{{ exp.startDate }} — {{ exp.isCurrent ? 'Présent' : exp.endDate }}</div>
+              </div>
+              <ul class="exp-bullets" *ngIf="exp.bulletPoints?.length">
+                <li *ngFor="let bp of exp.bulletPoints">{{ bp }}</li>
+              </ul>
+              <p class="exp-desc" *ngIf="!exp.bulletPoints?.length && exp.description">{{ exp.description }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- FORMATIONS -->
+        <div class="cv-section" *ngIf="cvData.educations?.length">
+          <div class="cv-section-title" [class]="'accent-'+cvData.theme">
+            <span class="section-icon">🎓</span> Formation académique
+          </div>
+          <div *ngFor="let edu of cvData.educations; let last=last" class="edu-block" [class.edu-last]="last">
+            <div class="edu-timeline-dot" [class]="'dot-'+cvData.theme"></div>
+            <div class="edu-content">
+              <div class="edu-header">
+                <div>
+                  <div class="edu-degree">{{ edu.degree }}</div>
+                  <div class="edu-school">{{ edu.institution }}<span *ngIf="edu.location"> · {{ edu.location }}</span></div>
+                </div>
+                <div class="edu-years-badge">{{ edu.startYear }} — {{ edu.endYear }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- fin col droite -->
+    </div><!-- fin body -->
+
+    <!-- FOOTER CV -->
+    <div class="cv-footer" [class]="'theme-footer-'+cvData.theme">
+      <span>CV généré avec TalentSn ✦</span>
+    </div>
+
+  </div><!-- fin cv-document -->
+
+  <ng-template #noCvTpl>
+    <div class="no-cv-msg">
+      <div class="no-cv-icon">📄</div>
+      <div class="no-cv-title">Aucun CV généré</div>
+      <div class="no-cv-sub">Complétez l'onboarding pour générer votre CV IA</div>
+      <button class="btn-primary" (click)="goBack()">Retour au dashboard</button>
+    </div>
+  </ng-template>
+</div>
+
+<ng-template #loadTpl>
+  <div class="loading-screen"><div class="load-spin"></div><div>Chargement du CV…</div></div>
+</ng-template>

@@ -1,0 +1,52 @@
+/* Reset CSS moderne */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: 'Inter', 'Space Grotesk', sans-serif;
+  overflow-x: hidden;
+}
+
+
+ [class*="app-"] {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+}
+
+
+:root {
+  --primary: #1EC28B;
+  --primary-dark: #0F8B5E;
+  --primary-light: #6EE7B7;
+  --secondary: #8B5CF6;
+  --dark: #0A0A0F;
+  --dark-2: #14161F;
+  --dark-3: #1A1C2E;
+  --gray: #5A5A72;
+  --gray-light: #A0A0C0;
+  --white: #FFFFFF;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --gradient-1: linear-gradient(135deg, #1EC28B, #6EE7B7);
+  --gradient-2: linear-gradient(135deg, #8B5CF6, #3B82F6);
+  --gradient-3: linear-gradient(135deg, #F59E0B, #EF4444);
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+

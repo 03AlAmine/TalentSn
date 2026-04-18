@@ -1,0 +1,251 @@
+<div class="cv-upload-wrap">
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  ÉTAT : IDLE — Zone de dépôt            -->
+  <!-- ═══════════════════════════════════════ -->
+  <div
+    class="drop-zone"
+    [class.dragging]="isDragging"
+    *ngIf="mode === 'idle' || mode === 'dragging'"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+  >
+    <!-- Icône animée -->
+    <div class="drop-icon">
+      <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="5" width="45" height="58" rx="4" fill="none" stroke="currentColor" stroke-width="2.5"/>
+        <rect x="10" y="5" width="45" height="58" rx="4" fill="url(#grad)" opacity="0.08"/>
+        <polyline points="38,5 55,5 55,22" fill="none" stroke="currentColor" stroke-width="2.5"/>
+        <line x1="38" y1="5" x2="55" y2="22" stroke="currentColor" stroke-width="2.5"/>
+        <line x1="20" y1="28" x2="45" y2="28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <line x1="20" y1="36" x2="45" y2="36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <line x1="20" y1="44" x2="35" y2="44" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <!-- Flèche upload -->
+        <circle cx="60" cy="58" r="14" fill="var(--accent)" opacity="0.15"/>
+        <polyline points="55,60 60,54 65,60" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="60" y1="54" x2="60" y2="65" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="var(--accent)"/>
+            <stop offset="100%" stop-color="var(--accent2)"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <h2 class="drop-title">Importez votre CV</h2>
+    <p class="drop-sub">Glissez-déposez votre CV ici, ou cliquez pour choisir un fichier</p>
+
+    <div class="drop-formats">
+      <span class="format-badge">PDF</span>
+      <span class="format-badge">JPG</span>
+      <span class="format-badge">PNG</span>
+    </div>
+
+    <button class="btn-choose" (click)="triggerFileInput()">
+      <span>Choisir un fichier</span>
+    </button>
+
+    <input
+      id="cv-file-input"
+      type="file"
+      accept=".pdf,.jpg,.jpeg,.png,.webp"
+      (change)="onFileInputChange($event)"
+      style="display:none"
+    />
+
+    <div class="drop-hint">Taille maximale : 10 MB</div>
+
+    <!-- Option formulaire manuel -->
+    <div class="skip-row">
+      <button class="btn-skip" (click)="skip()">
+        Remplir le formulaire manuellement →
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  ÉTAT : PROCESSING — Analyse en cours   -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="processing-wrap" *ngIf="isProcessing">
+    <div class="processing-card">
+
+      <div class="proc-file">
+        <div class="proc-file-icon">
+          {{ fileName.endsWith('.pdf') ? '📄' : '🖼️' }}
+        </div>
+        <div class="proc-file-name">{{ fileName }}</div>
+      </div>
+
+      <!-- Étapes visuelles -->
+      <div class="proc-steps">
+        <div class="proc-step" [class.active]="progress.stage === 'reading'" [class.done]="['ocr','parsing','done'].includes(progress.stage)">
+          <div class="proc-step-dot">
+            <span *ngIf="!['ocr','parsing','done'].includes(progress.stage)">1</span>
+            <span *ngIf="['ocr','parsing','done'].includes(progress.stage)">✓</span>
+          </div>
+          <div class="proc-step-label">Lecture du fichier</div>
+        </div>
+        <div class="proc-step-line"></div>
+        <div class="proc-step" [class.active]="progress.stage === 'ocr'" [class.done]="['parsing','done'].includes(progress.stage)">
+          <div class="proc-step-dot">
+            <span *ngIf="!['parsing','done'].includes(progress.stage)">2</span>
+            <span *ngIf="['parsing','done'].includes(progress.stage)">✓</span>
+          </div>
+          <div class="proc-step-label">Extraction texte</div>
+        </div>
+        <div class="proc-step-line"></div>
+        <div class="proc-step" [class.active]="progress.stage === 'parsing'" [class.done]="progress.stage === 'done'">
+          <div class="proc-step-dot">
+            <span *ngIf="progress.stage !== 'done'">3</span>
+            <span *ngIf="progress.stage === 'done'">✓</span>
+          </div>
+          <div class="proc-step-label">Analyse IA</div>
+        </div>
+      </div>
+
+      <!-- Barre de progression -->
+      <div class="proc-progress-wrap">
+        <div class="proc-progress-bar">
+          <div class="proc-progress-fill" [style.width.%]="progress.progress"></div>
+        </div>
+        <div class="proc-progress-pct">{{ progress.progress }}%</div>
+      </div>
+
+      <div class="proc-message">
+        <div class="proc-spinner"></div>
+        {{ progress.message }}
+      </div>
+
+      <p class="proc-note">
+        🔒 Votre document ne quitte jamais votre appareil — traitement 100% local
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  ÉTAT : DONE — Résultats extraits        -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="result-wrap" *ngIf="isDone && extractedProfile">
+    <div class="result-header">
+      <div class="result-icon">✅</div>
+      <div>
+        <h2 class="result-title">Profil extrait !</h2>
+        <p class="result-sub">
+          Vérifiez les informations ci-dessous et confirmez
+        </p>
+      </div>
+      <div class="result-confidence">
+        <div class="conf-label">Précision</div>
+        <div class="conf-score" [class.high]="extractedProfile!.confidence >= 70" [class.mid]="extractedProfile!.confidence >= 40 && extractedProfile!.confidence < 70" [class.low]="extractedProfile!.confidence < 40">
+          {{ extractedProfile!.confidence }}%
+        </div>
+        <div class="conf-tag">{{ getConfidenceLabel(extractedProfile!.confidence) }}</div>
+      </div>
+    </div>
+
+    <div class="result-grid">
+
+      <!-- Identité -->
+      <div class="result-card" *ngIf="extractedProfile!.firstName || extractedProfile!.email">
+        <div class="rc-title">👤 Identité</div>
+        <div class="rc-row" *ngIf="extractedProfile!.firstName || extractedProfile!.lastName">
+          <span class="rc-key">Nom</span>
+          <span class="rc-val">{{ extractedProfile!.firstName }} {{ extractedProfile!.lastName }}</span>
+        </div>
+        <div class="rc-row" *ngIf="extractedProfile!.email">
+          <span class="rc-key">Email</span>
+          <span class="rc-val">{{ extractedProfile!.email }}</span>
+        </div>
+        <div class="rc-row" *ngIf="extractedProfile!.phone">
+          <span class="rc-key">Téléphone</span>
+          <span class="rc-val">{{ extractedProfile!.phone }}</span>
+        </div>
+        <div class="rc-row" *ngIf="extractedProfile!.city">
+          <span class="rc-key">Ville</span>
+          <span class="rc-val">{{ extractedProfile!.city }}{{ extractedProfile!.country ? ', ' + extractedProfile!.country : '' }}</span>
+        </div>
+        <div class="rc-row" *ngIf="extractedProfile!.title">
+          <span class="rc-key">Titre</span>
+          <span class="rc-val">{{ extractedProfile!.title }}</span>
+        </div>
+      </div>
+
+      <!-- Expériences -->
+      <div class="result-card" *ngIf="extractedProfile!.experiences.length > 0 && extractedProfile!.experiences[0].title">
+        <div class="rc-title">💼 Expériences ({{ extractedProfile!.experiences.length }})</div>
+        <div class="rc-exp" *ngFor="let exp of extractedProfile!.experiences; let i = index">
+          <div class="rc-exp-title">{{ exp.title }}</div>
+          <div class="rc-exp-sub">{{ exp.company }} {{ exp.startDate ? '· ' + exp.startDate.slice(0,4) : '' }}{{ exp.isCurrent ? ' – présent' : (exp.endDate ? ' – ' + exp.endDate.slice(0,4) : '') }}</div>
+        </div>
+      </div>
+
+      <!-- Formation -->
+      <div class="result-card" *ngIf="extractedProfile!.educations.length > 0 && extractedProfile!.educations[0].degree">
+        <div class="rc-title">🎓 Formation ({{ extractedProfile!.educations.length }})</div>
+        <div class="rc-exp" *ngFor="let edu of extractedProfile!.educations">
+          <div class="rc-exp-title">{{ edu.degree }}</div>
+          <div class="rc-exp-sub">{{ edu.institution }} {{ edu.endYear ? '· ' + edu.endYear : '' }}</div>
+        </div>
+      </div>
+
+      <!-- Compétences -->
+      <div class="result-card" *ngIf="extractedProfile!.technicalSkills.length > 0">
+        <div class="rc-title">⚙️ Compétences techniques ({{ extractedProfile!.technicalSkills.length }})</div>
+        <div class="rc-tags">
+          <span class="rc-tag" *ngFor="let skill of extractedProfile!.technicalSkills">{{ skill }}</span>
+        </div>
+      </div>
+
+      <!-- Langues -->
+      <div class="result-card" *ngIf="extractedProfile!.languages.length > 0">
+        <div class="rc-title">🌍 Langues</div>
+        <div class="rc-row" *ngFor="let lang of extractedProfile!.languages">
+          <span class="rc-key">{{ lang.name }}</span>
+          <span class="rc-val rc-level">{{ lang.level }}</span>
+        </div>
+      </div>
+
+      <!-- LinkedIn / GitHub -->
+      <div class="result-card" *ngIf="extractedProfile!.linkedin || extractedProfile!.github">
+        <div class="rc-title">🔗 Liens</div>
+        <div class="rc-row" *ngIf="extractedProfile!.linkedin">
+          <span class="rc-key">LinkedIn</span>
+          <span class="rc-val rc-link">{{ extractedProfile!.linkedin }}</span>
+        </div>
+        <div class="rc-row" *ngIf="extractedProfile!.github">
+          <span class="rc-key">GitHub</span>
+          <span class="rc-val rc-link">{{ extractedProfile!.github }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-note">
+      ℹ️ Vous pourrez corriger ou compléter ces informations à l'étape suivante
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-retry" (click)="retryUpload()">↺ Changer de fichier</button>
+      <button class="btn-confirm" (click)="confirmProfile()">
+        Utiliser ces informations →
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  ÉTAT : ERROR                           -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="error-wrap" *ngIf="isError">
+    <div class="error-card">
+      <div class="error-icon">⚠️</div>
+      <h3 class="error-title">Une erreur s'est produite</h3>
+      <p class="error-msg">{{ errorMsg }}</p>
+      <div class="error-actions">
+        <button class="btn-retry" (click)="retryUpload()">Réessayer</button>
+        <button class="btn-skip-err" (click)="skip()">Remplir manuellement</button>
+      </div>
+    </div>
+  </div>
+
+</div>
