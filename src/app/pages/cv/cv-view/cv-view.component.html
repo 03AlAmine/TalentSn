@@ -1,261 +1,647 @@
 <div class="cv-page" *ngIf="!isLoading; else loadTpl">
 
   <!-- TOASTS -->
-  <div class="toast success" *ngIf="showSaveToast">✅ Modifications sauvegardées</div>
-  <div class="toast success" *ngIf="showShareToast">📋 Lien copié !</div>
+  <div class="toast toast-save" *ngIf="showSaveToast">
+    <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l3.5 3.5L13 4" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Sauvegardé
+  </div>
+  <div class="toast toast-share" *ngIf="showShareToast">Lien copié</div>
+  <div class="toast toast-saving" *ngIf="isSaving && !showSaveToast">Sauvegarde…</div>
 
-  <!-- TOP BAR -->
+  <!-- ══ TOOLBAR ══ -->
   <div class="cv-toolbar no-print" *ngIf="!isSharedView">
-    <button class="btn-back" (click)="goBack()">← Retour</button>
+    <button class="btn-back" (click)="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Retour
+    </button>
+
     <div class="toolbar-center">
-      <div class="theme-picker">
-        <span class="theme-picker-label">Thème :</span>
-        <button *ngFor="let t of themes" class="theme-dot"
-                [style.background]="t.color"
-                [class.active]="cvData?.theme===t.id"
-                [title]="t.label"
-                (click)="changeTheme(t.id)"></button>
+      <div class="toolbar-group">
+        <span class="toolbar-label">Modèle</span>
+        <div class="template-picker">
+          <button *ngFor="let t of templates" class="tpl-btn"
+            [class.active]="cvData?.template === t.id" [title]="t.label"
+            (click)="changeTemplate(t.id)">
+            <div class="tpl-preview">
+              <div class="tpl-preview-header" [style.background]="t.headerBg"></div>
+              <div class="tpl-preview-lines">
+                <div class="tpl-line long"></div>
+                <div class="tpl-line short"></div>
+                <div class="tpl-line medium"></div>
+              </div>
+            </div>
+            <span class="tpl-name">{{ t.label }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="toolbar-divider"></div>
+
+      <div class="toolbar-group">
+        <span class="toolbar-label">Couleur</span>
+        <div class="color-picker">
+          <button *ngFor="let c of accentColors" class="color-swatch"
+            [class.active]="currentAccentColor === c.value" [title]="c.label"
+            [style.background]="c.value" (click)="changeAccentColor(c.value)">
+            <svg *ngIf="currentAccentColor === c.value" viewBox="0 0 12 12" fill="none" class="swatch-check">
+              <path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="toolbar-divider"></div>
+
+      <div class="edit-hint no-print">
+        <svg viewBox="0 0 16 16" fill="none" width="12" height="12"><path d="M11 2.5a1.5 1.5 0 012.12 2.12L5.5 12.25 2 13.5l1.25-3.5L11 2.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        Cliquez sur n'importe quel texte pour le modifier
       </div>
     </div>
+
     <div class="toolbar-right">
-      <button class="btn-share" (click)="copyShareLink()">🔗 Partager</button>
+      <button class="btn-share" (click)="copyShareLink()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+        Partager
+      </button>
       <button class="btn-export" (click)="exportPdf()" [disabled]="isExporting">
-        <span *ngIf="!isExporting">⬇ Exporter PDF</span>
-        <span *ngIf="isExporting">Export…</span>
+        <svg *ngIf="!isExporting" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        {{ isExporting ? 'Export…' : 'Télécharger PDF' }}
       </button>
-      <button class="btn-edit" (click)="toggleEdit()" *ngIf="!isEditing">✏️ Modifier</button>
-      <button class="btn-save" (click)="saveChanges()" *ngIf="isEditing" [disabled]="isSaving">
-        {{ isSaving ? 'Sauvegarde…' : '💾 Sauvegarder' }}
-      </button>
-      <button class="btn-cancel" (click)="toggleEdit()" *ngIf="isEditing">✕ Annuler</button>
     </div>
   </div>
 
   <!-- ══ CV DOCUMENT ══ -->
-  <div class="cv-document" id="cv-to-print" *ngIf="cvData; else noCvTpl">
+  <div *ngIf="cvData; else noCvTpl" id="cv-to-print"
+       class="cv-document"
+       [class]="'tpl-' + (cvData.template || 'executive')"
+       [class.cv-editable]="!isSharedView">
 
-    <!-- HEADER -->
-    <div class="cv-header" [class]="'theme-'+cvData.theme">
+    <!-- ════════════════════════════════════ -->
+    <!--  TEMPLATE: EXECUTIVE               -->
+    <!-- ════════════════════════════════════ -->
+    <ng-container *ngIf="(cvData.template || 'executive') === 'executive'">
 
-      <!-- Colonne gauche du header: photo -->
-      <div class="cv-header-photo-col">
-        <div class="cv-photo-wrap"
-             [class.clickable]="!isSharedView"
-             (click)="triggerPhotoUpload()"
-             [title]="isSharedView ? '' : 'Changer la photo'">
-
-          <img *ngIf="userData?.photoURL && !isUploadingPhoto"
-               [src]="userData?.photoURL"
-               class="cv-photo" alt="Photo profil">
-
-          <div *ngIf="!userData?.photoURL && !isUploadingPhoto"
-               class="cv-photo-placeholder">
+      <!-- HEADER -->
+      <div class="exec-header">
+        <div class="exec-photo-wrap" [class.clickable]="!isSharedView" (click)="triggerPhotoUpload()">
+          <img *ngIf="userData?.photoURL && !isUploadingPhoto" [src]="userData?.photoURL" class="exec-photo" alt="Photo">
+          <div *ngIf="!userData?.photoURL && !isUploadingPhoto" class="exec-photo-initials">
             {{ userData?.firstName?.charAt(0) }}{{ userData?.lastName?.charAt(0) }}
           </div>
-
-          <div *ngIf="isUploadingPhoto" class="cv-photo-uploading">
-            <div class="upload-spinner"></div>
+          <div *ngIf="isUploadingPhoto" class="exec-photo-uploading"><div class="upload-spinner"></div></div>
+          <div class="exec-photo-overlay" *ngIf="!isSharedView">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="18" height="18"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
           </div>
+        </div>
 
-          <!-- Overlay "changer photo" au hover -->
-          <div class="cv-photo-overlay" *ngIf="!isSharedView">
-            <span>📷</span>
+        <div class="exec-header-info">
+          <h1 class="exec-name"
+              [contentEditable]="!isSharedView"
+              [class.ce-field]="!isSharedView"
+              spellcheck="false"
+              (keydown)="onSingleLineKeydown($event)"
+              (blur)="onFieldBlur($event, 'userData', undefined, 'firstName')">{{ userData?.firstName }} {{ userData?.lastName }}</h1>
+          <div class="exec-title"
+               [contentEditable]="!isSharedView"
+               [class.ce-field]="!isSharedView"
+               spellcheck="false"
+               (keydown)="onSingleLineKeydown($event)"
+               (blur)="onFieldBlur($event, 'userData', undefined, 'title')">{{ userData?.title }}</div>
+          <div class="exec-divider"></div>
+          <div class="exec-contacts">
+            <span *ngIf="userData?.email" class="exec-contact-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="contact-icon"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+              <span [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                    (keydown)="onSingleLineKeydown($event)"
+                    (blur)="onFieldBlur($event, 'userData', undefined, 'email')">{{ userData?.email }}</span>
+            </span>
+            <span *ngIf="userData?.phone" class="exec-contact-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="contact-icon"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.0 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.72 6.72l1.28-1.28a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+              <span [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                    (keydown)="onSingleLineKeydown($event)"
+                    (blur)="onFieldBlur($event, 'userData', undefined, 'phone')">{{ userData?.phone }}</span>
+            </span>
+            <span *ngIf="location" class="exec-contact-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="contact-icon"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              {{ location }}
+            </span>
+            <a *ngIf="linkedinUrl" [href]="linkedinUrl" target="_blank" class="exec-contact-item exec-link">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="contact-icon"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+              {{ linkedinHandle || 'LinkedIn' }}
+            </a>
+            <a *ngIf="githubUrl" [href]="githubUrl" target="_blank" class="exec-contact-item exec-link">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="contact-icon"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
+              {{ githubHandle || 'GitHub' }}
+            </a>
           </div>
         </div>
       </div>
 
-      <!-- Colonne droite du header: infos -->
-      <div class="cv-header-info">
-        <h1 class="cv-name">{{ fullName }}</h1>
-        <div class="cv-title-pro">{{ userData?.title }}</div>
+      <!-- BODY -->
+      <div class="exec-body">
 
-        <div class="cv-contacts">
-          <span *ngIf="userData?.email">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
-            {{ userData?.email }}
-          </span>
-          <span *ngIf="userData?.phone">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.0 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.72 6.72l1.28-1.28a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-            {{ userData?.phone }}
-          </span>
-          <span *ngIf="location">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            {{ location }}
-          </span>
-          <a *ngIf="linkedinUrl" [href]="linkedinUrl" target="_blank" class="cv-contact-link">
-            <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
-            {{ linkedinHandle || 'LinkedIn' }}
-          </a>
-          <a *ngIf="githubUrl" [href]="githubUrl" target="_blank" class="cv-contact-link">
-            <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
-            {{ githubHandle || 'GitHub' }}
-          </a>
-        </div>
-      </div>
+        <!-- COL GAUCHE -->
+        <div class="exec-col-left">
 
-    </div><!-- fin header -->
-
-    <!-- BODY -->
-    <div class="cv-body">
-
-      <!-- COL GAUCHE -->
-      <div class="cv-col-left">
-
-        <!-- COMPÉTENCES TECH -->
-        <div class="cv-section">
-          <div class="cv-section-title" [class]="'accent-'+cvData.theme">
-            <span class="section-icon">⚙️</span> Compétences techniques
-          </div>
-          <div *ngIf="!isEditing" class="skills-wrap">
-            <span class="skill-pill" [class]="'pill-'+cvData.theme" *ngFor="let s of cvData.technicalSkills">{{ s }}</span>
-            <span *ngIf="!cvData.technicalSkills?.length" class="empty-field">Aucune compétence renseignée</span>
-          </div>
-          <div *ngIf="isEditing" class="edit-skills-wrap">
-            <div class="edit-skill-tags">
-              <span class="edit-tag" *ngFor="let s of editTechSkills; let i=index">
-                {{ s }}<button (click)="removeTechSkill(i)">×</button>
+          <!-- Compétences techniques -->
+          <div class="exec-section">
+            <h3 class="exec-section-title">Compétences techniques</h3>
+            <div class="exec-skills">
+              <span class="exec-skill-tag" *ngFor="let s of cvData.technicalSkills; let i=index">
+                {{ s }}
+                <button *ngIf="!isSharedView" class="skill-remove" (click)="removeTechSkill(i)" title="Supprimer">×</button>
               </span>
+              <span *ngIf="!cvData.technicalSkills?.length" class="empty-field">Non renseigné</span>
             </div>
-            <div class="edit-skill-input">
-              <input [(ngModel)]="newTechSkill" placeholder="Ajouter…" (keyup.enter)="addTechSkill()">
-              <button (click)="addTechSkill()">+</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- SOFT SKILLS -->
-        <div class="cv-section">
-          <div class="cv-section-title" [class]="'accent-'+cvData.theme">
-            <span class="section-icon">🤝</span> Soft skills
-          </div>
-          <div *ngIf="!isEditing" class="skills-wrap">
-            <span class="skill-pill soft" *ngFor="let s of cvData.softSkills">{{ s }}</span>
-            <span *ngIf="!cvData.softSkills?.length" class="empty-field">Aucun soft skill</span>
-          </div>
-          <div *ngIf="isEditing" class="edit-skills-wrap">
-            <div class="edit-skill-tags">
-              <span class="edit-tag soft" *ngFor="let s of editSoftSkills; let i=index">
-                {{ s }}<button (click)="removeSoftSkill(i)">×</button>
-              </span>
-            </div>
-            <div class="edit-skill-input">
-              <input [(ngModel)]="newSoftSkill" placeholder="Ajouter…" (keyup.enter)="addSoftSkill()">
-              <button (click)="addSoftSkill()">+</button>
+            <div class="skill-add-row no-print" *ngIf="!isSharedView">
+              <ng-container *ngIf="!showTechSkillInput">
+                <button class="skill-add-btn" (click)="showTechSkillInput=true">+ Ajouter</button>
+              </ng-container>
+              <ng-container *ngIf="showTechSkillInput">
+                <input class="skill-inline-input" [(ngModel)]="newTechSkill" placeholder="Compétence…"
+                       (keyup.enter)="addTechSkill()" (keyup.escape)="showTechSkillInput=false" autofocus>
+                <button class="skill-confirm-btn" (click)="addTechSkill()">↵</button>
+                <button class="skill-cancel-btn" (click)="showTechSkillInput=false">✕</button>
+              </ng-container>
             </div>
           </div>
+
+          <!-- Soft skills -->
+          <div class="exec-section">
+            <h3 class="exec-section-title">Savoir-être</h3>
+            <div class="exec-soft-skills">
+              <div class="exec-soft-item" *ngFor="let s of cvData.softSkills; let i=index">
+                <span class="exec-soft-dot"></span>{{ s }}
+                <button *ngIf="!isSharedView" class="skill-remove soft" (click)="removeSoftSkill(i)">×</button>
+              </div>
+              <span *ngIf="!cvData.softSkills?.length" class="empty-field">Non renseigné</span>
+            </div>
+            <div class="skill-add-row no-print" *ngIf="!isSharedView">
+              <ng-container *ngIf="!showSoftSkillInput">
+                <button class="skill-add-btn" (click)="showSoftSkillInput=true">+ Ajouter</button>
+              </ng-container>
+              <ng-container *ngIf="showSoftSkillInput">
+                <input class="skill-inline-input" [(ngModel)]="newSoftSkill" placeholder="Savoir-être…"
+                       (keyup.enter)="addSoftSkill()" (keyup.escape)="showSoftSkillInput=false">
+                <button class="skill-confirm-btn" (click)="addSoftSkill()">↵</button>
+                <button class="skill-cancel-btn" (click)="showSoftSkillInput=false">✕</button>
+              </ng-container>
+            </div>
+          </div>
+
+          <!-- Langues -->
+          <div class="exec-section" *ngIf="cvData.languages?.length">
+            <h3 class="exec-section-title">Langues</h3>
+            <div *ngFor="let lang of cvData.languages" class="exec-lang-item">
+              <span class="exec-lang-name">{{ lang.name }}</span>
+              <span class="exec-lang-level">{{ lang.level }}</span>
+            </div>
+          </div>
+
+          <!-- Certifications -->
+          <div class="exec-section" *ngIf="cvData.certifications?.length && cvData.certifications[0]?.name">
+            <h3 class="exec-section-title">Certifications</h3>
+            <div *ngFor="let cert of cvData.certifications" class="exec-cert-item">
+              <div class="exec-cert-name">{{ cert.name }}</div>
+              <div class="exec-cert-issuer">{{ cert.issuer }}</div>
+            </div>
+          </div>
+
+          <!-- Infos -->
+          <div class="exec-section" *ngIf="cvData.additionalInfo?.contractType || cvData.additionalInfo?.availability">
+            <h3 class="exec-section-title">Informations</h3>
+            <div class="exec-info-line" *ngIf="cvData.additionalInfo?.contractType">
+              <span class="exec-info-label">Contrat</span>
+              <span class="exec-info-val">{{ cvData.additionalInfo.contractType }}</span>
+            </div>
+            <div class="exec-info-line" *ngIf="cvData.additionalInfo?.availability">
+              <span class="exec-info-label">Disponibilité</span>
+              <span class="exec-info-val">{{ cvData.additionalInfo.availability }}</span>
+            </div>
+          </div>
         </div>
 
-        <!-- LANGUES -->
-        <div class="cv-section" *ngIf="cvData.languages?.length">
-          <div class="cv-section-title" [class]="'accent-'+cvData.theme">
-            <span class="section-icon">🌍</span> Langues
-          </div>
-          <div *ngFor="let lang of cvData.languages" class="lang-item">
-            <span class="lang-name">{{ lang.name }}</span>
-            <span class="lang-badge">{{ lang.level }}</span>
-          </div>
-        </div>
+        <!-- COL DROITE -->
+        <div class="exec-col-right">
 
-        <!-- CERTIFICATIONS -->
-        <div class="cv-section" *ngIf="cvData.certifications?.length && cvData.certifications[0]?.name">
-          <div class="cv-section-title" [class]="'accent-'+cvData.theme">
-            <span class="section-icon">🏆</span> Certifications
+          <!-- Résumé -->
+          <div class="exec-section" *ngIf="cvData.summary !== undefined">
+            <h3 class="exec-section-title">Profil professionnel</h3>
+            <p class="exec-summary"
+               [contentEditable]="!isSharedView"
+               [class.ce-field]="!isSharedView"
+               spellcheck="false"
+               (blur)="onFieldBlur($event, 'summary')">{{ cvData.summary }}</p>
           </div>
-          <div *ngFor="let cert of cvData.certifications" class="cert-item">
-            <div class="cert-name">{{ cert.name }}</div>
-            <div class="cert-issuer">{{ cert.issuer }}</div>
-          </div>
-        </div>
 
-        <!-- INFOS PRATIQUES -->
-        <div class="cv-section">
-          <div class="cv-section-title" [class]="'accent-'+cvData.theme">
-            <span class="section-icon">📋</span> Informations
-          </div>
-          <div class="info-line" *ngIf="cvData.additionalInfo?.contractType">
-            <span class="info-label">Contrat</span>
-            <span class="info-val">{{ cvData.additionalInfo.contractType }}</span>
-          </div>
-          <div class="info-line" *ngIf="cvData.additionalInfo?.availability">
-            <span class="info-label">Disponibilité</span>
-            <span class="info-val">{{ cvData.additionalInfo.availability }}</span>
-          </div>
-        </div>
-
-      </div><!-- fin col gauche -->
-
-      <!-- COL DROITE -->
-      <div class="cv-col-right">
-
-        <!-- RÉSUMÉ -->
-        <div class="cv-section" *ngIf="cvData.summary || isEditing">
-          <div class="cv-section-title" [class]="'accent-'+cvData.theme">
-            <span class="section-icon">👤</span> Profil professionnel
-          </div>
-          <p *ngIf="!isEditing" class="cv-summary">{{ cvData.summary }}</p>
-          <textarea *ngIf="isEditing" [(ngModel)]="editSummary" class="edit-textarea" rows="5" placeholder="Rédigez votre résumé…"></textarea>
-        </div>
-
-        <!-- EXPÉRIENCES -->
-        <div class="cv-section" *ngIf="cvData.experiences?.length">
-          <div class="cv-section-title" [class]="'accent-'+cvData.theme">
-            <span class="section-icon">💼</span> Expériences professionnelles
-          </div>
-          <div *ngFor="let exp of cvData.experiences; let last=last" class="exp-block" [class.exp-last]="last">
-            <div class="exp-timeline-dot" [class]="'dot-'+cvData.theme"></div>
-            <div class="exp-content">
-              <div class="exp-header">
-                <div class="exp-title-company">
-                  <div class="exp-job-title">{{ exp.title }}</div>
-                  <div class="exp-company">
-                    {{ exp.company }}
-                    <span *ngIf="exp.location" class="exp-loc"> · {{ exp.location }}</span>
+          <!-- Expériences -->
+          <div class="exec-section" *ngIf="cvData.experiences?.length">
+            <h3 class="exec-section-title">Expériences professionnelles</h3>
+            <div *ngFor="let exp of cvData.experiences; let ei=index; let last=last" class="exec-exp-block">
+              <div class="exec-exp-header">
+                <div class="exec-exp-left">
+                  <div class="exec-exp-title"
+                       [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                       (keydown)="onSingleLineKeydown($event)"
+                       (blur)="onFieldBlur($event, 'experiences', ei, 'title')">{{ exp.title }}</div>
+                  <div class="exec-exp-company">
+                    <span [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                          (keydown)="onSingleLineKeydown($event)"
+                          (blur)="onFieldBlur($event, 'experiences', ei, 'company')">{{ exp.company }}</span>
+                    <span *ngIf="exp.location" class="exec-exp-loc"> — {{ exp.location }}</span>
                   </div>
                 </div>
-                <div class="exp-dates-badge">{{ exp.startDate }} — {{ exp.isCurrent ? 'Présent' : exp.endDate }}</div>
-              </div>
-              <ul class="exp-bullets" *ngIf="exp.bulletPoints?.length">
-                <li *ngFor="let bp of exp.bulletPoints">{{ bp }}</li>
-              </ul>
-              <p class="exp-desc" *ngIf="!exp.bulletPoints?.length && exp.description">{{ exp.description }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- FORMATIONS -->
-        <div class="cv-section" *ngIf="cvData.educations?.length">
-          <div class="cv-section-title" [class]="'accent-'+cvData.theme">
-            <span class="section-icon">🎓</span> Formation académique
-          </div>
-          <div *ngFor="let edu of cvData.educations; let last=last" class="edu-block" [class.edu-last]="last">
-            <div class="edu-timeline-dot" [class]="'dot-'+cvData.theme"></div>
-            <div class="edu-content">
-              <div class="edu-header">
-                <div>
-                  <div class="edu-degree">{{ edu.degree }}</div>
-                  <div class="edu-school">{{ edu.institution }}<span *ngIf="edu.location"> · {{ edu.location }}</span></div>
+                <div class="exec-exp-dates">
+                  <span [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                        (keydown)="onSingleLineKeydown($event)"
+                        (blur)="onFieldBlur($event, 'experiences', ei, 'startDate')">{{ exp.startDate }}</span>
+                  –
+                  <span *ngIf="!exp.isCurrent"
+                        [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                        (keydown)="onSingleLineKeydown($event)"
+                        (blur)="onFieldBlur($event, 'experiences', ei, 'endDate')">{{ exp.endDate }}</span>
+                  <span *ngIf="exp.isCurrent">Présent</span>
                 </div>
-                <div class="edu-years-badge">{{ edu.startYear }} — {{ edu.endYear }}</div>
               </div>
+
+              <ul class="exec-exp-bullets" *ngIf="exp.bulletPoints?.length">
+                <li *ngFor="let bp of exp.bulletPoints; let bi=index" class="bullet-item">
+                  <span [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                        (blur)="onBulletBlur($event, ei, bi)">{{ bp }}</span>
+                  <button *ngIf="!isSharedView" class="bullet-remove no-print" (click)="removeBullet(ei, bi)" title="Supprimer">×</button>
+                </li>
+              </ul>
+              <p class="exec-exp-desc" *ngIf="!exp.bulletPoints?.length && exp.description"
+                 [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                 (blur)="onFieldBlur($event, 'experiences', ei, 'description')">{{ exp.description }}</p>
+
+              <button *ngIf="!isSharedView" class="add-bullet-btn no-print" (click)="addBullet(ei)">+ Ajouter une réalisation</button>
+              <div class="exec-exp-separator" *ngIf="!last"></div>
+            </div>
+          </div>
+
+          <!-- Formations -->
+          <div class="exec-section" *ngIf="cvData.educations?.length">
+            <h3 class="exec-section-title">Formation</h3>
+            <div *ngFor="let edu of cvData.educations; let ei=index; let last=last" class="exec-edu-block">
+              <div class="exec-edu-header">
+                <div>
+                  <div class="exec-edu-degree"
+                       [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                       (keydown)="onSingleLineKeydown($event)"
+                       (blur)="onFieldBlur($event, 'educations', ei, 'degree')">{{ edu.degree }}</div>
+                  <div class="exec-edu-school"
+                       [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                       (keydown)="onSingleLineKeydown($event)"
+                       (blur)="onFieldBlur($event, 'educations', ei, 'institution')">{{ edu.institution }}</div>
+                </div>
+                <div class="exec-edu-years">
+                  <span [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                        (keydown)="onSingleLineKeydown($event)"
+                        (blur)="onFieldBlur($event, 'educations', ei, 'startYear')">{{ edu.startYear }}</span>
+                  –
+                  <span [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                        (keydown)="onSingleLineKeydown($event)"
+                        (blur)="onFieldBlur($event, 'educations', ei, 'endYear')">{{ edu.endYear }}</span>
+                </div>
+              </div>
+              <div class="exec-exp-separator" *ngIf="!last"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </ng-container>
+
+
+    <!-- ════════════════════════════════════ -->
+    <!--  TEMPLATE: SIDEBAR                 -->
+    <!-- ════════════════════════════════════ -->
+    <ng-container *ngIf="(cvData.template || 'executive') === 'sidebar'">
+      <div class="side-layout">
+
+        <!-- Panel gauche -->
+        <div class="side-panel">
+          <div class="side-photo-wrap" [class.clickable]="!isSharedView" (click)="triggerPhotoUpload()">
+            <img *ngIf="userData?.photoURL && !isUploadingPhoto" [src]="userData?.photoURL" class="side-photo" alt="">
+            <div *ngIf="!userData?.photoURL && !isUploadingPhoto" class="side-photo-initials">{{ userData?.firstName?.charAt(0) }}{{ userData?.lastName?.charAt(0) }}</div>
+            <div *ngIf="isUploadingPhoto" class="side-photo-uploading"><div class="upload-spinner"></div></div>
+            <div class="side-photo-overlay" *ngIf="!isSharedView">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="16" height="16"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+          </div>
+
+          <h1 class="side-name"
+              [contentEditable]="!isSharedView" [class.ce-field-dark]="!isSharedView" spellcheck="false"
+              (keydown)="onSingleLineKeydown($event)"
+              (blur)="onFieldBlur($event, 'userData', undefined, 'firstName')">{{ userData?.firstName }} {{ userData?.lastName }}</h1>
+          <div class="side-title"
+               [contentEditable]="!isSharedView" [class.ce-field-dark]="!isSharedView" spellcheck="false"
+               (keydown)="onSingleLineKeydown($event)"
+               (blur)="onFieldBlur($event, 'userData', undefined, 'title')">{{ userData?.title }}</div>
+
+          <div class="side-sep"></div>
+
+          <div class="side-section">
+            <h4 class="side-section-title">Contact</h4>
+            <div class="side-contact-item" *ngIf="userData?.email">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="side-icon"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+              <span [contentEditable]="!isSharedView" [class.ce-field-dark]="!isSharedView" spellcheck="false"
+                    (keydown)="onSingleLineKeydown($event)"
+                    (blur)="onFieldBlur($event, 'userData', undefined, 'email')">{{ userData?.email }}</span>
+            </div>
+            <div class="side-contact-item" *ngIf="userData?.phone">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="side-icon"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.0 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.72 6.72l1.28-1.28a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+              <span [contentEditable]="!isSharedView" [class.ce-field-dark]="!isSharedView" spellcheck="false"
+                    (keydown)="onSingleLineKeydown($event)"
+                    (blur)="onFieldBlur($event, 'userData', undefined, 'phone')">{{ userData?.phone }}</span>
+            </div>
+            <div class="side-contact-item" *ngIf="location">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="side-icon"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              {{ location }}
+            </div>
+            <a *ngIf="linkedinUrl" [href]="linkedinUrl" target="_blank" class="side-contact-item side-link">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="side-icon"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+              {{ linkedinHandle || 'LinkedIn' }}
+            </a>
+          </div>
+
+          <div class="side-section">
+            <h4 class="side-section-title">Compétences</h4>
+            <span class="side-skill-tag" *ngFor="let s of cvData.technicalSkills; let i=index">
+              {{ s }}<button *ngIf="!isSharedView" class="skill-remove-dark no-print" (click)="removeTechSkill(i)">×</button>
+            </span>
+            <div class="skill-add-row-dark no-print" *ngIf="!isSharedView">
+              <ng-container *ngIf="!showTechSkillInput">
+                <button class="skill-add-btn-dark" (click)="showTechSkillInput=true">+ Ajouter</button>
+              </ng-container>
+              <ng-container *ngIf="showTechSkillInput">
+                <input class="skill-inline-input-dark" [(ngModel)]="newTechSkill" placeholder="Compétence…"
+                       (keyup.enter)="addTechSkill()" (keyup.escape)="showTechSkillInput=false">
+                <button class="skill-confirm-btn-dark" (click)="addTechSkill()">↵</button>
+              </ng-container>
+            </div>
+          </div>
+
+          <div class="side-section">
+            <h4 class="side-section-title">Savoir-être</h4>
+            <div class="side-soft-item" *ngFor="let s of cvData.softSkills; let i=index">
+              {{ s }}<button *ngIf="!isSharedView" class="skill-remove-dark no-print" (click)="removeSoftSkill(i)">×</button>
+            </div>
+            <div class="skill-add-row-dark no-print" *ngIf="!isSharedView">
+              <ng-container *ngIf="!showSoftSkillInput">
+                <button class="skill-add-btn-dark" (click)="showSoftSkillInput=true">+ Ajouter</button>
+              </ng-container>
+              <ng-container *ngIf="showSoftSkillInput">
+                <input class="skill-inline-input-dark" [(ngModel)]="newSoftSkill" placeholder="Savoir-être…"
+                       (keyup.enter)="addSoftSkill()" (keyup.escape)="showSoftSkillInput=false">
+                <button class="skill-confirm-btn-dark" (click)="addSoftSkill()">↵</button>
+              </ng-container>
+            </div>
+          </div>
+
+          <div class="side-section" *ngIf="cvData.languages?.length">
+            <h4 class="side-section-title">Langues</h4>
+            <div *ngFor="let lang of cvData.languages" class="side-lang-item">
+              <span>{{ lang.name }}</span><span class="side-lang-level">{{ lang.level }}</span>
             </div>
           </div>
         </div>
 
-      </div><!-- fin col droite -->
-    </div><!-- fin body -->
+        <!-- Main -->
+        <div class="side-main">
+          <div class="side-main-section" *ngIf="cvData.summary !== undefined">
+            <h3 class="side-main-title">Profil</h3>
+            <p class="side-summary"
+               [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+               (blur)="onFieldBlur($event, 'summary')">{{ cvData.summary }}</p>
+          </div>
 
-    <!-- FOOTER CV -->
-    <div class="cv-footer" [class]="'theme-footer-'+cvData.theme">
-      <span>CV généré avec TalentSn ✦</span>
-    </div>
+          <div class="side-main-section" *ngIf="cvData.experiences?.length">
+            <h3 class="side-main-title">Expériences</h3>
+            <div *ngFor="let exp of cvData.experiences; let ei=index" class="side-exp-block">
+              <div class="side-exp-dot"></div>
+              <div class="side-exp-content">
+                <div class="side-exp-header">
+                  <div>
+                    <div class="side-exp-title"
+                         [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                         (keydown)="onSingleLineKeydown($event)"
+                         (blur)="onFieldBlur($event, 'experiences', ei, 'title')">{{ exp.title }}</div>
+                    <div class="side-exp-company"
+                         [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                         (keydown)="onSingleLineKeydown($event)"
+                         (blur)="onFieldBlur($event, 'experiences', ei, 'company')">{{ exp.company }}</div>
+                  </div>
+                  <div class="side-exp-dates">{{ exp.startDate }} – {{ exp.isCurrent ? 'Présent' : exp.endDate }}</div>
+                </div>
+                <ul class="side-exp-bullets" *ngIf="exp.bulletPoints?.length">
+                  <li *ngFor="let bp of exp.bulletPoints; let bi=index" class="bullet-item">
+                    <span [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                          (blur)="onBulletBlur($event, ei, bi)">{{ bp }}</span>
+                    <button *ngIf="!isSharedView" class="bullet-remove no-print" (click)="removeBullet(ei, bi)">×</button>
+                  </li>
+                </ul>
+                <p class="side-exp-desc" *ngIf="!exp.bulletPoints?.length && exp.description"
+                   [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                   (blur)="onFieldBlur($event, 'experiences', ei, 'description')">{{ exp.description }}</p>
+                <button *ngIf="!isSharedView" class="add-bullet-btn no-print" (click)="addBullet(ei)">+ Ajouter une réalisation</button>
+              </div>
+            </div>
+          </div>
 
-  </div><!-- fin cv-document -->
+          <div class="side-main-section" *ngIf="cvData.educations?.length">
+            <h3 class="side-main-title">Formation</h3>
+            <div *ngFor="let edu of cvData.educations; let ei=index" class="side-exp-block">
+              <div class="side-exp-dot"></div>
+              <div class="side-exp-content">
+                <div class="side-exp-header">
+                  <div>
+                    <div class="side-exp-title"
+                         [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                         (keydown)="onSingleLineKeydown($event)"
+                         (blur)="onFieldBlur($event, 'educations', ei, 'degree')">{{ edu.degree }}</div>
+                    <div class="side-exp-company"
+                         [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                         (keydown)="onSingleLineKeydown($event)"
+                         (blur)="onFieldBlur($event, 'educations', ei, 'institution')">{{ edu.institution }}</div>
+                  </div>
+                  <div class="side-exp-dates">{{ edu.startYear }} – {{ edu.endYear }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+
+    <!-- ════════════════════════════════════ -->
+    <!--  TEMPLATE: MINIMAL                 -->
+    <!-- ════════════════════════════════════ -->
+    <ng-container *ngIf="(cvData.template || 'executive') === 'minimal'">
+      <div class="min-layout">
+        <div class="min-header">
+          <div class="min-photo-wrap" [class.clickable]="!isSharedView" (click)="triggerPhotoUpload()">
+            <img *ngIf="userData?.photoURL && !isUploadingPhoto" [src]="userData?.photoURL" class="min-photo" alt="">
+            <div *ngIf="!userData?.photoURL && !isUploadingPhoto" class="min-photo-initials">{{ userData?.firstName?.charAt(0) }}{{ userData?.lastName?.charAt(0) }}</div>
+            <div *ngIf="isUploadingPhoto" class="min-photo-uploading"><div class="upload-spinner"></div></div>
+            <div class="min-photo-overlay" *ngIf="!isSharedView">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="16" height="16"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+          </div>
+          <div class="min-header-right">
+            <h1 class="min-name"
+                [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                (keydown)="onSingleLineKeydown($event)"
+                (blur)="onFieldBlur($event, 'userData', undefined, 'firstName')">{{ userData?.firstName }} {{ userData?.lastName }}</h1>
+            <div class="min-title"
+                 [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                 (keydown)="onSingleLineKeydown($event)"
+                 (blur)="onFieldBlur($event, 'userData', undefined, 'title')">{{ userData?.title }}</div>
+            <div class="min-contacts">
+              <span *ngIf="userData?.email" class="min-contact"
+                    [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                    (keydown)="onSingleLineKeydown($event)"
+                    (blur)="onFieldBlur($event, 'userData', undefined, 'email')">{{ userData?.email }}</span>
+              <span class="min-contact-sep" *ngIf="userData?.email && userData?.phone">|</span>
+              <span *ngIf="userData?.phone" class="min-contact"
+                    [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                    (keydown)="onSingleLineKeydown($event)"
+                    (blur)="onFieldBlur($event, 'userData', undefined, 'phone')">{{ userData?.phone }}</span>
+              <span class="min-contact-sep" *ngIf="location">|</span>
+              <span *ngIf="location" class="min-contact">{{ location }}</span>
+              <span class="min-contact-sep" *ngIf="linkedinUrl">|</span>
+              <a *ngIf="linkedinUrl" [href]="linkedinUrl" target="_blank" class="min-contact min-link">{{ linkedinHandle }}</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="min-rule"></div>
+
+        <div class="min-body">
+          <div class="min-section" *ngIf="cvData.summary !== undefined">
+            <h3 class="min-section-title">Profil</h3>
+            <p class="min-summary"
+               [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+               (blur)="onFieldBlur($event, 'summary')">{{ cvData.summary }}</p>
+          </div>
+
+          <div class="min-section" *ngIf="cvData.experiences?.length">
+            <h3 class="min-section-title">Expériences professionnelles</h3>
+            <div *ngFor="let exp of cvData.experiences; let ei=index" class="min-entry">
+              <div class="min-entry-header">
+                <div class="min-entry-left">
+                  <div class="min-entry-title"
+                       [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                       (keydown)="onSingleLineKeydown($event)"
+                       (blur)="onFieldBlur($event, 'experiences', ei, 'title')">{{ exp.title }}</div>
+                  <div class="min-entry-sub"
+                       [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                       (keydown)="onSingleLineKeydown($event)"
+                       (blur)="onFieldBlur($event, 'experiences', ei, 'company')">{{ exp.company }}</div>
+                </div>
+                <div class="min-entry-dates">{{ exp.startDate }} – {{ exp.isCurrent ? 'Présent' : exp.endDate }}</div>
+              </div>
+              <ul class="min-bullets" *ngIf="exp.bulletPoints?.length">
+                <li *ngFor="let bp of exp.bulletPoints; let bi=index" class="bullet-item">
+                  <span [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                        (blur)="onBulletBlur($event, ei, bi)">{{ bp }}</span>
+                  <button *ngIf="!isSharedView" class="bullet-remove no-print" (click)="removeBullet(ei, bi)">×</button>
+                </li>
+              </ul>
+              <p class="min-desc" *ngIf="!exp.bulletPoints?.length && exp.description"
+                 [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                 (blur)="onFieldBlur($event, 'experiences', ei, 'description')">{{ exp.description }}</p>
+              <button *ngIf="!isSharedView" class="add-bullet-btn no-print" (click)="addBullet(ei)">+ Ajouter une réalisation</button>
+            </div>
+          </div>
+
+          <div class="min-section" *ngIf="cvData.educations?.length">
+            <h3 class="min-section-title">Formation</h3>
+            <div *ngFor="let edu of cvData.educations; let ei=index" class="min-entry">
+              <div class="min-entry-header">
+                <div class="min-entry-left">
+                  <div class="min-entry-title"
+                       [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                       (keydown)="onSingleLineKeydown($event)"
+                       (blur)="onFieldBlur($event, 'educations', ei, 'degree')">{{ edu.degree }}</div>
+                  <div class="min-entry-sub"
+                       [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
+                       (keydown)="onSingleLineKeydown($event)"
+                       (blur)="onFieldBlur($event, 'educations', ei, 'institution')">{{ edu.institution }}</div>
+                </div>
+                <div class="min-entry-dates">{{ edu.startYear }} – {{ edu.endYear }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="min-two-col">
+            <div>
+              <div class="min-section">
+                <h3 class="min-section-title">Compétences techniques</h3>
+                <div class="min-skills">
+                  <span class="min-skill" *ngFor="let s of cvData.technicalSkills; let i=index">
+                    {{ s }}<button *ngIf="!isSharedView" class="skill-remove-min no-print" (click)="removeTechSkill(i)">×</button>
+                  </span>
+                </div>
+                <div class="skill-add-row no-print" *ngIf="!isSharedView">
+                  <ng-container *ngIf="!showTechSkillInput">
+                    <button class="skill-add-btn" (click)="showTechSkillInput=true">+ Ajouter</button>
+                  </ng-container>
+                  <ng-container *ngIf="showTechSkillInput">
+                    <input class="skill-inline-input" [(ngModel)]="newTechSkill" placeholder="Compétence…"
+                           (keyup.enter)="addTechSkill()" (keyup.escape)="showTechSkillInput=false">
+                    <button class="skill-confirm-btn" (click)="addTechSkill()">↵</button>
+                    <button class="skill-cancel-btn" (click)="showTechSkillInput=false">✕</button>
+                  </ng-container>
+                </div>
+              </div>
+              <div class="min-section">
+                <h3 class="min-section-title">Savoir-être</h3>
+                <div class="min-skills">
+                  <span class="min-skill soft" *ngFor="let s of cvData.softSkills; let i=index">
+                    {{ s }}<button *ngIf="!isSharedView" class="skill-remove-min no-print" (click)="removeSoftSkill(i)">×</button>
+                  </span>
+                </div>
+                <div class="skill-add-row no-print" *ngIf="!isSharedView">
+                  <ng-container *ngIf="!showSoftSkillInput">
+                    <button class="skill-add-btn" (click)="showSoftSkillInput=true">+ Ajouter</button>
+                  </ng-container>
+                  <ng-container *ngIf="showSoftSkillInput">
+                    <input class="skill-inline-input" [(ngModel)]="newSoftSkill" placeholder="Savoir-être…"
+                           (keyup.enter)="addSoftSkill()" (keyup.escape)="showSoftSkillInput=false">
+                    <button class="skill-confirm-btn" (click)="addSoftSkill()">↵</button>
+                    <button class="skill-cancel-btn" (click)="showSoftSkillInput=false">✕</button>
+                  </ng-container>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="min-section" *ngIf="cvData.languages?.length">
+                <h3 class="min-section-title">Langues</h3>
+                <div *ngFor="let lang of cvData.languages" class="min-lang">
+                  <span>{{ lang.name }}</span><span class="min-lang-level">{{ lang.level }}</span>
+                </div>
+              </div>
+              <div class="min-section" *ngIf="cvData.additionalInfo?.contractType || cvData.additionalInfo?.availability">
+                <h3 class="min-section-title">Informations</h3>
+                <div class="min-info" *ngIf="cvData.additionalInfo?.contractType"><span>Contrat :</span> {{ cvData.additionalInfo.contractType }}</div>
+                <div class="min-info" *ngIf="cvData.additionalInfo?.availability"><span>Disponibilité :</span> {{ cvData.additionalInfo.availability }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+  </div>
 
   <ng-template #noCvTpl>
     <div class="no-cv-msg">
-      <div class="no-cv-icon">📄</div>
+      <div class="no-cv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" width="64" height="64"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
       <div class="no-cv-title">Aucun CV généré</div>
-      <div class="no-cv-sub">Complétez l'onboarding pour générer votre CV IA</div>
+      <div class="no-cv-sub">Complétez l'onboarding pour générer votre CV</div>
       <button class="btn-primary" (click)="goBack()">Retour au dashboard</button>
     </div>
   </ng-template>

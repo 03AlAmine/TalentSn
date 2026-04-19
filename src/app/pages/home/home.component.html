@@ -3,8 +3,10 @@
 <nav class="navbar" [class.scrolled]="isScrolled">
   <div class="navbar-container">
     <div class="navbar-brand" routerLink="/">
-      <div class="logo-icon">⚡</div>
-      <span class="logo-text">Talent<span class="logo-highlight">Sn</span></span>
+      <img class="logo-icon" src="assets/logo.png" alt="Logo TalentSn" />
+      <span class="logo-text"
+        >Talent<span class="logo-highlight">Sn</span></span
+      >
     </div>
 
     <div class="navbar-actions">
@@ -18,7 +20,11 @@
         <span class="free-badge">Gratuit</span>
       </button>
       <button class="mobile-toggle" (click)="toggleMobileMenu()">
-        <i class="fas" [class.fa-bars]="!mobileMenuOpen" [class.fa-times]="mobileMenuOpen"></i>
+        <i
+          class="fas"
+          [class.fa-bars]="!mobileMenuOpen"
+          [class.fa-times]="mobileMenuOpen"
+        ></i>
       </button>
     </div>
   </div>
@@ -37,19 +43,22 @@
     <div class="hero-left">
       <div class="hero-kicker">
         <span class="pulse-dot"></span>
-        <span class="kicker-text">Blockchain Polygon · IA Prédictive · Afrique de l'Ouest</span>
+        <span class="kicker-text"
+          >Blockchain Polygon · IA Prédictive · Afrique de l'Ouest</span
+        >
         <span class="live-indicator">● LIVE</span>
       </div>
 
       <h1 class="hero-h1">
-        Le recrutement<br>
-        <em class="gradient-text">sans fraude</em>,<br>
+        Le recrutement<br />
+        <em class="gradient-text">sans fraude</em>,<br />
         c'est maintenant.
       </h1>
 
       <p class="hero-p">
-        TalentSn certifie chaque diplôme sur la blockchain Polygon et utilise une IA de pointe
-        pour matcher les meilleurs talents — plus vite, plus juste, plus fiable.
+        TalentSn certifie chaque diplôme sur la blockchain Polygon et utilise
+        une IA de pointe pour matcher les meilleurs talents — plus vite, plus
+        juste, plus fiable.
       </p>
 
       <div class="hero-actions">
@@ -93,12 +102,18 @@
       </div>
 
       <div class="profiles-container">
-        <div class="profile-row" *ngFor="let profile of topProfiles; let i = index"
-             [style.animation-delay]="i * 0.1 + 's'"
-             (mouseenter)="onProfileHover(profile)"
-             (mouseleave)="onProfileLeave()">
+        <div
+          class="profile-row"
+          *ngFor="let profile of topProfiles; let i = index"
+          [style.animation-delay]="i * 0.1 + 's'"
+          (mouseenter)="onProfileHover(profile)"
+          (mouseleave)="onProfileLeave()"
+        >
           <div class="profile-avatar">
-            <div class="av" [ngStyle]="{ background: profile.bg, color: profile.color }">
+            <div
+              class="av"
+              [ngStyle]="{ background: profile.bg, color: profile.color }"
+            >
               {{ profile.initials }}
             </div>
             <div class="verified-badge" *ngIf="profile.verified">
@@ -112,7 +127,10 @@
             </div>
             <div class="profile-role">{{ profile.role }}</div>
             <div class="profile-skills">
-              <span *ngFor="let skill of profile.skills.slice(0, 2)" class="skill-tag">
+              <span
+                *ngFor="let skill of profile.skills.slice(0, 2)"
+                class="skill-tag"
+              >
                 {{ skill }}
               </span>
               <span class="skill-tag more" *ngIf="profile.skills.length > 2">
@@ -122,17 +140,32 @@
           </div>
           <div class="score-badge">
             <svg class="score-ring" viewBox="0 0 36 36">
-              <path class="score-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="3"/>
-              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none"
-                    [attr.stroke]="profile.score >= 90 ? '#1EC28B' : profile.score >= 80 ? '#F59E0B' : '#EF4444'"
-                    stroke-width="3"
-                    stroke-dasharray="100"
-                    stroke-linecap="round"
-                    [attr.stroke-dashoffset]="100 - profile.score"/>
+              <path
+                class="score-bg"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="rgba(255,255,255,0.1)"
+                stroke-width="3"
+              />
+              <path
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                [attr.stroke]="
+                  profile.score >= 90
+                    ? '#1EC28B'
+                    : profile.score >= 80
+                      ? '#F59E0B'
+                      : '#EF4444'
+                "
+                stroke-width="3"
+                stroke-dasharray="100"
+                stroke-linecap="round"
+                [attr.stroke-dashoffset]="100 - profile.score"
+              />
             </svg>
-            <span class="score-value">{{ profile.score }}<span class="percent">%</span></span>
+            <span class="score-value"
+              >{{ profile.score }}<span class="percent">%</span></span
+            >
           </div>
         </div>
       </div>
@@ -156,7 +189,9 @@
         </div>
         <div class="stat-chip">
           <i class="fas fa-clock"></i>
-          <span>Dernière mise à jour : <strong>{{ currentTime }}</strong></span>
+          <span
+            >Dernière mise à jour : <strong>{{ currentTime }}</strong></span
+          >
         </div>
       </div>
     </div>
@@ -165,7 +200,11 @@
 
 <section class="stats-bar">
   <div class="stats-inner">
-    <div class="stat-item" *ngFor="let stat of stats; let i = index" [style.animation-delay]="i * 0.1 + 's'">
+    <div
+      class="stat-item"
+      *ngFor="let stat of stats; let i = index"
+      [style.animation-delay]="i * 0.1 + 's'"
+    >
       <div class="stat-icon">
         <i [class]="stat.icon"></i>
       </div>
@@ -175,7 +214,11 @@
           <span class="stat-suffix" *ngIf="stat.suffix">{{ stat.suffix }}</span>
         </div>
         <div class="stat-lbl">{{ stat.label }}</div>
-        <div class="stat-trend" *ngIf="stat.trend" [style.color]="stat.trendColor">
+        <div
+          class="stat-trend"
+          *ngIf="stat.trend"
+          [style.color]="stat.trendColor"
+        >
           <i [class]="stat.trendIcon"></i>
           <span>{{ stat.trend }}</span>
         </div>
@@ -191,13 +234,20 @@
       Pourquoi TalentSn
       <span class="eyebrow-line right"></span>
     </div>
-    <h2 class="section-title">Conçu pour le <span class="gradient-text">marché africain</span></h2>
-    <p class="section-sub">Confiance technologique, efficacité IA, souveraineté des données</p>
+    <h2 class="section-title">
+      Conçu pour le <span class="gradient-text">marché africain</span>
+    </h2>
+    <p class="section-sub">
+      Confiance technologique, efficacité IA, souveraineté des données
+    </p>
   </div>
 
   <div class="features-grid">
-    <div class="feat-card" *ngFor="let feat of features; let i = index"
-         [style.animation-delay]="i * 0.1 + 's'">
+    <div
+      class="feat-card"
+      *ngFor="let feat of features; let i = index"
+      [style.animation-delay]="i * 0.1 + 's'"
+    >
       <div class="feat-card-inner">
         <div class="feat-icon" [ngClass]="feat.iconColor">
           <i [class]="feat.iconClass"></i>
@@ -222,13 +272,20 @@
         Ils nous font confiance
         <span class="eyebrow-line right"></span>
       </div>
-      <h2 class="section-title">+845 entreprises <span class="gradient-text">innovantes</span></h2>
-      <p class="section-sub">Découvrez pourquoi les leaders du marché choisissent TalentSn</p>
+      <h2 class="section-title">
+        +845 entreprises <span class="gradient-text">innovantes</span>
+      </h2>
+      <p class="section-sub">
+        Découvrez pourquoi les leaders du marché choisissent TalentSn
+      </p>
     </div>
 
     <div class="testimonials-grid">
-      <div class="testimonial-card" *ngFor="let testimonial of testimonials; let i = index"
-           [style.animation-delay]="i * 0.1 + 's'">
+      <div
+        class="testimonial-card"
+        *ngFor="let testimonial of testimonials; let i = index"
+        [style.animation-delay]="i * 0.1 + 's'"
+      >
         <div class="quote-icon">
           <i class="fas fa-quote-left"></i>
         </div>
@@ -243,7 +300,7 @@
           </div>
         </div>
         <div class="rating">
-          <i class="fas fa-star" *ngFor="let star of [1,2,3,4,5]"></i>
+          <i class="fas fa-star" *ngFor="let star of [1, 2, 3, 4, 5]"></i>
         </div>
       </div>
     </div>
@@ -258,8 +315,13 @@
       <i class="fas fa-gem"></i>
       Offre limitée
     </div>
-    <h2 class="cta-title">Prêt à révolutionner votre <span class="gradient-text">recrutement</span> ?</h2>
-    <p class="cta-sub">Rejoignez les 15 000+ professionnels qui font confiance à TalentSn.</p>
+    <h2 class="cta-title">
+      Prêt à révolutionner votre
+      <span class="gradient-text">recrutement</span> ?
+    </h2>
+    <p class="cta-sub">
+      Rejoignez les 15 000+ professionnels qui font confiance à TalentSn.
+    </p>
     <div class="cta-actions">
       <button class="btn-primary btn-large" routerLink="/register">
         <i class="fas fa-user-plus"></i>
@@ -283,10 +345,13 @@
     <div class="footer-grid">
       <div class="footer-brand">
         <div class="logo">
-          <div class="logo-icon">⚡</div>
+          <img class="logo-icon" src="assets/logo.png" alt="Logo TalentSn" />
           Talent<span class="logo-highlight">Sn</span>
         </div>
-        <p>Sécurisez vos recrutements grâce à la blockchain et l'IA. L'avenir du travail commence ici.</p>
+        <p>
+          Sécurisez vos recrutements grâce à la blockchain et l'IA. L'avenir du
+          travail commence ici.
+        </p>
         <div class="trust-badges">
           <div class="trust-badge-footer">
             <i class="fas fa-shield-alt"></i>
@@ -302,32 +367,76 @@
       <div class="footer-col">
         <h4><i class="fas fa-cube"></i> Plateforme</h4>
         <ul class="footer-links">
-          <li><a href="#"><i class="fas fa-chevron-right"></i> Comment ça marche</a></li>
-          <li><a href="#"><i class="fas fa-chevron-right"></i> Pour les recruteurs</a></li>
-          <li><a href="#"><i class="fas fa-chevron-right"></i> Talents certifiés</a></li>
-          <li><a href="#"><i class="fas fa-chevron-right"></i> Tarifs</a></li>
-          <li><a href="#"><i class="fas fa-chevron-right"></i> API Développeurs</a></li>
+          <li>
+            <a href="#"
+              ><i class="fas fa-chevron-right"></i> Comment ça marche</a
+            >
+          </li>
+          <li>
+            <a href="#"
+              ><i class="fas fa-chevron-right"></i> Pour les recruteurs</a
+            >
+          </li>
+          <li>
+            <a href="#"
+              ><i class="fas fa-chevron-right"></i> Talents certifiés</a
+            >
+          </li>
+          <li>
+            <a href="#"><i class="fas fa-chevron-right"></i> Tarifs</a>
+          </li>
+          <li>
+            <a href="#"
+              ><i class="fas fa-chevron-right"></i> API Développeurs</a
+            >
+          </li>
         </ul>
       </div>
 
       <div class="footer-col">
         <h4><i class="fas fa-chart-line"></i> Ressources</h4>
         <ul class="footer-links">
-          <li><a href="#"><i class="fas fa-chevron-right"></i> Blog & IA insights</a></li>
-          <li><a href="#"><i class="fas fa-chevron-right"></i> Études de cas</a></li>
-          <li><a href="#"><i class="fas fa-chevron-right"></i> Webinaires</a></li>
-          <li><a href="#"><i class="fas fa-chevron-right"></i> Support technique</a></li>
-          <li><a href="#"><i class="fas fa-chevron-right"></i> Centre d'aide</a></li>
+          <li>
+            <a href="#"
+              ><i class="fas fa-chevron-right"></i> Blog & IA insights</a
+            >
+          </li>
+          <li>
+            <a href="#"><i class="fas fa-chevron-right"></i> Études de cas</a>
+          </li>
+          <li>
+            <a href="#"><i class="fas fa-chevron-right"></i> Webinaires</a>
+          </li>
+          <li>
+            <a href="#"
+              ><i class="fas fa-chevron-right"></i> Support technique</a
+            >
+          </li>
+          <li>
+            <a href="#"><i class="fas fa-chevron-right"></i> Centre d'aide</a>
+          </li>
         </ul>
       </div>
 
       <div class="footer-col">
         <h4><i class="fas fa-gavel"></i> Légal</h4>
         <ul class="footer-links">
-          <li><a href="#"><i class="fas fa-shield"></i> Confidentialité</a></li>
-          <li><a href="#"><i class="fas fa-file-contract"></i> Conditions d'utilisation</a></li>
-          <li><a href="#"><i class="fas fa-database"></i> Souveraineté des données</a></li>
-          <li><a href="#"><i class="fas fa-cookie-bite"></i> Cookies</a></li>
+          <li>
+            <a href="#"><i class="fas fa-shield"></i> Confidentialité</a>
+          </li>
+          <li>
+            <a href="#"
+              ><i class="fas fa-file-contract"></i> Conditions d'utilisation</a
+            >
+          </li>
+          <li>
+            <a href="#"
+              ><i class="fas fa-database"></i> Souveraineté des données</a
+            >
+          </li>
+          <li>
+            <a href="#"><i class="fas fa-cookie-bite"></i> Cookies</a>
+          </li>
         </ul>
         <div class="contact-info">
           <a href="#" class="contact-email">
@@ -348,7 +457,9 @@
         <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
         <a href="#" class="social-icon"><i class="fab fa-discord"></i></a>
       </div>
-      <p>© 2025 TalentSn — Recrutement décentralisé & IA. Tous droits réservés.</p>
+      <p>
+        © 2025 TalentSn — Recrutement décentralisé & IA. Tous droits réservés.
+      </p>
       <div class="legal-links">
         <a href="#">Mentions légales</a>
         <a href="#">Accessibilité</a>

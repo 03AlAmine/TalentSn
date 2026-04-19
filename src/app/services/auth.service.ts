@@ -19,6 +19,8 @@ import { switchMap } from 'rxjs/operators';
 export interface CvData {
   generatedAt: any;
   theme: string;
+  template?: string;
+  accentColor: string;
   summary: string;
   experiences: any[];
   educations: any[];

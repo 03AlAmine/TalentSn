@@ -23,7 +23,10 @@
       "default",
       {
         "ignore": [
-          "backdrop-filter"
+          "backdrop-filter",
+          "border-bottom-color: color-mix(in srgb, var(--cv-accent, #0f172a) 15%, white)",
+          "border-color: color-mix(in srgb, var(--cv-accent, #0f172a) 20%, white)",
+          "user-select"
         ]
       }
     ],

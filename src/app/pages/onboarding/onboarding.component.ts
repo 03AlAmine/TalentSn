@@ -214,7 +214,8 @@ Réponds UNIQUEMENT en JSON valide :
       softSkills: parsed.softSkills || this.softSkills,
       languages: parsed.languages || this.languages,
       certifications: parsed.certifications || this.certifications,
-      additionalInfo: this.additionalInfo, shareToken
+      additionalInfo: this.additionalInfo, shareToken,
+      accentColor: parsed.accentColor || '',
     };
   }
 
@@ -226,7 +227,8 @@ Réponds UNIQUEMENT en JSON valide :
       technicalSkills: this.technicalSkills, softSkills: this.softSkills,
       languages: this.languages, certifications: this.certifications,
       additionalInfo: this.additionalInfo,
-      shareToken: Math.random().toString(36).substring(2, 10)
+      shareToken: Math.random().toString(36).substring(2, 10),
+      accentColor: '',
     };
     await this.authService.saveCvData(uid, cvData);
   }
