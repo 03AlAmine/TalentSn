@@ -53,12 +53,10 @@ export class CompanySettingsComponent implements OnInit {
   successMessage = '';
   errorMessage = '';
 
-  // Logo upload
   logoFile: File | null = null;
   logoPreview: string | null = null;
   isUploading = false;
 
-  // Active tab
   activeTab: 'general' | 'contact' | 'social' | 'branding' = 'general';
 
   constructor(
@@ -117,7 +115,6 @@ export class CompanySettingsComponent implements OnInit {
     if (input.files && input.files[0]) {
       this.logoFile = input.files[0];
 
-      // Preview
       const reader = new FileReader();
       reader.onload = (e) => {
         this.logoPreview = e.target?.result as string;
@@ -157,7 +154,6 @@ export class CompanySettingsComponent implements OnInit {
     this.successMessage = '';
 
     try {
-      // Upload logo if changed
       if (this.logoFile) {
         const logoUrl = await this.uploadLogo();
         if (logoUrl) {
@@ -165,7 +161,6 @@ export class CompanySettingsComponent implements OnInit {
         }
       }
 
-      // Update user document
       const userRef = doc(this.firestore, 'users', this.userData.uid);
       await updateDoc(userRef, {
         companyName: this.companyData.companyName,
@@ -185,7 +180,7 @@ export class CompanySettingsComponent implements OnInit {
         updatedAt: new Date(),
       });
 
-      this.successMessage = 'Paramètres enregistrés avec succès !';
+      this.successMessage = 'Paramètres enregistrés avec succès';
       setTimeout(() => this.successMessage = '', 3000);
     } catch (error) {
       console.error('Error saving company settings:', error);

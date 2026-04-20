@@ -27,6 +27,7 @@ export class OfferListComponent implements OnInit {
     'draft',
     'closed',
   ];
+
   constructor(
     private recruiterService: RecruiterService,
     private router: Router,
@@ -119,26 +120,26 @@ export class OfferListComponent implements OnInit {
   formatDate(ts: any): string {
     if (!ts) return '';
     const d = ts.toDate ? ts.toDate() : new Date(ts);
-    return d.toLocaleDateString('fr-FR');
+    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
   }
 
   formatSalary(min?: number, max?: number, currency = 'XOF'): string {
     if (!min && !max) return 'Non précisé';
     const fmt = (n: number) => new Intl.NumberFormat('fr-FR').format(n);
-    if (min && max) return `${fmt(min)} – ${fmt(max)} ${currency}`;
+    if (min && max) return `${fmt(min)} - ${fmt(max)} ${currency}`;
     if (min) return `À partir de ${fmt(min)} ${currency}`;
     return `Jusqu'à ${fmt(max!)} ${currency}`;
   }
 
   getJobTypeColor(type: string): string {
     const map: Record<string, string> = {
-      CDI: '#00D68F',
+      CDI: '#2ecc9f',
       CDD: '#3b82f6',
       Stage: '#f59e0b',
-      Freelance: '#8b5cf6',
+      Freelance: '#a855f7',
       Alternance: '#ec4899',
       'Temps partiel': '#6b7280',
     };
-    return map[type] || '#00D68F';
+    return map[type] || '#2ecc9f';
   }
 }

@@ -2,7 +2,12 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { RecruiterService, Application, JobOffer, ApplicationStatus } from '../../../../core/services/recruiter.service';
+import {
+  RecruiterService,
+  Application,
+  JobOffer,
+  ApplicationStatus,
+} from '../../../../core/services/recruiter.service';
 
 @Component({
   selector: 'app-application-detail',
@@ -20,11 +25,9 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
   successMessage = '';
   errorMessage = '';
 
-  // Notes
   notes: string = '';
   isEditingNotes = false;
 
-  // Interview scheduling
   showInterviewModal = false;
   interviewData = {
     date: '',
@@ -36,7 +39,6 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
     notes: '',
   };
 
-  // Feedback
   showFeedbackModal = false;
   feedbackData = {
     message: '',
@@ -59,7 +61,6 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
       this.router.navigate(['/recruiter/applications']);
     }
 
-    // Auto-refresh every 30 seconds
     this.refreshInterval = setInterval(() => {
       if (this.applicationId && !this.isEditingNotes) {
         this.loadApplication(false);
@@ -77,19 +78,17 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
     if (showLoader) this.isLoading = true;
     try {
       const allApps = await this.recruiterService.getAllMyApplications();
-      const found = allApps.find(a => a.id === this.applicationId);
+      const found = allApps.find((a) => a.id === this.applicationId);
 
       if (found) {
         this.application = found;
         this.notes = found.notes || '';
 
-        // Load job offer details
         if (found.jobId) {
           const offers = await this.recruiterService.getMyJobOffers();
-          this.jobOffer = offers.find(o => o.id === found.jobId) || null;
+          this.jobOffer = offers.find((o) => o.id === found.jobId) || null;
         }
 
-        // Mark as viewed if still new
         if (this.application.status === 'new') {
           await this.updateStatus('viewed', false);
         }
@@ -107,17 +106,21 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
     if (!this.application) return;
 
     try {
-      await this.recruiterService.updateApplicationStatus(this.application.id!, newStatus, this.notes);
+      await this.recruiterService.updateApplicationStatus(
+        this.application.id!,
+        newStatus,
+        this.notes,
+      );
       this.application.status = newStatus;
       await this.recruiterService.refreshStats();
 
       if (showFeedback) {
         this.successMessage = `Statut mis à jour : ${this.getStatusLabel(newStatus)}`;
-        setTimeout(() => this.successMessage = '', 3000);
+        setTimeout(() => (this.successMessage = ''), 3000);
       }
     } catch (error) {
       this.errorMessage = 'Erreur lors de la mise à jour du statut';
-      setTimeout(() => this.errorMessage = '', 3000);
+      setTimeout(() => (this.errorMessage = ''), 3000);
     }
   }
 
@@ -126,14 +129,18 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
 
     this.isSaving = true;
     try {
-      await this.recruiterService.updateApplicationStatus(this.application.id!, this.application.status, this.notes);
+      await this.recruiterService.updateApplicationStatus(
+        this.application.id!,
+        this.application.status,
+        this.notes,
+      );
       this.application.notes = this.notes;
       this.isEditingNotes = false;
       this.successMessage = 'Notes enregistrées';
-      setTimeout(() => this.successMessage = '', 2000);
+      setTimeout(() => (this.successMessage = ''), 2000);
     } catch (error) {
       this.errorMessage = 'Erreur lors de l\'enregistrement des notes';
-      setTimeout(() => this.errorMessage = '', 3000);
+      setTimeout(() => (this.errorMessage = ''), 3000);
     } finally {
       this.isSaving = false;
     }
@@ -146,10 +153,10 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
       await this.recruiterService.rateApplication(this.application.id!, rating);
       this.application.rating = rating;
       this.successMessage = `Évaluation : ${rating}/5 étoiles`;
-      setTimeout(() => this.successMessage = '', 2000);
+      setTimeout(() => (this.successMessage = ''), 2000);
     } catch (error) {
       this.errorMessage = 'Erreur lors de l\'évaluation';
-      setTimeout(() => this.errorMessage = '', 3000);
+      setTimeout(() => (this.errorMessage = ''), 3000);
     }
   }
 
@@ -165,17 +172,19 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
 
     this.isSaving = true;
     try {
-      // Update status to interview
       await this.updateStatus('interview', false);
-
       this.showInterviewModal = false;
       this.successMessage = 'Invitation envoyée au candidat';
-      setTimeout(() => this.successMessage = '', 3000);
+      setTimeout(() => (this.successMessage = ''), 3000);
 
-      // Reset form
       this.interviewData = {
-        date: '', time: '', duration: 60, type: 'video',
-        location: '', meetingLink: '', notes: '',
+        date: '',
+        time: '',
+        duration: 60,
+        type: 'video',
+        location: '',
+        meetingLink: '',
+        notes: '',
       };
     } catch (error) {
       this.errorMessage = 'Erreur lors de l\'envoi de l\'invitation';
@@ -192,7 +201,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
       await this.updateStatus('rejected', false);
       this.showFeedbackModal = false;
       this.successMessage = 'Réponse envoyée au candidat';
-      setTimeout(() => this.successMessage = '', 3000);
+      setTimeout(() => (this.successMessage = ''), 3000);
 
       this.feedbackData = { message: '', rating: 3 };
     } catch (error) {
@@ -223,12 +232,12 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
 
   getStatusColor(status: ApplicationStatus): string {
     const config = this.recruiterService.appStatusConfig[status];
-    return config?.color || '#5A5A72';
+    return config?.color || '#6b7683';
   }
 
   getStatusBg(status: ApplicationStatus): string {
     const config = this.recruiterService.appStatusConfig[status];
-    return config?.bg || 'rgba(90, 90, 114, 0.1)';
+    return config?.bg || 'rgba(107, 118, 131, 0.1)';
   }
 
   formatDate(ts: any): string {
@@ -238,8 +247,6 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
     });
   }
 
@@ -254,7 +261,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
     return `Il y a ${diffDays} jours`;
   }
 
-  stars(rating: number | undefined): number[] {
+  stars(): number[] {
     return [1, 2, 3, 4, 5];
   }
 

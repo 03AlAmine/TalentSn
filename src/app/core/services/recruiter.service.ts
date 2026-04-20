@@ -99,6 +99,7 @@ export interface Application {
 export interface RecruiterStats {
   totalOffers: number;
   activeOffers: number;
+  newOffers: number; // Ajouté pour le trend
   totalApplications: number;
   newApplications: number;
   shortlisted: number;
@@ -119,6 +120,7 @@ export class RecruiterService {
     newApplications: 0,
     shortlisted: 0,
     interviews: 0,
+    newOffers: 0
   });
   stats$ = this.statsSubject.asObservable();
 
@@ -325,16 +327,28 @@ export class RecruiterService {
     const offers = await this.getMyJobOffers();
     const apps = await this.getAllMyApplications();
 
+    // Calculer les nouvelles offres (créées dans les 7 derniers jours)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const newOffers = offers.filter((o) => {
+      if (!o.createdAt) return false;
+      const createdDate = o.createdAt.toDate
+        ? o.createdAt.toDate()
+        : new Date(o.createdAt);
+      return createdDate > sevenDaysAgo;
+    }).length;
+
     this.statsSubject.next({
       totalOffers: offers.length,
       activeOffers: offers.filter((o) => o.status === 'active').length,
+      newOffers: newOffers,
       totalApplications: apps.length,
       newApplications: apps.filter((a) => a.status === 'new').length,
       shortlisted: apps.filter((a) => a.status === 'shortlisted').length,
       interviews: apps.filter((a) => a.status === 'interview').length,
     });
   }
-
   /* ── HELPERS ── */
 
   readonly sectors = [

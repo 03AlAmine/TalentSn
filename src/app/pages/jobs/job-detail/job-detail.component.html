@@ -12,7 +12,7 @@
       <div class="jd-hero-header">
         <div class="jd-company-logo">
           <img *ngIf="offer.companyLogo" [src]="offer.companyLogo" alt="">
-          <span *ngIf="!offer.companyLogo">{{ offer?.companyName?.[0] || '?' }}</span>
+          <span *ngIf="!offer.companyLogo">{{ offer.companyName[0] || '?' }}</span>
         </div>
         <div class="jd-title-block">
           <div class="jd-tags">

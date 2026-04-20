@@ -1,11 +1,14 @@
 <div class="application-list-container">
   <!-- Header -->
   <div class="page-header">
-    <h1>Candidatures</h1>
+    <div>
+      <h1>Candidatures</h1>
+      <p class="header-subtitle">Suivez et gérez toutes les candidatures reçues</p>
+    </div>
     <div class="header-stats">
-      <span class="stat-badge"> 📬 Total: {{ applications.length }} </span>
+      <span class="stat-badge">Total: {{ applications.length }}</span>
       <span class="stat-badge new" *ngIf="getStatusCount('new') > 0">
-        🆕 Nouvelles: {{ getStatusCount("new") }}
+        Nouvelles: {{ getStatusCount("new") }}
       </span>
     </div>
   </div>
@@ -19,7 +22,7 @@
         [class.active]="filterStatus === status"
         (click)="filterStatus = status; onFilterChange()"
       >
-        {{ status === "all" ? "Toutes" : getStatusLabel(status) }}
+        <span>{{ status === "all" ? "Toutes" : getStatusLabel(status) }}</span>
         <span class="count">{{ getStatusCount(status) }}</span>
       </button>
     </div>
@@ -27,7 +30,10 @@
     <!-- Search and Filters -->
     <div class="search-filters">
       <div class="search-box">
-        <span class="search-icon">🔍</span>
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="10" cy="10" r="7"/>
+          <line x1="21" y1="21" x2="15" y2="15"/>
+        </svg>
         <input
           type="text"
           placeholder="Rechercher par nom, poste..."
@@ -68,7 +74,11 @@
           dateRange !== 'all'
         "
       >
-        ✕ Réinitialiser
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+        Réinitialiser
       </button>
     </div>
   </div>
@@ -76,29 +86,34 @@
   <!-- Selected Offer Banner -->
   <div class="selected-offer-banner" *ngIf="selectedOffer">
     <div class="banner-content">
-      <span class="banner-icon">📋</span>
-      <span class="banner-text"
-        >Offre: <strong>{{ selectedOffer.title }}</strong></span
-      >
-      <span class="banner-count"
-        >{{ filteredApplications.length }} candidature(s)</span
-      >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M4 4h16v16H4zM8 4v16M16 4v16M4 12h16"/>
+      </svg>
+      <span class="banner-text">Offre: <strong>{{ selectedOffer.title }}</strong></span>
+      <span class="banner-count">{{ filteredApplications.length }} candidature(s)</span>
     </div>
-    <button class="banner-close" (click)="clearFilters()">✕</button>
+    <button class="banner-close" (click)="clearFilters()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
   </div>
 
   <!-- Loading -->
   <div *ngIf="isLoading" class="loader-container">
-    <div class="spinner"></div>
+    <div class="loader"></div>
     <p>Chargement des candidatures...</p>
   </div>
 
   <!-- Empty State -->
-  <div
-    *ngIf="!isLoading && filteredApplications.length === 0"
-    class="empty-state"
-  >
-    <div class="empty-icon">📬</div>
+  <div *ngIf="!isLoading && filteredApplications.length === 0" class="empty-state">
+    <div class="empty-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+        <path d="M4 4h16v16H4z"/>
+        <path d="M8 8h8M8 12h6M8 16h4"/>
+      </svg>
+    </div>
     <h3>Aucune candidature trouvée</h3>
     <p *ngIf="filterStatus !== 'all' || filterOfferId || searchTerm">
       Modifiez vos filtres pour voir plus de résultats.
@@ -107,32 +122,28 @@
       Vous n'avez pas encore reçu de candidatures.
     </p>
     <button class="btn-primary" routerLink="/recruiter/offers/create">
-      + Publier une offre
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Publier une offre
     </button>
   </div>
 
   <!-- Results Summary -->
-  <div
-    *ngIf="!isLoading && filteredApplications.length > 0"
-    class="results-summary"
-  >
+  <div *ngIf="!isLoading && filteredApplications.length > 0" class="results-summary">
     <span>{{ filteredApplications.length }} candidature(s) trouvée(s)</span>
-    <span *ngIf="filterOfferId && selectedOffer">
-      pour "{{ selectedOffer.title }}"
-    </span>
+    <span *ngIf="filterOfferId && selectedOffer"> pour "{{ selectedOffer.title }}"</span>
   </div>
 
   <!-- Applications Table -->
-  <div
-    *ngIf="!isLoading && filteredApplications.length > 0"
-    class="applications-table-container"
-  >
+  <div *ngIf="!isLoading && filteredApplications.length > 0" class="applications-table-container">
     <table class="applications-table">
       <thead>
         <tr>
           <th>Candidat</th>
           <th>Poste</th>
-          <th>Date de candidature</th>
+          <th>Date</th>
           <th>Statut</th>
           <th>Évaluation</th>
           <th>Actions</th>
@@ -143,84 +154,66 @@
           *ngFor="let app of paginatedApplications"
           class="application-row"
           [class.new]="app.status === 'new'"
+          (click)="viewApplication(app.id!)"
         >
           <td class="candidate-cell">
             <div class="candidate-info">
               <div class="candidate-avatar">
-                <img
-                  *ngIf="app.candidatePhoto"
-                  [src]="app.candidatePhoto"
-                  alt=""
-                />
-                <span *ngIf="!app.candidatePhoto">{{
-                  app?.candidateName?.[0] || "?"
-                }}</span>
+                <img *ngIf="app.candidatePhoto" [src]="app.candidatePhoto" alt="" />
+                <span *ngIf="!app.candidatePhoto">{{ app.candidateName[0] || "?" }}</span>
               </div>
               <div class="candidate-details">
                 <div class="candidate-name">{{ app.candidateName }}</div>
-                <div class="candidate-title">
-                  {{ app.candidateTitle || "Profil non renseigné" }}
-                </div>
+                <div class="candidate-title">{{ app.candidateTitle || "Profil non renseigné" }}</div>
                 <div class="candidate-location" *ngIf="app.candidateCity">
-                  📍 {{ app.candidateCity }}
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z"/>
+                    <circle cx="12" cy="9" r="3"/>
+                  </svg>
+                  {{ app.candidateCity }}
                 </div>
               </div>
             </div>
           </td>
           <td class="job-cell">
-            <div class="job-info">
-              <div class="job-title">{{ app.jobTitle }}</div>
-            </div>
+            <div class="job-title">{{ app.jobTitle }}</div>
           </td>
           <td class="date-cell">
-            <div class="date-info">
-              <div class="date-full">{{ formatDate(app.appliedAt) }}</div>
-              <div class="date-relative">
-                {{ getRelativeDate(app.appliedAt) }}
-              </div>
-            </div>
+            <div class="date-full">{{ formatDate(app.appliedAt) }}</div>
+            <div class="date-relative">{{ getRelativeDate(app.appliedAt) }}</div>
           </td>
           <td class="status-cell">
-            <div class="status-container">
-              <select
-                class="status-select"
-                [style.color]="getStatusColor(app.status)"
-                [style.border-color]="getStatusColor(app.status) + '40'"
-                [value]="app.status"
-                (change)="updateStatus(app, $any($event.target).value)"
-              >
-                <option *ngFor="let status of appStatusKeys" [value]="status">
-                  {{ getStatusLabel(status) }}
-                </option>
-              </select>
-            </div>
+            <select
+              class="status-select"
+              [style.color]="getStatusColor(app.status)"
+              [style.borderColor]="getStatusColor(app.status) + '40'"
+              [value]="app.status"
+              (change)="updateStatus(app, $any($event.target).value); $event.stopPropagation()"
+            >
+              <option *ngFor="let status of appStatusKeys" [value]="status">
+                {{ getStatusLabel(status) }}
+              </option>
+            </select>
           </td>
           <td class="rating-cell">
             <div class="stars" *ngIf="app.rating">
-              <span
-                *ngFor="let s of stars(app.rating); let i = index"
-                [class.filled]="i < (app.rating || 0)"
-              >
-                ★
-              </span>
+              <span *ngFor="let s of stars(); let i = index" [class.filled]="i < (app.rating || 0)">★</span>
             </div>
             <span *ngIf="!app.rating" class="no-rating">—</span>
           </td>
           <td class="actions-cell">
             <div class="action-buttons">
-              <button
-                class="action-btn view"
-                (click)="viewApplication(app.id!)"
-                title="Voir le dossier"
-              >
-                👁️
+              <button class="action-btn view" (click)="viewApplication(app.id!); $event.stopPropagation()" title="Voir le dossier">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
               </button>
-              <button
-                class="action-btn cv"
-                (click)="viewCandidateCV(app.candidateId)"
-                title="Voir le CV"
-              >
-                📄
+              <button class="action-btn cv" (click)="viewCandidateCV(app.candidateId); $event.stopPropagation()" title="Voir le CV">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M4 4h16v16H4z"/>
+                  <path d="M8 8h8M8 12h6M8 16h4"/>
+                </svg>
               </button>
             </div>
           </td>
@@ -230,12 +223,11 @@
 
     <!-- Pagination -->
     <div class="pagination" *ngIf="totalPages > 1">
-      <button
-        class="page-btn"
-        (click)="goToPage(currentPage - 1)"
-        [disabled]="currentPage === 1"
-      >
-        ← Précédent
+      <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Précédent
       </button>
       <div class="page-numbers">
         <button
@@ -246,12 +238,11 @@
           {{ page }}
         </button>
       </div>
-      <button
-        class="page-btn"
-        (click)="goToPage(currentPage + 1)"
-        [disabled]="currentPage === totalPages"
-      >
-        Suivant →
+      <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
+        Suivant
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
       </button>
     </div>
   </div>
@@ -259,32 +250,26 @@
   <!-- Quick Stats Cards -->
   <div class="stats-cards" *ngIf="!isLoading && applications.length > 0">
     <div class="stat-card">
-      <div class="stat-icon">🆕</div>
       <div class="stat-value">{{ getStatusCount("new") }}</div>
       <div class="stat-label">Nouvelles</div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon">👁️</div>
       <div class="stat-value">{{ getStatusCount("viewed") }}</div>
       <div class="stat-label">Consultées</div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon">⭐</div>
       <div class="stat-value">{{ getStatusCount("shortlisted") }}</div>
-      <div class="stat-label">Sélectionnées</div>
+      <div class="stat-label">Présélectionnées</div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon">📅</div>
       <div class="stat-value">{{ getStatusCount("interview") }}</div>
       <div class="stat-label">En entretien</div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon">✅</div>
       <div class="stat-value">{{ getStatusCount("offer") }}</div>
       <div class="stat-label">Offre envoyée</div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon">❌</div>
       <div class="stat-value">{{ getStatusCount("rejected") }}</div>
       <div class="stat-label">Refusées</div>
     </div>

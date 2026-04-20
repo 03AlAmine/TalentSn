@@ -1,21 +1,29 @@
 <div class="company-settings-container">
   <!-- Header -->
   <div class="settings-header">
-    <h1>Paramètres de l'entreprise</h1>
+    <h1>Paramètres entreprise</h1>
     <p>Gérez les informations de votre entreprise</p>
   </div>
 
   <!-- Messages -->
   <div *ngIf="successMessage" class="alert success">
-    ✓ {{ successMessage }}
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    {{ successMessage }}
   </div>
   <div *ngIf="errorMessage" class="alert error">
-    ⚠️ {{ errorMessage }}
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    {{ errorMessage }}
   </div>
 
   <!-- Loading -->
   <div *ngIf="isLoading" class="loader-container">
-    <div class="spinner"></div>
+    <div class="loader"></div>
   </div>
 
   <!-- Content -->
@@ -23,16 +31,31 @@
     <!-- Tabs -->
     <div class="settings-tabs">
       <button class="tab-btn" [class.active]="activeTab === 'general'" (click)="activeTab = 'general'">
-        🏢 Général
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M4 4h16v16H4z"/>
+          <path d="M9 4v16M15 4v16M4 9h16M4 15h16"/>
+        </svg>
+        Général
       </button>
       <button class="tab-btn" [class.active]="activeTab === 'contact'" (click)="activeTab = 'contact'">
-        📞 Contact
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        Contact
       </button>
       <button class="tab-btn" [class.active]="activeTab === 'social'" (click)="activeTab = 'social'">
-        🌐 Réseaux sociaux
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M16 3h5v5M8 21H3v-5M21 3l-7 7M3 21l7-7"/>
+        </svg>
+        Réseaux
       </button>
       <button class="tab-btn" [class.active]="activeTab === 'branding'" (click)="activeTab = 'branding'">
-        🎨 Identité visuelle
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        Identité
       </button>
     </div>
 
@@ -42,7 +65,7 @@
         <h3>Informations générales</h3>
         <div class="form-grid">
           <div class="form-field full-width">
-            <label>Nom de l'entreprise *</label>
+            <label>Nom de l'entreprise <span class="required">*</span></label>
             <input type="text" [(ngModel)]="companyData.companyName" placeholder="ex: TalentSn">
           </div>
 
@@ -63,8 +86,8 @@
           </div>
 
           <div class="form-field full-width">
-            <label>Description de l'entreprise</label>
-            <textarea [(ngModel)]="companyData.companyDescription" rows="5"
+            <label>Description</label>
+            <textarea [(ngModel)]="companyData.companyDescription" rows="4"
               placeholder="Décrivez votre entreprise, sa mission, ses valeurs..."></textarea>
           </div>
         </div>
@@ -153,15 +176,27 @@
         <div class="logo-upload">
           <div class="logo-preview" *ngIf="logoPreview">
             <img [src]="logoPreview" alt="Company logo">
-            <button class="remove-logo" (click)="removeLogo()">✕</button>
+            <button class="remove-logo" (click)="removeLogo()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
           </div>
           <div class="logo-placeholder" *ngIf="!logoPreview">
-            <span class="placeholder-icon">🏢</span>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+              <path d="M4 4h16v16H4z"/>
+              <path d="M9 4v16M15 4v16M4 9h16M4 15h16"/>
+            </svg>
             <p>Aucun logo</p>
           </div>
           <div class="logo-actions">
             <label class="upload-btn">
-              📁 Choisir un fichier
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+              Choisir un fichier
               <input type="file" accept="image/*" (change)="onLogoSelected($event)" hidden>
             </label>
             <p class="upload-hint">PNG, JPG ou GIF. Max 2MB.</p>
@@ -170,14 +205,17 @@
       </div>
 
       <div class="form-section">
-        <h3>Aperçu de la carte entreprise</h3>
+        <h3>Aperçu</h3>
         <div class="company-preview">
           <div class="preview-card">
             <div class="preview-logo" *ngIf="logoPreview">
               <img [src]="logoPreview" alt="Logo">
             </div>
             <div class="preview-logo placeholder" *ngIf="!logoPreview">
-              <span>🏢</span>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <path d="M4 4h16v16H4z"/>
+                <path d="M9 4v16M15 4v16M4 9h16M4 15h16"/>
+              </svg>
             </div>
             <div class="preview-info">
               <h4>{{ companyData.companyName || 'Nom de l\'entreprise' }}</h4>
@@ -195,7 +233,14 @@
         Annuler
       </button>
       <button class="btn-primary" (click)="saveSettings()" [disabled]="isSaving">
-        <span *ngIf="!isSaving">💾 Enregistrer les modifications</span>
+        <span *ngIf="!isSaving">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Enregistrer
+        </span>
         <span *ngIf="isSaving" class="btn-spinner"></span>
       </button>
     </div>

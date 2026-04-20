@@ -25,27 +25,27 @@ interface TalentProfile {
     technicalSkills?: string[];
     softSkills?: string[];
     experiences?: Array<{
-      position: string;
+      title?: string;
+      position?: string;
       company: string;
       startDate: string;
       endDate?: string;
       description?: string;
     }>;
-    education?: Array<{
+    educations?: Array<{
       degree: string;
-      field: string;
       institution: string;
-      startDate: string;
-      endDate?: string;
+      startYear?: number;
+      endYear?: number;
     }>;
     languages?: Array<{
-      language: string;
+      name?: string;
+      language?: string;
       level: string;
     }>;
     certifications?: Array<{
       name: string;
       issuer: string;
-      date: string;
     }>;
     projects?: Array<{
       name: string;
@@ -54,8 +54,6 @@ interface TalentProfile {
       link?: string;
     }>;
   };
-  createdAt?: any;
-  updatedAt?: any;
 }
 
 @Component({
@@ -71,13 +69,11 @@ export class TalentProfileComponent implements OnInit {
   isLoading = true;
   errorMessage = '';
 
-  // Contact modal
   showContactModal = false;
   contactMessage = '';
   selectedOfferId = '';
   jobOffers: JobOffer[] = [];
 
-  // Active tab
   activeTab: 'profile' | 'experience' | 'education' | 'skills' | 'projects' = 'profile';
 
   constructor(
@@ -123,8 +119,7 @@ export class TalentProfileComponent implements OnInit {
       return;
     }
 
-    // Here you would implement sending a message to the candidate
-    // For now, we'll just show a success message
+    // TODO: Implement actual message sending
     console.log('Sending message to candidate:', {
       candidateId: this.candidateId,
       candidateEmail: this.candidate?.email,
@@ -136,8 +131,8 @@ export class TalentProfileComponent implements OnInit {
     this.contactMessage = '';
     this.selectedOfferId = '';
 
-    // Show success notification (you can implement a toast service)
-    alert('Message envoyé au candidat avec succès !');
+    // TODO: Show success notification
+    alert('Message envoyé au candidat');
   }
 
   viewCV() {
@@ -162,7 +157,7 @@ export class TalentProfileComponent implements OnInit {
 
   getExperienceLevel(): string {
     const levelMap: Record<string, string> = {
-      'Junior (0-2 ans)': 'Débutant',
+      'Junior (0-2 ans)': 'Junior',
       'Confirmé (3-5 ans)': 'Confirmé',
       'Senior (5-10 ans)': 'Senior',
       'Expert (10+ ans)': 'Expert',
@@ -170,36 +165,29 @@ export class TalentProfileComponent implements OnInit {
     return levelMap[this.candidate?.experienceYears || ''] || this.candidate?.experienceYears || 'Non spécifié';
   }
 
-  formatDate(dateString: string): string {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' });
-  }
-
-  getYearsOfExperience(experiences?: any[]): number {
-    if (!experiences?.length) return 0;
-
-    let totalYears = 0;
-    for (const exp of experiences) {
-      if (exp.startDate) {
-        const start = new Date(exp.startDate);
-        const end = exp.endDate ? new Date(exp.endDate) : new Date();
-        const years = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 365);
-        totalYears += years;
+  getLevelWidth(level: string): string {
+    const levelMap: Record<string, number> = {
+      'Débutant': 25,
+      'Intermédiaire': 50,
+      'Avancé': 75,
+      'Courant': 90,
+      'Natif': 100,
+      'Notions': 20,
+      'Professionnel': 70,
+      'maternelle': 100,
+      'bilingue': 95,
+      'courant': 85,
+      'professionnel': 70,
+      'intermédiaire': 50,
+      'élémentaire': 30,
+      'débutant': 20,
+    };
+    const normalizedLevel = level?.toLowerCase() || '';
+    for (const [key, value] of Object.entries(levelMap)) {
+      if (normalizedLevel.includes(key.toLowerCase())) {
+        return `${value}%`;
       }
     }
-    return Math.round(totalYears);
+    return '50%';
   }
-  getLevelWidth(level: string): string {
-  const levelMap: Record<string, number> = {
-    'Débutant': 25,
-    'Intermédiaire': 50,
-    'Avancé': 75,
-    'Courant': 90,
-    'Natif': 100,
-    'Notions': 20,
-    'Professionnel': 70,
-  };
-  return `${levelMap[level] || 50}%`;
-}
 }

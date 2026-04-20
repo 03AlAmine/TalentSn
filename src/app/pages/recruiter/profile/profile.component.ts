@@ -30,12 +30,10 @@ export class ProfileComponent implements OnInit {
   successMessage = '';
   errorMessage = '';
 
-  // Photo upload
   photoFile: File | null = null;
   photoPreview: string | null = null;
   isUploading = false;
 
-  // Password change
   showPasswordModal = false;
   passwordData = {
     currentPassword: '',
@@ -79,7 +77,6 @@ export class ProfileComponent implements OnInit {
     if (input.files && input.files[0]) {
       this.photoFile = input.files[0];
 
-      // Preview
       const reader = new FileReader();
       reader.onload = (e) => {
         this.photoPreview = e.target?.result as string;
@@ -118,7 +115,6 @@ export class ProfileComponent implements OnInit {
     this.successMessage = '';
 
     try {
-      // Upload photo if changed
       let photoUrl = this.userData.photoURL;
       if (this.photoFile) {
         const newPhotoUrl = await this.uploadPhoto();
@@ -127,7 +123,6 @@ export class ProfileComponent implements OnInit {
         }
       }
 
-      // Update user document
       const userRef = doc(this.firestore, 'users', this.userData.uid);
       await updateDoc(userRef, {
         firstName: this.profileData.firstName,
@@ -140,10 +135,9 @@ export class ProfileComponent implements OnInit {
         updatedAt: new Date(),
       });
 
-      // Update local user data
       this.authService.refreshUserData();
 
-      this.successMessage = 'Profil mis à jour avec succès !';
+      this.successMessage = 'Profil mis à jour avec succès';
       setTimeout(() => this.successMessage = '', 3000);
     } catch (error) {
       console.error('Error saving profile:', error);
@@ -168,14 +162,13 @@ export class ProfileComponent implements OnInit {
     this.passwordError = '';
 
     try {
-      // This would call an auth service method to change password
+      // TODO: Implement actual password change with Firebase Auth
       // await this.authService.changePassword(this.passwordData.currentPassword, this.passwordData.newPassword);
 
       this.showPasswordModal = false;
-      this.successMessage = 'Mot de passe modifié avec succès !';
+      this.successMessage = 'Mot de passe modifié avec succès';
       setTimeout(() => this.successMessage = '', 3000);
 
-      // Reset form
       this.passwordData = {
         currentPassword: '',
         newPassword: '',

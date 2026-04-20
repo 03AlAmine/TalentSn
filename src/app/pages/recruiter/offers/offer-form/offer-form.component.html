@@ -1,22 +1,38 @@
 <div class="offer-form-container">
   <div class="page-header">
-    <button class="back-btn" (click)="cancel()">← Retour</button>
-    <h1>{{ isEditMode ? 'Modifier l\'offre' : 'Nouvelle offre d\'emploi' }}</h1>
+    <button class="back-btn" (click)="cancel()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Retour
+    </button>
+    <div>
+      <h1>{{ isEditMode ? 'Modifier l\'offre' : 'Nouvelle offre' }}</h1>
+      <p class="header-subtitle">{{ isEditMode ? 'Modifiez les informations de votre annonce' : 'Créez une nouvelle annonce d\'emploi' }}</p>
+    </div>
   </div>
 
   <!-- Loading -->
   <div *ngIf="isLoading" class="loader-container">
-    <div class="spinner"></div>
+    <div class="loader"></div>
   </div>
 
   <!-- Form -->
   <form *ngIf="!isLoading" (ngSubmit)="saveOffer(true)" class="offer-form">
     <!-- Success/Error Messages -->
     <div *ngIf="successMessage" class="alert success">
-      ✓ {{ successMessage }}
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      {{ successMessage }}
     </div>
     <div *ngIf="errorMessage" class="alert error">
-      ⚠️ {{ errorMessage }}
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {{ errorMessage }}
     </div>
 
     <!-- Section 1: Basic Info -->
@@ -28,12 +44,12 @@
 
       <div class="form-grid">
         <div class="form-field full-width">
-          <label>Titre du poste *</label>
+          <label>Titre du poste <span class="required">*</span></label>
           <input type="text" [(ngModel)]="offer.title" name="title" placeholder="ex: Développeur Full Stack Senior">
         </div>
 
         <div class="form-field">
-          <label>Secteur *</label>
+          <label>Secteur <span class="required">*</span></label>
           <select [(ngModel)]="offer.sector" name="sector">
             <option value="">Sélectionner un secteur</option>
             <option *ngFor="let s of sectors" [value]="s">{{ s }}</option>
@@ -45,7 +61,7 @@
           <div class="type-buttons">
             <button *ngFor="let type of jobTypes" type="button"
               class="type-btn" [class.active]="offer.type === type"
-              [style.border-color]="offer.type === type ? getJobTypeColor(type) : ''"
+              [style.borderColor]="offer.type === type ? '#2ecc9f' : ''"
               (click)="offer.type = type">
               {{ type }}
             </button>
@@ -53,7 +69,7 @@
         </div>
 
         <div class="form-field">
-          <label>Localisation *</label>
+          <label>Localisation <span class="required">*</span></label>
           <input type="text" [(ngModel)]="offer.location" name="location" placeholder="ex: Dakar, Sénégal">
         </div>
 
@@ -107,7 +123,7 @@
       <div class="options-row">
         <label class="checkbox-option" [class.active]="offer.urgent">
           <input type="checkbox" [(ngModel)]="offer.urgent" name="urgent">
-          🔥 Offre urgente
+          <span>Offre urgente</span>
         </label>
       </div>
     </div>
@@ -116,7 +132,7 @@
     <div class="form-section">
       <div class="section-header">
         <span class="step-number">2</span>
-        <h2>Description du poste *</h2>
+        <h2>Description du poste <span class="required">*</span></h2>
       </div>
       <textarea class="description-input" [(ngModel)]="offer.description" name="description"
         rows="8" placeholder="Décrivez le poste, le contexte de l'entreprise, les missions principales..."></textarea>
@@ -131,7 +147,7 @@
 
       <!-- Responsibilities -->
       <div class="tag-field">
-        <label>📋 Responsabilités</label>
+        <label>Responsabilités</label>
         <div class="tag-input">
           <input type="text" [(ngModel)]="newResponsibility" name="newResponsibility"
             placeholder="Ajouter une responsabilité..."
@@ -148,7 +164,7 @@
 
       <!-- Requirements -->
       <div class="tag-field">
-        <label>✅ Prérequis indispensables</label>
+        <label>Prérequis indispensables</label>
         <div class="tag-input">
           <input type="text" [(ngModel)]="newRequirement" name="newRequirement"
             placeholder="Ajouter un prérequis..."
@@ -165,7 +181,7 @@
 
       <!-- Nice to Have -->
       <div class="tag-field">
-        <label>⭐ Atouts appréciés</label>
+        <label>Atouts appréciés</label>
         <div class="tag-input">
           <input type="text" [(ngModel)]="newNiceToHave" name="newNiceToHave"
             placeholder="Ajouter un atout..."
@@ -182,7 +198,7 @@
 
       <!-- Benefits -->
       <div class="tag-field">
-        <label>🎁 Avantages</label>
+        <label>Avantages</label>
         <div class="tag-input">
           <input type="text" [(ngModel)]="newBenefit" name="newBenefit"
             placeholder="Ajouter un avantage..."
@@ -224,10 +240,22 @@
     <div class="form-actions">
       <button type="button" class="btn-secondary" (click)="cancel()">Annuler</button>
       <button type="button" class="btn-outline" (click)="saveOffer(false)" [disabled]="isSaving">
-        📝 Enregistrer comme brouillon
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+          <polyline points="7 3 7 8 15 8"/>
+        </svg>
+        Brouillon
       </button>
       <button type="submit" class="btn-primary" [disabled]="isSaving">
-        <span *ngIf="!isSaving">{{ isEditMode ? '✓ Mettre à jour' : '🚀 Publier l\'offre' }}</span>
+        <span *ngIf="!isSaving">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          {{ isEditMode ? 'Mettre à jour' : 'Publier' }}
+        </span>
         <span *ngIf="isSaving" class="btn-spinner"></span>
       </button>
     </div>

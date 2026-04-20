@@ -23,18 +23,15 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
   jobOffers: JobOffer[] = [];
   isLoading = true;
 
-  // Filters
   filterStatus: string = 'all';
   filterOfferId: string = '';
   searchTerm: string = '';
   dateRange: 'all' | 'today' | 'week' | 'month' = 'all';
 
-  // Pagination
   currentPage = 1;
   itemsPerPage = 10;
   totalPages = 1;
 
-  // Selected offer for filter
   selectedOffer: JobOffer | null = null;
 
   private subs = new Subscription();
@@ -46,7 +43,6 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
   ) {}
 
   async ngOnInit() {
-    // Check for offerId in query params
     this.subs.add(
       this.route.queryParams.subscribe((params) => {
         if (params['offerId']) {
@@ -65,7 +61,6 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
   async loadData() {
     this.isLoading = true;
     try {
-      // Load applications and offers in parallel
       const [applications, offers] = await Promise.all([
         this.recruiterService.getAllMyApplications(),
         this.recruiterService.getMyJobOffers(),
@@ -74,10 +69,8 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
       this.applications = applications;
       this.jobOffers = offers;
 
-      // If filterOfferId is set, find the offer
       if (this.filterOfferId) {
-        this.selectedOffer =
-          this.jobOffers.find((o) => o.id === this.filterOfferId) || null;
+        this.selectedOffer = this.jobOffers.find((o) => o.id === this.filterOfferId) || null;
       }
 
       this.applyFilters();
@@ -87,26 +80,26 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
       this.isLoading = false;
     }
   }
+
   get statusList(): string[] {
     return ['all', ...this.appStatusKeys];
   }
+
   get pages(): number[] {
-  return Array.from({ length: this.totalPages }, (_, i) => i + 1);
-}
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
   applyFilters() {
     let filtered = [...this.applications];
 
-    // Filter by status
     if (this.filterStatus !== 'all') {
       filtered = filtered.filter((a) => a.status === this.filterStatus);
     }
 
-    // Filter by offer
     if (this.filterOfferId) {
       filtered = filtered.filter((a) => a.jobId === this.filterOfferId);
     }
 
-    // Filter by search term (candidate name or job title)
     if (this.searchTerm.trim()) {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -117,15 +110,12 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
       );
     }
 
-    // Filter by date range
     if (this.dateRange !== 'all') {
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
       filtered = filtered.filter((a) => {
-        const appliedDate = a.appliedAt?.toDate
-          ? a.appliedAt.toDate()
-          : new Date(a.appliedAt);
+        const appliedDate = a.appliedAt?.toDate ? a.appliedAt.toDate() : new Date(a.appliedAt);
 
         if (this.dateRange === 'today') {
           return appliedDate >= today;
@@ -142,21 +132,14 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
       });
     }
 
-    // Sort by most recent first
     filtered.sort((a, b) => {
-      const dateA = a.appliedAt?.toDate
-        ? a.appliedAt.toDate()
-        : new Date(a.appliedAt);
-      const dateB = b.appliedAt?.toDate
-        ? b.appliedAt.toDate()
-        : new Date(b.appliedAt);
+      const dateA = a.appliedAt?.toDate ? a.appliedAt.toDate() : new Date(a.appliedAt);
+      const dateB = b.appliedAt?.toDate ? b.appliedAt.toDate() : new Date(b.appliedAt);
       return dateB.getTime() - dateA.getTime();
     });
 
     this.filteredApplications = filtered;
-    this.totalPages = Math.ceil(
-      this.filteredApplications.length / this.itemsPerPage,
-    );
+    this.totalPages = Math.ceil(this.filteredApplications.length / this.itemsPerPage);
     this.currentPage = 1;
   }
 
@@ -181,12 +164,6 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
     this.applyFilters();
   }
 
-  selectOffer(offerId: string) {
-    this.filterOfferId = offerId;
-    this.selectedOffer = this.jobOffers.find((o) => o.id === offerId) || null;
-    this.applyFilters();
-  }
-
   get paginatedApplications(): Application[] {
     const start = (this.currentPage - 1) * this.itemsPerPage;
     const end = start + this.itemsPerPage;
@@ -205,21 +182,13 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
   }
 
   getStatusLabel(status: string): string {
-    const config =
-      this.recruiterService.appStatusConfig[status as ApplicationStatus];
+    const config = this.recruiterService.appStatusConfig[status as ApplicationStatus];
     return config?.label || status;
   }
 
   getStatusColor(status: string): string {
-    const config =
-      this.recruiterService.appStatusConfig[status as ApplicationStatus];
-    return config?.color || '#5A5A72';
-  }
-
-  getStatusBg(status: string): string {
-    const config =
-      this.recruiterService.appStatusConfig[status as ApplicationStatus];
-    return config?.bg || 'rgba(90, 90, 114, 0.1)';
+    const config = this.recruiterService.appStatusConfig[status as ApplicationStatus];
+    return config?.color || '#6b7683';
   }
 
   async updateStatus(application: Application, newStatus: string) {
@@ -245,10 +214,7 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
     const d = ts.toDate ? ts.toDate() : new Date(ts);
     return d.toLocaleDateString('fr-FR', {
       day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      month: 'short',
     });
   }
 
@@ -269,13 +235,11 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
     return this.formatDate(ts);
   }
 
-  stars(rating: number | undefined): number[] {
+  stars(): number[] {
     return [1, 2, 3, 4, 5];
   }
 
   get appStatusKeys(): ApplicationStatus[] {
-    return Object.keys(
-      this.recruiterService.appStatusConfig,
-    ) as ApplicationStatus[];
+    return Object.keys(this.recruiterService.appStatusConfig) as ApplicationStatus[];
   }
 }

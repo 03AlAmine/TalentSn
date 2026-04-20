@@ -21,7 +21,6 @@ export class OfferFormComponent implements OnInit {
   errorMessage = '';
   userData: UserData | null = null;
 
-  // Form fields
   offer: Partial<JobOffer> = {
     title: '',
     sector: '',
@@ -43,7 +42,6 @@ export class OfferFormComponent implements OnInit {
     status: 'active',
   };
 
-  // Temporary inputs for tags
   newSkill = '';
   newResponsibility = '';
   newRequirement = '';
@@ -92,7 +90,6 @@ export class OfferFormComponent implements OnInit {
     }
   }
 
-  /* ── TAG MANAGEMENT ── */
   addTag(field: keyof Pick<JobOffer, 'skills' | 'responsibilities' | 'requirements' | 'niceToHave' | 'benefits'>, value: string) {
     if (!value.trim()) return;
     const arr = (this.offer[field] as string[]) || [];
@@ -126,7 +123,6 @@ export class OfferFormComponent implements OnInit {
     }
   }
 
-  /* ── FORM VALIDATION ── */
   isValid(): boolean {
     if (!this.offer.title?.trim()) return false;
     if (!this.offer.description?.trim()) return false;
@@ -135,7 +131,6 @@ export class OfferFormComponent implements OnInit {
     return true;
   }
 
-  /* ── SAVE ── */
   async saveOffer(publish: boolean = true) {
     if (!this.isValid()) {
       this.errorMessage = 'Veuillez remplir tous les champs obligatoires (titre, description, secteur, localisation)';
@@ -155,10 +150,10 @@ export class OfferFormComponent implements OnInit {
 
       if (this.isEditMode && this.offerId) {
         await this.recruiterService.updateJobOffer(this.offerId, this.offer);
-        this.successMessage = 'Offre mise à jour avec succès !';
+        this.successMessage = 'Offre mise à jour avec succès';
       } else {
         await this.recruiterService.createJobOffer(this.offer);
-        this.successMessage = 'Offre publiée avec succès !';
+        this.successMessage = 'Offre publiée avec succès';
       }
 
       setTimeout(() => {
@@ -171,7 +166,6 @@ export class OfferFormComponent implements OnInit {
     }
   }
 
-  /* ── HELPERS ── */
   get sectors() { return this.recruiterService.sectors; }
   get jobTypes() { return this.recruiterService.jobTypes; }
   get experienceLevels() { return this.recruiterService.experienceLevels; }
@@ -180,10 +174,10 @@ export class OfferFormComponent implements OnInit {
 
   getJobTypeColor(type: string): string {
     const map: Record<string, string> = {
-      CDI: '#00D68F', CDD: '#3b82f6', Stage: '#f59e0b',
-      Freelance: '#8b5cf6', Alternance: '#ec4899', 'Temps partiel': '#6b7280',
+      CDI: '#2ecc9f', CDD: '#3b82f6', Stage: '#f59e0b',
+      Freelance: '#a855f7', Alternance: '#ec4899', 'Temps partiel': '#6b7280',
     };
-    return map[type] || '#00D68F';
+    return map[type] || '#2ecc9f';
   }
 
   cancel() {

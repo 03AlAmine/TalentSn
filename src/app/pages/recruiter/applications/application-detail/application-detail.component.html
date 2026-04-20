@@ -2,25 +2,39 @@
   <!-- Header -->
   <div class="page-header">
     <button class="back-btn" (click)="goBack()">
-      ← Retour aux candidatures
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Retour
     </button>
-    <h1>Dossier candidat</h1>
+    <div>
+      <h1>Dossier candidat</h1>
+      <p class="header-subtitle">Consultez et gérez le profil du candidat</p>
+    </div>
   </div>
 
   <!-- Loading -->
   <div *ngIf="isLoading" class="loader-container">
-    <div class="spinner"></div>
+    <div class="loader"></div>
     <p>Chargement du dossier...</p>
   </div>
 
   <!-- Error -->
   <div *ngIf="errorMessage" class="alert error">
-    ⚠️ {{ errorMessage }}
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    {{ errorMessage }}
   </div>
 
   <!-- Success -->
   <div *ngIf="successMessage" class="alert success">
-    ✓ {{ successMessage }}
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    {{ successMessage }}
   </div>
 
   <!-- Content -->
@@ -33,32 +47,67 @@
         <div class="candidate-header">
           <div class="candidate-avatar">
             <img *ngIf="application.candidatePhoto" [src]="application.candidatePhoto" alt="">
-            <span *ngIf="!application.candidatePhoto">{{ application?.candidateName?.[0] || '?' }}</span>
+            <span *ngIf="!application.candidatePhoto">{{ application.candidateName[0] || '?' }}</span>
           </div>
           <div class="candidate-info">
             <h2>{{ application.candidateName }}</h2>
             <p class="candidate-title">{{ application.candidateTitle || 'Profil non renseigné' }}</p>
             <div class="candidate-meta">
-              <span *ngIf="application.candidateCity">📍 {{ application.candidateCity }}</span>
-              <span *ngIf="application.candidateSector">🏢 {{ application.candidateSector }}</span>
-              <span *ngIf="application.candidateExperience">📅 {{ application.candidateExperience }}</span>
-              <span *ngIf="application.candidateEducation">🎓 {{ application.candidateEducation }}</span>
+              <span *ngIf="application.candidateCity">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z"/>
+                  <circle cx="12" cy="9" r="3"/>
+                </svg>
+                {{ application.candidateCity }}
+              </span>
+              <span *ngIf="application.candidateSector">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 4h16v16H4z"/>
+                  <path d="M9 4v16M15 4v16M4 9h16M4 15h16"/>
+                </svg>
+                {{ application.candidateSector }}
+              </span>
+              <span *ngIf="application.candidateExperience">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                {{ application.candidateExperience }}
+              </span>
+              <span *ngIf="application.candidateEducation">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                {{ application.candidateEducation }}
+              </span>
             </div>
           </div>
           <button class="cv-btn" (click)="viewCV()">
-            📄 Voir le CV complet
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16v16H4z"/>
+              <path d="M8 8h8M8 12h6M8 16h4"/>
+            </svg>
+            Voir le CV complet
           </button>
         </div>
 
-        <!-- Contact Info Card (Email only) -->
+        <!-- Contact Info Card -->
         <div class="action-card" *ngIf="application.candidateEmail">
           <div class="card-header">
-            <span class="card-icon">📞</span>
+            <svg class="card-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
             <h3>Contact</h3>
           </div>
           <div class="contact-info">
             <p class="contact-item">
-              <span class="contact-icon">✉️</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
               <a [href]="'mailto:' + application.candidateEmail">{{ application.candidateEmail }}</a>
             </p>
           </div>
@@ -67,14 +116,16 @@
         <!-- Job Info -->
         <div class="info-card" *ngIf="jobOffer">
           <div class="card-header">
-            <span class="card-icon">📋</span>
+            <svg class="card-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M4 4h16v16H4zM8 4v16M16 4v16M4 12h16"/>
+            </svg>
             <h3>Offre postulée</h3>
           </div>
           <div class="job-details">
             <div class="job-title">{{ jobOffer.title }}</div>
             <div class="job-meta">
               <span>{{ jobOffer.type }}</span>
-              <span>•</span>
+              <span class="meta-separator">•</span>
               <span>{{ jobOffer.location }}</span>
             </div>
             <div class="job-description" *ngIf="jobOffer.description">
@@ -86,18 +137,21 @@
         <!-- Cover Letter -->
         <div class="info-card" *ngIf="application.coverLetter">
           <div class="card-header">
-            <span class="card-icon">💌</span>
+            <svg class="card-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
             <h3>Lettre de motivation</h3>
           </div>
-          <div class="cover-letter">
-            {{ application.coverLetter }}
-          </div>
+          <div class="cover-letter">{{ application.coverLetter }}</div>
         </div>
 
         <!-- CV Data -->
         <div class="info-card" *ngIf="application.cvData">
           <div class="card-header">
-            <span class="card-icon">📄</span>
+            <svg class="card-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M4 4h16v16H4z"/>
+              <path d="M8 8h8M8 12h6M8 16h4"/>
+            </svg>
             <h3>Résumé du profil</h3>
           </div>
 
@@ -119,26 +173,24 @@
             <div class="experience-list">
               <div class="experience-item" *ngFor="let exp of application.cvData.experiences">
                 <div class="exp-header">
-                  <span class="exp-title">{{ exp.position }}</span>
+                  <span class="exp-title">{{ exp.title || exp.position }}</span>
                   <span class="exp-company">{{ exp.company }}</span>
                 </div>
                 <div class="exp-date" *ngIf="exp.startDate">
                   {{ exp.startDate }} - {{ exp.endDate || 'Présent' }}
                 </div>
-                <div class="exp-description" *ngIf="exp.description">
-                  {{ exp.description }}
-                </div>
+                <div class="exp-description" *ngIf="exp.description">{{ exp.description }}</div>
               </div>
             </div>
           </div>
 
-          <div class="cv-section" *ngIf="application.cvData.education?.length">
+          <div class="cv-section" *ngIf="application.cvData.educations?.length">
             <h4>Formation</h4>
             <div class="education-list">
-              <div class="education-item" *ngFor="let edu of application.cvData.education">
-                <div class="edu-title">{{ edu.degree }} - {{ edu.field }}</div>
+              <div class="education-item" *ngFor="let edu of application.cvData.educations">
+                <div class="edu-title">{{ edu.degree }}</div>
                 <div class="edu-institution">{{ edu.institution }}</div>
-                <div class="edu-date">{{ edu.startDate }} - {{ edu.endDate || 'Présent' }}</div>
+                <div class="edu-date" *ngIf="edu.startYear">{{ edu.startYear }} - {{ edu.endYear || 'Présent' }}</div>
               </div>
             </div>
           </div>
@@ -147,7 +199,7 @@
             <h4>Langues</h4>
             <div class="languages-list">
               <span *ngFor="let lang of application.cvData.languages" class="language-tag">
-                {{ lang.language }}: {{ lang.level }}
+                {{ lang.name }}: {{ lang.level }}
               </span>
             </div>
           </div>
@@ -159,8 +211,12 @@
         <!-- Status Card -->
         <div class="action-card">
           <div class="card-header">
-            <span class="card-icon">📊</span>
-            <h3>Statut</h3>
+            <svg class="card-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <h3>Statut actuel</h3>
           </div>
           <div class="status-badge large"
             [style.color]="getStatusColor(application.status)"
@@ -176,7 +232,10 @@
         <!-- Status Change Card -->
         <div class="action-card">
           <div class="card-header">
-            <span class="card-icon">🔄</span>
+            <svg class="card-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
             <h3>Changer le statut</h3>
           </div>
           <div class="status-buttons">
@@ -184,7 +243,7 @@
               *ngFor="let status of appStatusKeys"
               class="status-btn"
               [class.active]="application.status === status"
-              [style.border-color]="getStatusColor(status)"
+              [style.borderColor]="getStatusColor(status)"
               [style.background]="application.status === status ? getStatusBg(status) : 'white'"
               [style.color]="getStatusColor(status)"
               (click)="updateStatus(status)">
@@ -196,12 +255,14 @@
         <!-- Rating Card -->
         <div class="action-card">
           <div class="card-header">
-            <span class="card-icon">⭐</span>
+            <svg class="card-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
             <h3>Évaluation</h3>
           </div>
           <div class="rating-stars">
             <button
-              *ngFor="let s of stars(application.rating); let i=index"
+              *ngFor="let s of stars(); let i=index"
               class="star-btn"
               [class.filled]="i < (application.rating || 0)"
               (click)="rateApplication(i + 1)">
@@ -214,10 +275,16 @@
         <!-- Notes Card -->
         <div class="action-card">
           <div class="card-header">
-            <span class="card-icon">📝</span>
+            <svg class="card-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M17 3l4 4-7 7H10v-4l7-7z"/>
+              <path d="M4 20h16"/>
+            </svg>
             <h3>Notes internes</h3>
             <button class="edit-notes-btn" (click)="isEditingNotes = !isEditingNotes" *ngIf="!isEditingNotes">
-              ✏️ Modifier
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 3l4 4-7 7H10v-4l7-7z"/>
+              </svg>
+              Modifier
             </button>
           </div>
 
@@ -245,21 +312,40 @@
         <!-- Quick Actions Card -->
         <div class="action-card">
           <div class="card-header">
-            <span class="card-icon">⚡</span>
+            <svg class="card-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M13 3l9 9-9 9-9-9 9-9z"/>
+              <path d="M9 12h6"/>
+            </svg>
             <h3>Actions rapides</h3>
           </div>
           <div class="quick-actions">
             <button class="quick-action-btn shortlist" (click)="updateStatus('shortlisted')">
-              ⭐ Sélectionner
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              Présélectionner
             </button>
             <button class="quick-action-btn interview" (click)="showInterviewModal = true">
-              📅 Planifier entretien
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              Planifier entretien
             </button>
             <button class="quick-action-btn hire" (click)="updateStatus('offer')">
-              ✅ Envoyer offre
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Envoyer offre
             </button>
             <button class="quick-action-btn reject" (click)="showFeedbackModal = true">
-              ❌ Rejeter
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+              Refuser
             </button>
           </div>
         </div>
@@ -272,7 +358,12 @@
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>Planifier un entretien</h3>
-        <button class="modal-close" (click)="showInterviewModal = false">✕</button>
+        <button class="modal-close" (click)="showInterviewModal = false">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
       </div>
       <div class="modal-body">
         <div class="form-group">
@@ -284,7 +375,7 @@
           <input type="time" [(ngModel)]="interviewData.time">
         </div>
         <div class="form-group">
-          <label>Durée (minutes)</label>
+          <label>Durée</label>
           <select [(ngModel)]="interviewData.duration">
             <option [value]="30">30 minutes</option>
             <option [value]="45">45 minutes</option>
@@ -296,13 +387,16 @@
           <label>Type d'entretien</label>
           <div class="radio-group">
             <label class="radio-option">
-              <input type="radio" value="video" [(ngModel)]="interviewData.type"> 📹 Visio
+              <input type="radio" value="video" [(ngModel)]="interviewData.type">
+              Visio
             </label>
             <label class="radio-option">
-              <input type="radio" value="phone" [(ngModel)]="interviewData.type"> 📞 Téléphone
+              <input type="radio" value="phone" [(ngModel)]="interviewData.type">
+              Téléphone
             </label>
             <label class="radio-option">
-              <input type="radio" value="inperson" [(ngModel)]="interviewData.type"> 🏢 Présentiel
+              <input type="radio" value="inperson" [(ngModel)]="interviewData.type">
+              Présentiel
             </label>
           </div>
         </div>
@@ -315,7 +409,7 @@
           <input type="url" [(ngModel)]="interviewData.meetingLink" placeholder="https://meet.google.com/...">
         </div>
         <div class="form-group">
-          <label>Notes (optionnel)</label>
+          <label>Notes</label>
           <textarea [(ngModel)]="interviewData.notes" rows="3" placeholder="Informations supplémentaires..."></textarea>
         </div>
       </div>
@@ -333,21 +427,24 @@
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>Refuser la candidature</h3>
-        <button class="modal-close" (click)="showFeedbackModal = false">✕</button>
+        <button class="modal-close" (click)="showFeedbackModal = false">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
       </div>
       <div class="modal-body">
-        <p class="modal-warning">
-          Êtes-vous sûr de vouloir refuser cette candidature ?
-        </p>
+        <p class="modal-warning">Êtes-vous sûr de vouloir refuser cette candidature ?</p>
         <div class="form-group">
-          <label>Message de refus (optionnel)</label>
+          <label>Message de refus</label>
           <textarea [(ngModel)]="feedbackData.message" rows="4"
             placeholder="Un message personnalisé sera envoyé au candidat..."></textarea>
         </div>
         <div class="form-group">
-          <label>Feedback (optionnel)</label>
+          <label>Feedback</label>
           <div class="feedback-stars">
-            <span *ngFor="let s of stars(feedbackData.rating); let i=index"
+            <span *ngFor="let s of stars(); let i=index"
               class="feedback-star" [class.active]="i < feedbackData.rating"
               (click)="feedbackData.rating = i + 1">
               ★

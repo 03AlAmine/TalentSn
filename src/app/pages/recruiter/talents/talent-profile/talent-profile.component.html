@@ -2,27 +2,42 @@
   <!-- Header -->
   <div class="page-header">
     <button class="back-btn" (click)="goBack()">
-      ← Retour à la recherche
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Retour
     </button>
     <div class="header-actions">
       <button class="contact-btn" (click)="showContactModal = true">
-        💬 Contacter
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        Contacter
       </button>
       <button class="cv-btn" (click)="viewCV()">
-        📄 Voir le CV complet
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 4h16v16H4z"/>
+          <path d="M8 8h8M8 12h6M8 16h4"/>
+        </svg>
+        Voir le CV
       </button>
     </div>
   </div>
 
   <!-- Loading -->
   <div *ngIf="isLoading" class="loader-container">
-    <div class="spinner"></div>
+    <div class="loader"></div>
     <p>Chargement du profil...</p>
   </div>
 
   <!-- Error -->
   <div *ngIf="errorMessage" class="alert error">
-    ⚠️ {{ errorMessage }}
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    {{ errorMessage }}
   </div>
 
   <!-- Profile Content -->
@@ -37,15 +52,40 @@
         <h1>{{ getFullName() }}</h1>
         <p class="profile-title">{{ candidate.title || 'Profil non renseigné' }}</p>
         <div class="profile-meta">
-          <span *ngIf="candidate.city">📍 {{ candidate.city }}{{ candidate.country ? ', ' + candidate.country : '' }}</span>
-          <span *ngIf="candidate.sector">🏢 {{ candidate.sector }}</span>
-          <span *ngIf="candidate.experienceYears">📅 {{ getExperienceLevel() }}</span>
-          <span *ngIf="candidate.educationLevel">🎓 {{ candidate.educationLevel }}</span>
+          <span *ngIf="candidate.city">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z"/>
+              <circle cx="12" cy="9" r="3"/>
+            </svg>
+            {{ candidate.city }}{{ candidate.country ? ', ' + candidate.country : '' }}
+          </span>
+          <span *ngIf="candidate.sector">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16v16H4z"/>
+              <path d="M9 4v16M15 4v16M4 9h16M4 15h16"/>
+            </svg>
+            {{ candidate.sector }}
+          </span>
+          <span *ngIf="candidate.experienceYears">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            {{ getExperienceLevel() }}
+          </span>
+          <span *ngIf="candidate.educationLevel">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            {{ candidate.educationLevel }}
+          </span>
         </div>
         <div class="profile-stats">
           <div class="stat">
             <span class="stat-value">{{ candidate.cvData?.experiences?.length || 0 }}</span>
-            <span class="stat-label">Années d'expérience</span>
+            <span class="stat-label">Expériences</span>
           </div>
           <div class="stat">
             <span class="stat-value">{{ candidate.cvData?.technicalSkills?.length || 0 }}</span>
@@ -62,19 +102,36 @@
     <!-- Tabs -->
     <div class="tabs">
       <button class="tab-btn" [class.active]="activeTab === 'profile'" (click)="activeTab = 'profile'">
-        📝 Profil
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M5 20v-2a7 7 0 0 1 14 0v2"/>
+        </svg>
+        Profil
       </button>
       <button class="tab-btn" [class.active]="activeTab === 'experience'" (click)="activeTab = 'experience'">
-        💼 Expériences
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M4 4h16v16H4zM8 4v16M16 4v16M4 12h16"/>
+        </svg>
+        Expériences
       </button>
       <button class="tab-btn" [class.active]="activeTab === 'education'" (click)="activeTab = 'education'">
-        🎓 Formation
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        Formation
       </button>
       <button class="tab-btn" [class.active]="activeTab === 'skills'" (click)="activeTab = 'skills'">
-        ⚙️ Compétences
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        Compétences
       </button>
       <button class="tab-btn" [class.active]="activeTab === 'projects'" (click)="activeTab = 'projects'">
-        🚀 Projets
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M13 3l9 9-9 9-9-9 9-9z"/>
+          <path d="M9 12h6"/>
+        </svg>
+        Projets
       </button>
     </div>
 
@@ -91,7 +148,7 @@
           <h3>Langues</h3>
           <div class="languages-list">
             <div class="language-item" *ngFor="let lang of candidate.cvData?.languages">
-              <span class="language-name">{{ lang.language }}</span>
+              <span class="language-name">{{ lang.language || lang.name }}</span>
               <div class="language-level">
                 <div class="level-bar" [style.width]="getLevelWidth(lang.level)"></div>
               </div>
@@ -105,7 +162,7 @@
           <div class="certifications-list">
             <div class="certification-item" *ngFor="let cert of candidate.cvData?.certifications">
               <div class="cert-name">{{ cert.name }}</div>
-              <div class="cert-details">{{ cert.issuer }} • {{ formatDate(cert.date) }}</div>
+              <div class="cert-details" *ngIf="cert.issuer">{{ cert.issuer }}</div>
             </div>
           </div>
         </div>
@@ -113,7 +170,7 @@
 
       <!-- Experience Tab -->
       <div *ngIf="activeTab === 'experience'" class="tab-pane">
-        <div *ngIf="candidate.cvData?.experiences?.length === 0" class="empty-tab">
+        <div *ngIf="!candidate.cvData?.experiences?.length" class="empty-tab">
           <p>Aucune expérience professionnelle renseignée.</p>
         </div>
         <div class="timeline" *ngIf="candidate.cvData?.experiences?.length">
@@ -121,7 +178,7 @@
             <div class="timeline-marker"></div>
             <div class="timeline-content">
               <div class="exp-header">
-                <h4>{{ exp.position }}</h4>
+                <h4>{{ exp.title || exp.position }}</h4>
                 <span class="exp-date">{{ exp.startDate }} - {{ exp.endDate || 'Présent' }}</span>
               </div>
               <p class="exp-company">{{ exp.company }}</p>
@@ -133,16 +190,16 @@
 
       <!-- Education Tab -->
       <div *ngIf="activeTab === 'education'" class="tab-pane">
-        <div *ngIf="candidate.cvData?.education?.length === 0" class="empty-tab">
+        <div *ngIf="!candidate.cvData?.educations?.length" class="empty-tab">
           <p>Aucune formation renseignée.</p>
         </div>
-        <div class="timeline" *ngIf="candidate.cvData?.education?.length">
-          <div class="timeline-item" *ngFor="let edu of candidate.cvData?.education">
+        <div class="timeline" *ngIf="candidate.cvData?.educations?.length">
+          <div class="timeline-item" *ngFor="let edu of candidate.cvData?.educations">
             <div class="timeline-marker"></div>
             <div class="timeline-content">
               <div class="edu-header">
-                <h4>{{ edu.degree }} - {{ edu.field }}</h4>
-                <span class="edu-date">{{ edu.startDate }} - {{ edu.endDate || 'Présent' }}</span>
+                <h4>{{ edu.degree }}</h4>
+                <span class="edu-date">{{ edu.startYear }} - {{ edu.endYear || 'Présent' }}</span>
               </div>
               <p class="edu-institution">{{ edu.institution }}</p>
             </div>
@@ -170,27 +227,32 @@
           </div>
         </div>
 
-        <div class="skills-section" *ngIf="!candidate.cvData?.technicalSkills?.length && !candidate.cvData?.softSkills?.length">
+        <div *ngIf="!candidate.cvData?.technicalSkills?.length && !candidate.cvData?.softSkills?.length" class="empty-tab">
           <p>Aucune compétence renseignée.</p>
         </div>
       </div>
 
       <!-- Projects Tab -->
       <div *ngIf="activeTab === 'projects'" class="tab-pane">
-        <div *ngIf="candidate.cvData?.projects?.length === 0" class="empty-tab">
+        <div *ngIf="!candidate.cvData?.projects?.length" class="empty-tab">
           <p>Aucun projet renseigné.</p>
         </div>
         <div class="projects-grid" *ngIf="candidate.cvData?.projects?.length">
           <div class="project-card" *ngFor="let project of candidate.cvData?.projects">
             <h4>{{ project.name }}</h4>
             <p class="project-description">{{ project.description }}</p>
-            <div class="project-techs">
+            <div class="project-techs" *ngIf="project.technologies.length">
               <span class="tech-tag" *ngFor="let tech of project.technologies">
                 {{ tech }}
               </span>
             </div>
             <a *ngIf="project.link" [href]="project.link" target="_blank" class="project-link">
-              Voir le projet →
+              Voir le projet
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
             </a>
           </div>
         </div>
@@ -203,11 +265,16 @@
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>Contacter {{ candidate?.firstName }}</h3>
-        <button class="modal-close" (click)="showContactModal = false">✕</button>
+        <button class="modal-close" (click)="showContactModal = false">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label>Offre concernée (optionnel)</label>
+          <label>Offre concernée</label>
           <select [(ngModel)]="selectedOfferId">
             <option value="">Sélectionner une offre</option>
             <option *ngFor="let offer of jobOffers" [value]="offer.id">
@@ -216,7 +283,7 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Message *</label>
+          <label>Message <span class="required">*</span></label>
           <textarea
             [(ngModel)]="contactMessage"
             rows="6"
@@ -228,7 +295,7 @@
       <div class="modal-footer">
         <button class="btn-secondary" (click)="showContactModal = false">Annuler</button>
         <button class="btn-primary" (click)="sendContactMessage()" [disabled]="!contactMessage.trim()">
-          Envoyer le message
+          Envoyer
         </button>
       </div>
     </div>

@@ -1,9 +1,16 @@
 <div class="offer-list-container">
   <!-- Header -->
   <div class="page-header">
-    <h1>Mes offres d'emploi</h1>
+    <div>
+      <h1>Offres d'emploi</h1>
+      <p class="header-subtitle">Gérez vos annonces et suivez les candidatures</p>
+    </div>
     <button class="btn-primary" routerLink="/recruiter/offers/create">
-      + Nouvelle offre
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Nouvelle offre
     </button>
   </div>
 
@@ -15,43 +22,49 @@
         [class.active]="filterStatus === filter"
         (click)="onFilterChange(filter)"
       >
-        {{
-          filter === "all"
-            ? "Toutes"
-            : filter === "active"
-              ? "Actives"
-              : filter === "paused"
-                ? "Pausées"
-                : filter === "draft"
-                  ? "Brouillons"
-                  : "Fermées"
-        }}
+        <span>{{
+          filter === "all" ? "Toutes" :
+          filter === "active" ? "Actives" :
+          filter === "paused" ? "Suspendues" :
+          filter === "draft" ? "Brouillons" : "Fermées"
+        }}</span>
         <span class="count">{{ getStatusCount(filter) }}</span>
       </button>
     </div>
 
     <div class="search-box">
-      <span class="search-icon">🔍</span>
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="10" cy="10" r="7"/>
+        <line x1="21" y1="21" x2="15" y2="15"/>
+      </svg>
       <input
         type="text"
-        placeholder="Rechercher par titre, localisation, secteur..."
+        placeholder="Rechercher par titre, localisation..."
         [(ngModel)]="searchTerm"
         (input)="onSearchChange()"
       />
       <button *ngIf="searchTerm" class="clear-btn" (click)="clearFilters()">
-        ✕
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
       </button>
     </div>
   </div>
 
   <!-- Loading -->
   <div *ngIf="isLoading" class="loader-container">
-    <div class="spinner"></div>
+    <div class="loader"></div>
   </div>
 
   <!-- Empty State -->
   <div *ngIf="!isLoading && filteredOffers.length === 0" class="empty-state">
-    <div class="empty-icon">📋</div>
+    <div class="empty-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+        <path d="M4 4h16v16H4z"/>
+        <path d="M8 8h8M8 12h6M8 16h4"/>
+      </svg>
+    </div>
     <h3>Aucune offre trouvée</h3>
     <p *ngIf="filterStatus !== 'all' || searchTerm">
       Modifiez vos filtres pour voir plus de résultats.
@@ -60,7 +73,11 @@
       Commencez par publier votre première offre d'emploi.
     </p>
     <button class="btn-primary" routerLink="/recruiter/offers/create">
-      + Créer une offre
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Créer une offre
     </button>
   </div>
 
@@ -68,40 +85,46 @@
   <div *ngIf="!isLoading && filteredOffers.length > 0" class="offers-grid">
     <div class="offer-card" *ngFor="let offer of filteredOffers">
       <div class="offer-header">
-        <div
-          class="offer-type"
-          [style.border-color]="getJobTypeColor(offer.type)"
-          [style.color]="getJobTypeColor(offer.type)"
-        >
+        <div class="offer-type" [style.borderColor]="getJobTypeColor(offer.type)" [style.color]="getJobTypeColor(offer.type)">
           {{ offer.type }}
         </div>
-        <div class="offer-badge" [class]="offer.status">
+        <div class="offer-badge" [class]="'badge-' + offer.status">
           {{
-            offer.status === "active"
-              ? "Active"
-              : offer.status === "paused"
-                ? "Pausée"
-                : offer.status === "draft"
-                  ? "Brouillon"
-                  : "Fermée"
+            offer.status === "active" ? "Active" :
+            offer.status === "paused" ? "Suspendue" :
+            offer.status === "draft" ? "Brouillon" : "Fermée"
           }}
         </div>
-        <div class="offer-urgent" *ngIf="offer.urgent">🔥 Urgent</div>
+        <div class="offer-urgent" *ngIf="offer.urgent">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          Urgent
+        </div>
       </div>
 
       <h3 class="offer-title">{{ offer.title }}</h3>
 
       <div class="offer-meta">
-        <span>📍 {{ offer.location || "Non spécifié" }}</span>
-        <span>•</span>
+        <span class="meta-location">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z"/>
+            <circle cx="12" cy="9" r="3"/>
+          </svg>
+          {{ offer.location || "Non spécifié" }}
+        </span>
+        <span class="meta-separator">•</span>
         <span>{{ offer.experienceLevel || "Non spécifié" }}</span>
       </div>
 
       <div class="offer-salary" *ngIf="offer.salaryMin || offer.salaryMax">
-        💰
-        {{
-          formatSalary(offer.salaryMin, offer.salaryMax, offer.salaryCurrency)
-        }}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        {{ formatSalary(offer.salaryMin, offer.salaryMax, offer.salaryCurrency) }}
       </div>
 
       <div class="offer-skills" *ngIf="offer.skills.length">
@@ -115,47 +138,60 @@
 
       <div class="offer-footer">
         <div class="offer-stats">
-          <span title="Candidatures">📬 {{ offer.applicationCount || 0 }}</span>
-          <span title="Vues">👁️ {{ offer.viewCount || 0 }}</span>
-          <span title="Date de création"
-            >📅 {{ formatDate(offer.createdAt) }}</span
-          >
+          <span class="stat-applications" title="Candidatures">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M4 4h16v16H4z"/>
+              <path d="M8 8h8M8 12h6M8 16h4"/>
+            </svg>
+            {{ offer.applicationCount || 0 }}
+          </span>
+          <span class="stat-views" title="Vues">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            {{ offer.viewCount || 0 }}
+          </span>
+          <span class="stat-date" title="Date de création">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            {{ formatDate(offer.createdAt) }}
+          </span>
         </div>
         <div class="offer-actions">
-          <button
-            class="action-btn"
-            (click)="viewApplications(offer.id!)"
-            title="Candidatures"
-          >
-            📬
+          <button class="action-btn" (click)="viewApplications(offer.id!)" title="Candidatures">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
           </button>
-          <button
-            class="action-btn edit"
-            (click)="editOffer(offer.id!)"
-            title="Modifier"
-          >
-            ✏️
+          <button class="action-btn edit" (click)="editOffer(offer.id!)" title="Modifier">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M17 3l4 4-7 7H10v-4l7-7z"/>
+              <path d="M4 20h16"/>
+            </svg>
           </button>
-          <button
-            class="action-btn duplicate"
-            (click)="duplicateOffer(offer)"
-            title="Dupliquer"
-          >
-            📋
+          <button class="action-btn duplicate" (click)="duplicateOffer(offer)" title="Dupliquer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="9" y="9" width="13" height="13" rx="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
           </button>
-          <button
-            class="action-btn toggle"
-            (click)="toggleOfferStatus(offer)"
-            [title]="offer.status === 'active' ? 'Mettre en pause' : 'Activer'"
-          >
-            {{ offer.status === "active" ? "⏸️" : "▶️" }}
+          <button class="action-btn toggle" (click)="toggleOfferStatus(offer)" [title]="offer.status === 'active' ? 'Suspendre' : 'Activer'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect *ngIf="offer.status === 'active'" x="6" y="4" width="4" height="16"/>
+              <rect *ngIf="offer.status === 'active'" x="14" y="4" width="4" height="16"/>
+              <polygon *ngIf="offer.status !== 'active'" points="5 3 19 12 5 21 5 3"/>
+            </svg>
           </button>
-          <button
-            class="action-btn delete"
-            (click)="deleteOffer(offer.id!)"
-            title="Supprimer"
-          >
-            🗑️
+          <button class="action-btn delete" (click)="deleteOffer(offer.id!)" title="Supprimer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 6h18M8 6v12h8V6M10 10v4M14 10v4"/>
+              <path d="M9 3h6v3H9z"/>
+            </svg>
           </button>
         </div>
       </div>

@@ -2,7 +2,10 @@
   <!-- Search Bar -->
   <div class="search-bar">
     <div class="search-input-wrapper">
-      <span class="search-icon">🔍</span>
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="10" cy="10" r="7"/>
+        <line x1="21" y1="21" x2="15" y2="15"/>
+      </svg>
       <input
         type="text"
         placeholder="Rechercher par nom, titre, compétence..."
@@ -11,7 +14,12 @@
     </div>
     <button class="search-btn" (click)="searchCandidates()">Rechercher</button>
     <button class="save-search-btn" (click)="showSaveSearchModal = true">
-      💾 Sauvegarder cette recherche
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
+      Sauvegarder
     </button>
   </div>
 
@@ -54,7 +62,11 @@
 
     <div class="filters-actions">
       <button class="clear-filters-btn" (click)="clearFilters()">
-        ✕ Réinitialiser tous les filtres
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+        Réinitialiser
       </button>
       <div class="results-count">
         {{ filteredCandidates.length }} talent(s) trouvé(s)
@@ -65,7 +77,12 @@
   <!-- Saved Searches -->
   <div class="saved-searches" *ngIf="savedSearches.length > 0">
     <div class="saved-searches-header">
-      <span>📌 Recherches sauvegardées</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
+      Recherches sauvegardées
     </div>
     <div class="saved-searches-list">
       <div class="saved-search-item" *ngFor="let search of savedSearches; let i = index">
@@ -73,7 +90,12 @@
         <span class="search-count">{{ search.resultsCount }} résultats</span>
         <div class="search-actions">
           <button class="apply-search" (click)="applySavedSearch(search)">Appliquer</button>
-          <button class="delete-search" (click)="deleteSavedSearch(i)">✕</button>
+          <button class="delete-search" (click)="deleteSavedSearch(i)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
@@ -89,28 +111,50 @@
         <option value="name">Nom</option>
       </select>
       <button class="sort-order-btn" (click)="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; changeSort()">
-        {{ sortOrder === 'asc' ? '↑' : '↓' }}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline *ngIf="sortOrder === 'asc'" points="6 9 12 15 18 9"/>
+          <polyline *ngIf="sortOrder === 'desc'" points="18 15 12 9 6 15"/>
+        </svg>
       </button>
     </div>
     <div class="view-controls">
       <button class="view-btn" [class.active]="viewMode === 'grid'" (click)="viewMode = 'grid'">
-        ▦ Grille
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        Grille
       </button>
       <button class="view-btn" [class.active]="viewMode === 'list'" (click)="viewMode = 'list'">
-        ≡ Liste
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <line x1="8" y1="6" x2="21" y2="6"/>
+          <line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/>
+          <line x1="3" y1="6" x2="3.01" y2="6"/>
+          <line x1="3" y1="12" x2="3.01" y2="12"/>
+          <line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+        Liste
       </button>
     </div>
   </div>
 
   <!-- Loading -->
   <div *ngIf="isLoading" class="loader-container">
-    <div class="spinner"></div>
+    <div class="loader"></div>
     <p>Recherche de talents...</p>
   </div>
 
   <!-- Empty State -->
   <div *ngIf="!isLoading && filteredCandidates.length === 0" class="empty-state">
-    <div class="empty-icon">🔍</div>
+    <div class="empty-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+        <circle cx="10" cy="10" r="7"/>
+        <line x1="21" y1="21" x2="15" y2="15"/>
+      </svg>
+    </div>
     <h3>Aucun talent trouvé</h3>
     <p>Modifiez vos critères de recherche pour voir plus de résultats.</p>
     <button class="clear-filters-btn" (click)="clearFilters()">Réinitialiser les filtres</button>
@@ -135,10 +179,18 @@
         <h3 class="candidate-name">{{ getFullName(candidate) }}</h3>
         <p class="candidate-title">{{ candidate.title || 'Profil non renseigné' }}</p>
         <p class="candidate-location" *ngIf="candidate.city">
-          📍 {{ candidate.city }}{{ candidate.country ? ', ' + candidate.country : '' }}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z"/>
+            <circle cx="12" cy="9" r="3"/>
+          </svg>
+          {{ candidate.city }}{{ candidate.country ? ', ' + candidate.country : '' }}
         </p>
         <p class="candidate-sector" *ngIf="candidate.sector">
-          🏢 {{ candidate.sector }}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M4 4h16v16H4z"/>
+            <path d="M9 4v16M15 4v16M4 9h16M4 15h16"/>
+          </svg>
+          {{ candidate.sector }}
         </p>
       </div>
 
@@ -152,7 +204,7 @@
       </div>
 
       <div class="card-footer">
-        <button class="view-profile-btn">Voir le profil →</button>
+        <button class="view-profile-btn">Voir le profil</button>
       </div>
     </div>
   </div>
@@ -168,9 +220,29 @@
         <div class="row-name">{{ getFullName(candidate) }}</div>
         <div class="row-title">{{ candidate.title || 'Profil non renseigné' }}</div>
         <div class="row-meta">
-          <span *ngIf="candidate.city">📍 {{ candidate.city }}</span>
-          <span *ngIf="candidate.sector">🏢 {{ candidate.sector }}</span>
-          <span *ngIf="candidate.experienceYears">📅 {{ candidate.experienceYears }}</span>
+          <span *ngIf="candidate.city">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z"/>
+              <circle cx="12" cy="9" r="3"/>
+            </svg>
+            {{ candidate.city }}
+          </span>
+          <span *ngIf="candidate.sector">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16v16H4z"/>
+              <path d="M9 4v16M15 4v16M4 9h16M4 15h16"/>
+            </svg>
+            {{ candidate.sector }}
+          </span>
+          <span *ngIf="candidate.experienceYears">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            {{ candidate.experienceYears }}
+          </span>
         </div>
         <div class="row-skills" *ngIf="getTopSkills(candidate, 3).length > 0">
           <span class="skill-tag" *ngFor="let skill of getTopSkills(candidate, 3)">
@@ -179,7 +251,7 @@
         </div>
       </div>
       <div class="row-actions">
-        <button class="view-btn">Voir le profil →</button>
+        <button class="view-btn">Voir le profil</button>
       </div>
     </div>
   </div>
@@ -187,7 +259,10 @@
   <!-- Pagination -->
   <div class="pagination" *ngIf="!isLoading && totalPages > 1">
     <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
-      ← Précédent
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Précédent
     </button>
     <div class="page-numbers">
       <button
@@ -199,7 +274,10 @@
       </button>
     </div>
     <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
-      Suivant →
+      Suivant
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="9 18 15 12 9 6"/>
+      </svg>
     </button>
   </div>
 
@@ -208,7 +286,12 @@
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>Sauvegarder cette recherche</h3>
-        <button class="modal-close" (click)="showSaveSearchModal = false">✕</button>
+        <button class="modal-close" (click)="showSaveSearchModal = false">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
       </div>
       <div class="modal-body">
         <div class="form-group">

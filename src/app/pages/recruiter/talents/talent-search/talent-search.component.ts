@@ -39,7 +39,6 @@ export class TalentSearchComponent implements OnInit {
   filteredCandidates: Candidate[] = [];
   isLoading = true;
 
-  // Filters
   filters = {
     keyword: '',
     sector: '',
@@ -49,21 +48,17 @@ export class TalentSearchComponent implements OnInit {
     minRating: 0,
   };
 
-  // Sort
   sortBy: 'relevance' | 'experience' | 'name' = 'relevance';
   sortOrder: 'asc' | 'desc' = 'desc';
 
-  // Pagination
   currentPage = 1;
   itemsPerPage = 12;
   totalPages = 1;
 
-  // Saved searches
   savedSearches: any[] = [];
   showSaveSearchModal = false;
   searchName = '';
 
-  // View mode
   viewMode: 'grid' | 'list' = 'grid';
 
   constructor(
@@ -92,7 +87,6 @@ export class TalentSearchComponent implements OnInit {
   applyFiltersAndSort() {
     let filtered = [...this.candidates];
 
-    // Apply keyword filter (already done in service, but double-check)
     if (this.filters.keyword) {
       const kw = this.filters.keyword.toLowerCase();
       filtered = filtered.filter(c =>
@@ -103,13 +97,17 @@ export class TalentSearchComponent implements OnInit {
       );
     }
 
-    // Apply sorting
     filtered.sort((a, b) => {
       let comparison = 0;
 
       switch (this.sortBy) {
         case 'experience':
-          const expOrder = { 'Junior (0-2 ans)': 1, 'Confirmé (3-5 ans)': 2, 'Senior (5-10 ans)': 3, 'Expert (10+ ans)': 4 };
+          const expOrder: Record<string, number> = {
+            'Junior (0-2 ans)': 1,
+            'Confirmé (3-5 ans)': 2,
+            'Senior (5-10 ans)': 3,
+            'Expert (10+ ans)': 4,
+          };
           const expA = expOrder[a.experienceYears as keyof typeof expOrder] || 0;
           const expB = expOrder[b.experienceYears as keyof typeof expOrder] || 0;
           comparison = expA - expB;
@@ -117,7 +115,7 @@ export class TalentSearchComponent implements OnInit {
         case 'name':
           comparison = `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
           break;
-        default: // relevance - keep as is
+        default:
           comparison = 0;
       }
 
@@ -134,7 +132,6 @@ export class TalentSearchComponent implements OnInit {
   }
 
   onKeywordSearch() {
-    // Debounce in production
     this.searchCandidates();
   }
 
@@ -182,7 +179,6 @@ export class TalentSearchComponent implements OnInit {
       resultsCount: this.filteredCandidates.length,
     };
 
-    // Save to localStorage for now (would be better to save to backend)
     const saved = localStorage.getItem('recruiter_saved_searches');
     const searches = saved ? JSON.parse(saved) : [];
     searches.unshift(searchToSave);
@@ -223,7 +219,7 @@ export class TalentSearchComponent implements OnInit {
 
   getExperienceLevel(experience: string): string {
     const levelMap: Record<string, string> = {
-      'Junior (0-2 ans)': 'Débutant',
+      'Junior (0-2 ans)': 'Junior',
       'Confirmé (3-5 ans)': 'Confirmé',
       'Senior (5-10 ans)': 'Senior',
       'Expert (10+ ans)': 'Expert',
