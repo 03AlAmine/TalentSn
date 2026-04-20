@@ -1,0 +1,245 @@
+<div class="talent-search-container">
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <div class="search-input-wrapper">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        placeholder="Rechercher par nom, titre, compétence..."
+        [(ngModel)]="filters.keyword"
+        (input)="onKeywordSearch()">
+    </div>
+    <button class="search-btn" (click)="searchCandidates()">Rechercher</button>
+    <button class="save-search-btn" (click)="showSaveSearchModal = true">
+      💾 Sauvegarder cette recherche
+    </button>
+  </div>
+
+  <!-- Filters Panel -->
+  <div class="filters-panel">
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label>Secteur</label>
+        <select [(ngModel)]="filters.sector" (change)="onFilterChange()">
+          <option value="">Tous les secteurs</option>
+          <option *ngFor="let sector of sectors" [value]="sector">{{ sector }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Ville</label>
+        <input
+          type="text"
+          placeholder="ex: Dakar, Paris..."
+          [(ngModel)]="filters.city"
+          (input)="onFilterChange()">
+      </div>
+
+      <div class="filter-group">
+        <label>Expérience</label>
+        <select [(ngModel)]="filters.experienceYears" (change)="onFilterChange()">
+          <option value="">Toutes expériences</option>
+          <option *ngFor="let level of experienceLevels" [value]="level">{{ level }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Niveau d'études</label>
+        <select [(ngModel)]="filters.educationLevel" (change)="onFilterChange()">
+          <option value="">Tous niveaux</option>
+          <option *ngFor="let level of educationLevels" [value]="level">{{ level }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="filters-actions">
+      <button class="clear-filters-btn" (click)="clearFilters()">
+        ✕ Réinitialiser tous les filtres
+      </button>
+      <div class="results-count">
+        {{ filteredCandidates.length }} talent(s) trouvé(s)
+      </div>
+    </div>
+  </div>
+
+  <!-- Saved Searches -->
+  <div class="saved-searches" *ngIf="savedSearches.length > 0">
+    <div class="saved-searches-header">
+      <span>📌 Recherches sauvegardées</span>
+    </div>
+    <div class="saved-searches-list">
+      <div class="saved-search-item" *ngFor="let search of savedSearches; let i = index">
+        <span class="search-name">{{ search.name }}</span>
+        <span class="search-count">{{ search.resultsCount }} résultats</span>
+        <div class="search-actions">
+          <button class="apply-search" (click)="applySavedSearch(search)">Appliquer</button>
+          <button class="delete-search" (click)="deleteSavedSearch(i)">✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sort and View Controls -->
+  <div class="controls-bar" *ngIf="!isLoading && filteredCandidates.length > 0">
+    <div class="sort-controls">
+      <label>Trier par :</label>
+      <select [(ngModel)]="sortBy" (change)="changeSort()">
+        <option value="relevance">Pertinence</option>
+        <option value="experience">Expérience</option>
+        <option value="name">Nom</option>
+      </select>
+      <button class="sort-order-btn" (click)="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; changeSort()">
+        {{ sortOrder === 'asc' ? '↑' : '↓' }}
+      </button>
+    </div>
+    <div class="view-controls">
+      <button class="view-btn" [class.active]="viewMode === 'grid'" (click)="viewMode = 'grid'">
+        ▦ Grille
+      </button>
+      <button class="view-btn" [class.active]="viewMode === 'list'" (click)="viewMode = 'list'">
+        ≡ Liste
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loader-container">
+    <div class="spinner"></div>
+    <p>Recherche de talents...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredCandidates.length === 0" class="empty-state">
+    <div class="empty-icon">🔍</div>
+    <h3>Aucun talent trouvé</h3>
+    <p>Modifiez vos critères de recherche pour voir plus de résultats.</p>
+    <button class="clear-filters-btn" (click)="clearFilters()">Réinitialiser les filtres</button>
+  </div>
+
+  <!-- Grid View -->
+  <div *ngIf="!isLoading && filteredCandidates.length > 0 && viewMode === 'grid'" class="candidates-grid">
+    <div class="candidate-card" *ngFor="let candidate of paginatedCandidates" (click)="viewCandidateProfile(candidate.uid || candidate.id)">
+      <div class="card-header">
+        <div class="candidate-avatar">
+          <img *ngIf="candidate.photoURL" [src]="candidate.photoURL" [alt]="getFullName(candidate)">
+          <span *ngIf="!candidate.photoURL">{{ getInitials(candidate) }}</span>
+        </div>
+        <div class="candidate-badges">
+          <span class="experience-badge" *ngIf="candidate.experienceYears">
+            {{ getExperienceLevel(candidate.experienceYears) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <h3 class="candidate-name">{{ getFullName(candidate) }}</h3>
+        <p class="candidate-title">{{ candidate.title || 'Profil non renseigné' }}</p>
+        <p class="candidate-location" *ngIf="candidate.city">
+          📍 {{ candidate.city }}{{ candidate.country ? ', ' + candidate.country : '' }}
+        </p>
+        <p class="candidate-sector" *ngIf="candidate.sector">
+          🏢 {{ candidate.sector }}
+        </p>
+      </div>
+
+      <div class="card-skills" *ngIf="getTopSkills(candidate).length > 0">
+        <span class="skill-tag" *ngFor="let skill of getTopSkills(candidate)">
+          {{ skill }}
+        </span>
+        <span class="skill-tag more" *ngIf="(candidate.cvData?.technicalSkills?.length || 0) > 4">
+          +{{ (candidate.cvData?.technicalSkills?.length || 0) - 4 }}
+        </span>
+      </div>
+
+      <div class="card-footer">
+        <button class="view-profile-btn">Voir le profil →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- List View -->
+  <div *ngIf="!isLoading && filteredCandidates.length > 0 && viewMode === 'list'" class="candidates-list">
+    <div class="candidate-row" *ngFor="let candidate of paginatedCandidates" (click)="viewCandidateProfile(candidate.uid || candidate.id)">
+      <div class="row-avatar">
+        <img *ngIf="candidate.photoURL" [src]="candidate.photoURL" [alt]="getFullName(candidate)">
+        <span *ngIf="!candidate.photoURL">{{ getInitials(candidate) }}</span>
+      </div>
+      <div class="row-info">
+        <div class="row-name">{{ getFullName(candidate) }}</div>
+        <div class="row-title">{{ candidate.title || 'Profil non renseigné' }}</div>
+        <div class="row-meta">
+          <span *ngIf="candidate.city">📍 {{ candidate.city }}</span>
+          <span *ngIf="candidate.sector">🏢 {{ candidate.sector }}</span>
+          <span *ngIf="candidate.experienceYears">📅 {{ candidate.experienceYears }}</span>
+        </div>
+        <div class="row-skills" *ngIf="getTopSkills(candidate, 3).length > 0">
+          <span class="skill-tag" *ngFor="let skill of getTopSkills(candidate, 3)">
+            {{ skill }}
+          </span>
+        </div>
+      </div>
+      <div class="row-actions">
+        <button class="view-btn">Voir le profil →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="!isLoading && totalPages > 1">
+    <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
+      ← Précédent
+    </button>
+    <div class="page-numbers">
+      <button
+        *ngFor="let page of [].constructor(totalPages); let i = index"
+        class="page-number"
+        [class.active]="currentPage === i + 1"
+        (click)="goToPage(i + 1)">
+        {{ i + 1 }}
+      </button>
+    </div>
+    <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
+      Suivant →
+    </button>
+  </div>
+
+  <!-- Save Search Modal -->
+  <div class="modal" *ngIf="showSaveSearchModal" (click)="showSaveSearchModal = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Sauvegarder cette recherche</h3>
+        <button class="modal-close" (click)="showSaveSearchModal = false">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nom de la recherche</label>
+          <input
+            type="text"
+            [(ngModel)]="searchName"
+            placeholder="ex: Développeurs Angular à Dakar"
+            autofocus>
+        </div>
+        <div class="search-preview">
+          <p><strong>Filtres actuels :</strong></p>
+          <ul>
+            <li *ngIf="filters.keyword">🔍 {{ filters.keyword }}</li>
+            <li *ngIf="filters.sector">🏢 {{ filters.sector }}</li>
+            <li *ngIf="filters.city">📍 {{ filters.city }}</li>
+            <li *ngIf="filters.experienceYears">📅 {{ filters.experienceYears }}</li>
+            <li *ngIf="filters.educationLevel">🎓 {{ filters.educationLevel }}</li>
+            <li *ngIf="!filters.keyword && !filters.sector && !filters.city && !filters.experienceYears && !filters.educationLevel">
+              Tous les talents
+            </li>
+          </ul>
+          <p class="results-preview">{{ filteredCandidates.length }} résultat(s)</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="showSaveSearchModal = false">Annuler</button>
+        <button class="btn-primary" (click)="saveCurrentSearch()" [disabled]="!searchName.trim()">
+          Sauvegarder
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

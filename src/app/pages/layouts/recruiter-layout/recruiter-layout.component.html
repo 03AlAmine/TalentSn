@@ -1,0 +1,208 @@
+<div class="recruiter-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.open]="sidebarOpen">
+    <div class="logo">Talent<span>Sn</span></div>
+
+    <div class="company-block">
+      <div class="avatar">
+        <img *ngIf="photoURL" [src]="photoURL" alt="photo">
+        <span *ngIf="!photoURL">{{ initials }}</span>
+      </div>
+
+      <div class="company-info">
+        <p class="company-name">{{ companyName }}</p>
+        <p class="position">{{ userData?.position || 'Recruteur' }}</p>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-item" routerLink="/recruiter/dashboard" routerLinkActive="active">
+        <span class="nav-icon">▦</span> Tableau de bord
+      </button>
+
+      <button class="nav-item" routerLink="/recruiter/offers" routerLinkActive="active">
+        <span class="nav-icon">◈</span> Mes offres
+      </button>
+
+      <button class="nav-item" routerLink="/recruiter/applications" routerLinkActive="active">
+        <span class="nav-icon">◉</span> Candidatures
+      </button>
+
+      <button class="nav-item" routerLink="/recruiter/talents" routerLinkActive="active">
+        <span class="nav-icon">◎</span> Explorer talents
+      </button>
+
+      <button class="nav-item" routerLink="/recruiter/messages" routerLinkActive="active">
+        <span class="nav-icon">💬</span> Messages
+      </button>
+
+      <button class="nav-item" routerLink="/recruiter/interviews" routerLinkActive="active">
+        <span class="nav-icon">📅</span> Entretiens
+      </button>
+
+      <div class="nav-sep"></div>
+
+      <button class="nav-item" routerLink="/recruiter/company" routerLinkActive="active">
+        <span class="nav-icon">⚙️</span> Paramètres entreprise
+      </button>
+
+      <button class="nav-item" routerLink="/recruiter/profile" routerLinkActive="active">
+        <span class="nav-icon">👤</span> Mon profil
+      </button>
+
+      <div class="nav-sep"></div>
+
+      <button class="nav-item publish-btn" routerLink="/recruiter/offers/create">
+        <span class="nav-icon">＋</span> Publier une offre
+      </button>
+    </nav>
+
+    <button class="logout" (click)="logout()">
+      <span>⏻</span> Déconnexion
+    </button>
+  </aside>
+
+  <div class="overlay" *ngIf="sidebarOpen" (click)="sidebarOpen=false"></div>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+
+      <button class="burger" (click)="sidebarOpen=!sidebarOpen">☰</button>
+
+      <!-- BREADCRUMB -->
+      <div class="breadcrumb">
+
+        <!-- DASHBOARD -->
+        <ng-container *ngIf="router.url.includes('/dashboard')">
+          <span>Tableau de bord</span>
+        </ng-container>
+
+        <!-- OFFERS -->
+        <ng-container *ngIf="router.url.includes('/offers')">
+
+          <span *ngIf="!router.url.includes('/create') && !router.url.includes('/edit')">
+            Mes offres
+          </span>
+
+          <span *ngIf="router.url.includes('/create')">
+            Nouvelle offre
+          </span>
+
+          <span *ngIf="router.url.includes('/edit')">
+            Modifier l'offre
+          </span>
+
+        </ng-container>
+
+        <!-- APPLICATIONS -->
+        <ng-container *ngIf="router.url.includes('/applications')">
+
+          <span *ngIf="!isApplicationDetail()">
+            Candidatures
+          </span>
+
+          <ng-container *ngIf="isApplicationDetail()">
+
+            <span class="breadcrumb-link" (click)="navigateTo('/recruiter/applications')">
+              Candidatures
+            </span>
+
+            <span class="breadcrumb-separator">/</span>
+
+            <span class="breadcrumb-current">
+              Détail candidature
+            </span>
+
+          </ng-container>
+
+        </ng-container>
+
+        <!-- TALENTS -->
+        <ng-container *ngIf="router.url.includes('/talents')">
+
+          <span *ngIf="!isTalentDetail()">
+            Explorer les talents
+          </span>
+
+          <ng-container *ngIf="isTalentDetail()">
+
+            <span class="breadcrumb-link" (click)="navigateTo('/recruiter/talents')">
+              Explorer les talents
+            </span>
+
+            <span class="breadcrumb-separator">/</span>
+
+            <span class="breadcrumb-current">
+              Profil candidat
+            </span>
+
+          </ng-container>
+
+        </ng-container>
+
+        <!-- AUTRES PAGES -->
+        <ng-container *ngIf="router.url.includes('/messages')">
+          <span>Messages</span>
+        </ng-container>
+
+        <ng-container *ngIf="router.url.includes('/interviews')">
+          <span>Entretiens</span>
+        </ng-container>
+
+        <ng-container *ngIf="router.url.includes('/company')">
+          <span>Paramètres entreprise</span>
+        </ng-container>
+
+        <ng-container *ngIf="router.url.includes('/profile')">
+          <span>Mon profil</span>
+        </ng-container>
+
+      </div>
+
+      <!-- CTA -->
+      <button class="topbar-cta" routerLink="/recruiter/offers/create">
+        <span>＋</span> Publier une offre
+      </button>
+
+      <!-- USER MENU -->
+      <div class="user-menu" (click)="toggleUserMenu()">
+
+        <div class="topbar-avatar">
+          <img *ngIf="photoURL" [src]="photoURL" alt="">
+          <span *ngIf="!photoURL">{{ initials }}</span>
+        </div>
+
+        <span class="user-name">{{ fullName }}</span>
+        <span class="dropdown-arrow">▼</span>
+
+        <div class="dropdown-menu" *ngIf="userMenuOpen">
+
+          <a routerLink="/recruiter/profile" class="dropdown-item">
+            <span>👤</span> Mon profil
+          </a>
+
+          <a routerLink="/recruiter/company" class="dropdown-item">
+            <span>⚙️</span> Paramètres entreprise
+          </a>
+
+          <div class="dropdown-divider"></div>
+
+          <button class="dropdown-item logout-item" (click)="logout()">
+            <span>⏻</span> Déconnexion
+          </button>
+
+        </div>
+      </div>
+
+    </header>
+
+    <!-- CONTENT -->
+    <div class="page-content">
+      <router-outlet></router-outlet>
+    </div>
+
+  </main>
+</div>

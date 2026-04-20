@@ -1,0 +1,142 @@
+<div class="dashboard-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loader-container">
+    <div class="spinner"></div>
+    <p>Chargement de votre tableau de bord...</p>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!isLoading" class="dashboard-content">
+    <!-- Welcome Header -->
+    <div class="welcome-header">
+      <div class="welcome-text">
+        <h1>Bonjour, {{ fullName }} 👋</h1>
+        <p class="welcome-subtitle">
+          {{ companyName }} · Tableau de bord recruteur
+        </p>
+      </div>
+      <button class="btn-primary" routerLink="/recruiter/offers/create">
+        <span>+</span> Publier une offre
+      </button>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card accent">
+        <div class="stat-icon">📋</div>
+        <div class="stat-value">{{ stats.totalOffers }}</div>
+        <div class="stat-label">Offres publiées</div>
+        <div class="stat-sub">{{ stats.activeOffers }} actives</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📬</div>
+        <div class="stat-value">{{ stats.totalApplications }}</div>
+        <div class="stat-label">Candidatures</div>
+        <div class="stat-sub">{{ stats.newApplications }} nouvelles</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-value">{{ stats.shortlisted }}</div>
+        <div class="stat-label">Sélectionnés</div>
+        <div class="stat-sub">profils retenus</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-value">{{ stats.interviews }}</div>
+        <div class="stat-label">Entretiens</div>
+        <div class="stat-sub">à venir</div>
+      </div>
+    </div>
+
+    <!-- Two Column Layout -->
+    <div class="two-columns">
+      <!-- Recent Offers -->
+      <div class="panel">
+        <div class="panel-header">
+          <h3>📌 Offres récentes</h3>
+          <a routerLink="/recruiter/offers" class="link-btn">Voir tout →</a>
+        </div>
+        <div *ngIf="offersLoading" class="loader-sm"></div>
+        <div *ngIf="!offersLoading && recentOffers.length === 0" class="empty-sm">
+          <p>Aucune offre publiée.</p>
+          <button routerLink="/recruiter/offers/create" class="inline-link">
+            Créer votre première offre →
+          </button>
+        </div>
+        <div class="offer-list" *ngIf="!offersLoading && recentOffers.length">
+          <div class="offer-row" *ngFor="let offer of recentOffers">
+            <div class="offer-info">
+              <div class="offer-title">{{ offer.title }}</div>
+              <div class="offer-meta">
+                <span class="offer-type" [style.color]="getJobTypeColor(offer.type)">
+                  {{ offer.type }}
+                </span>
+                <span>•</span>
+                <span>{{ offer.location }}</span>
+              </div>
+            </div>
+            <div class="offer-stats">
+              <span class="badge" [class]="offer.status">
+                {{ offer.status === 'active' ? 'Active' : offer.status === 'paused' ? 'Pausée' : offer.status }}
+              </span>
+              <span class="app-count">{{ offer.applicationCount || 0 }} candidature(s)</span>
+              <button class="icon-btn" (click)="viewOffer(offer.id!)" title="Voir détails">👁️</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Applications -->
+      <div class="panel">
+        <div class="panel-header">
+          <h3>📬 Dernières candidatures</h3>
+          <a routerLink="/recruiter/applications" class="link-btn">Voir tout →</a>
+        </div>
+        <div *ngIf="appsLoading" class="loader-sm"></div>
+        <div *ngIf="!appsLoading && recentApplications.length === 0" class="empty-sm">
+          <p>Aucune candidature reçue pour le moment.</p>
+        </div>
+        <div class="application-list" *ngIf="!appsLoading && recentApplications.length">
+          <div class="app-row" *ngFor="let app of recentApplications">
+            <div class="app-avatar">
+              <span>{{ app?.candidateName?.[0] || '?' }}</span>
+            </div>
+            <div class="app-info">
+              <div class="app-name">{{ app.candidateName }}</div>
+              <div class="app-job">{{ app.jobTitle }}</div>
+              <div class="app-date">{{ formatDate(app.appliedAt) }}</div>
+            </div>
+            <div class="app-status">
+              <span class="status-badge"
+                [style.color]="getAppStatusConf(app.status).color"
+                [style.background]="getAppStatusConf(app.status).bg">
+                {{ getAppStatusConf(app.status).label }}
+              </span>
+            </div>
+            <button class="icon-btn" (click)="viewApplication(app.id!)">→</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <button class="action-card" routerLink="/recruiter/talents">
+        <span class="action-icon">🔍</span>
+        <span class="action-text">Explorer les talents</span>
+      </button>
+      <button class="action-card" routerLink="/recruiter/messages">
+        <span class="action-icon">💬</span>
+        <span class="action-text">Messages</span>
+      </button>
+      <button class="action-card" routerLink="/recruiter/interviews">
+        <span class="action-icon">📅</span>
+        <span class="action-text">Entretiens</span>
+      </button>
+      <button class="action-card" routerLink="/recruiter/company">
+        <span class="action-icon">🏢</span>
+        <span class="action-text">Paramètres entreprise</span>
+      </button>
+    </div>
+  </div>
+</div>

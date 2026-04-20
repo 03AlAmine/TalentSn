@@ -1,0 +1,235 @@
+<div class="offer-form-container">
+  <div class="page-header">
+    <button class="back-btn" (click)="cancel()">← Retour</button>
+    <h1>{{ isEditMode ? 'Modifier l\'offre' : 'Nouvelle offre d\'emploi' }}</h1>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loader-container">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Form -->
+  <form *ngIf="!isLoading" (ngSubmit)="saveOffer(true)" class="offer-form">
+    <!-- Success/Error Messages -->
+    <div *ngIf="successMessage" class="alert success">
+      ✓ {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="alert error">
+      ⚠️ {{ errorMessage }}
+    </div>
+
+    <!-- Section 1: Basic Info -->
+    <div class="form-section">
+      <div class="section-header">
+        <span class="step-number">1</span>
+        <h2>Informations essentielles</h2>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-field full-width">
+          <label>Titre du poste *</label>
+          <input type="text" [(ngModel)]="offer.title" name="title" placeholder="ex: Développeur Full Stack Senior">
+        </div>
+
+        <div class="form-field">
+          <label>Secteur *</label>
+          <select [(ngModel)]="offer.sector" name="sector">
+            <option value="">Sélectionner un secteur</option>
+            <option *ngFor="let s of sectors" [value]="s">{{ s }}</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>Type de contrat</label>
+          <div class="type-buttons">
+            <button *ngFor="let type of jobTypes" type="button"
+              class="type-btn" [class.active]="offer.type === type"
+              [style.border-color]="offer.type === type ? getJobTypeColor(type) : ''"
+              (click)="offer.type = type">
+              {{ type }}
+            </button>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Localisation *</label>
+          <input type="text" [(ngModel)]="offer.location" name="location" placeholder="ex: Dakar, Sénégal">
+        </div>
+
+        <div class="form-field">
+          <label>Télétravail</label>
+          <div class="radio-group">
+            <label *ngFor="let opt of remoteOptions" class="radio-option" [class.active]="offer.remote === opt.value">
+              <input type="radio" [value]="opt.value" [(ngModel)]="offer.remote" name="remote" hidden>
+              {{ opt.label }}
+            </label>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Niveau d'expérience</label>
+          <select [(ngModel)]="offer.experienceLevel" name="experienceLevel">
+            <option *ngFor="let level of experienceLevels" [value]="level">{{ level }}</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>Niveau d'études</label>
+          <select [(ngModel)]="offer.educationLevel" name="educationLevel">
+            <option *ngFor="let level of educationLevels" [value]="level">{{ level }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Salary -->
+      <div class="salary-row">
+        <div class="form-field">
+          <label>Salaire minimum</label>
+          <input type="number" [(ngModel)]="offer.salaryMin" name="salaryMin" placeholder="400000">
+        </div>
+        <span class="salary-dash">—</span>
+        <div class="form-field">
+          <label>Salaire maximum</label>
+          <input type="number" [(ngModel)]="offer.salaryMax" name="salaryMax" placeholder="700000">
+        </div>
+        <div class="form-field narrow">
+          <label>Devise</label>
+          <select [(ngModel)]="offer.salaryCurrency" name="salaryCurrency">
+            <option value="XOF">XOF</option>
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="options-row">
+        <label class="checkbox-option" [class.active]="offer.urgent">
+          <input type="checkbox" [(ngModel)]="offer.urgent" name="urgent">
+          🔥 Offre urgente
+        </label>
+      </div>
+    </div>
+
+    <!-- Section 2: Description -->
+    <div class="form-section">
+      <div class="section-header">
+        <span class="step-number">2</span>
+        <h2>Description du poste *</h2>
+      </div>
+      <textarea class="description-input" [(ngModel)]="offer.description" name="description"
+        rows="8" placeholder="Décrivez le poste, le contexte de l'entreprise, les missions principales..."></textarea>
+    </div>
+
+    <!-- Section 3: Lists -->
+    <div class="form-section">
+      <div class="section-header">
+        <span class="step-number">3</span>
+        <h2>Détails du poste</h2>
+      </div>
+
+      <!-- Responsibilities -->
+      <div class="tag-field">
+        <label>📋 Responsabilités</label>
+        <div class="tag-input">
+          <input type="text" [(ngModel)]="newResponsibility" name="newResponsibility"
+            placeholder="Ajouter une responsabilité..."
+            (keydown)="onTagKeydown($event, 'responsibilities', newResponsibility)">
+          <button type="button" (click)="addTag('responsibilities', newResponsibility)">Ajouter</button>
+        </div>
+        <div class="tag-list" *ngIf="offer.responsibilities?.length">
+          <span *ngFor="let item of offer.responsibilities; let i=index" class="tag-item">
+            {{ item }}
+            <button type="button" (click)="removeTag('responsibilities', i)">×</button>
+          </span>
+        </div>
+      </div>
+
+      <!-- Requirements -->
+      <div class="tag-field">
+        <label>✅ Prérequis indispensables</label>
+        <div class="tag-input">
+          <input type="text" [(ngModel)]="newRequirement" name="newRequirement"
+            placeholder="Ajouter un prérequis..."
+            (keydown)="onTagKeydown($event, 'requirements', newRequirement)">
+          <button type="button" (click)="addTag('requirements', newRequirement)">Ajouter</button>
+        </div>
+        <div class="tag-list" *ngIf="offer.requirements?.length">
+          <span *ngFor="let item of offer.requirements; let i=index" class="tag-item required">
+            {{ item }}
+            <button type="button" (click)="removeTag('requirements', i)">×</button>
+          </span>
+        </div>
+      </div>
+
+      <!-- Nice to Have -->
+      <div class="tag-field">
+        <label>⭐ Atouts appréciés</label>
+        <div class="tag-input">
+          <input type="text" [(ngModel)]="newNiceToHave" name="newNiceToHave"
+            placeholder="Ajouter un atout..."
+            (keydown)="onTagKeydown($event, 'niceToHave', newNiceToHave)">
+          <button type="button" (click)="addTag('niceToHave', newNiceToHave)">Ajouter</button>
+        </div>
+        <div class="tag-list" *ngIf="offer.niceToHave?.length">
+          <span *ngFor="let item of offer.niceToHave; let i=index" class="tag-item nice">
+            {{ item }}
+            <button type="button" (click)="removeTag('niceToHave', i)">×</button>
+          </span>
+        </div>
+      </div>
+
+      <!-- Benefits -->
+      <div class="tag-field">
+        <label>🎁 Avantages</label>
+        <div class="tag-input">
+          <input type="text" [(ngModel)]="newBenefit" name="newBenefit"
+            placeholder="Ajouter un avantage..."
+            (keydown)="onTagKeydown($event, 'benefits', newBenefit)">
+          <button type="button" (click)="addTag('benefits', newBenefit)">Ajouter</button>
+        </div>
+        <div class="tag-list" *ngIf="offer.benefits?.length">
+          <span *ngFor="let item of offer.benefits; let i=index" class="tag-item benefit">
+            {{ item }}
+            <button type="button" (click)="removeTag('benefits', i)">×</button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Skills -->
+    <div class="form-section">
+      <div class="section-header">
+        <span class="step-number">4</span>
+        <h2>Compétences recherchées</h2>
+      </div>
+      <div class="tag-field">
+        <div class="tag-input">
+          <input type="text" [(ngModel)]="newSkill" name="newSkill"
+            placeholder="ex: Angular, Python, React, Node.js..."
+            (keydown)="onTagKeydown($event, 'skills', newSkill)">
+          <button type="button" (click)="addTag('skills', newSkill)">Ajouter</button>
+        </div>
+        <div class="skill-list" *ngIf="offer.skills?.length">
+          <span *ngFor="let skill of offer.skills; let i=index" class="skill-tag">
+            {{ skill }}
+            <button type="button" (click)="removeTag('skills', i)">×</button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="cancel()">Annuler</button>
+      <button type="button" class="btn-outline" (click)="saveOffer(false)" [disabled]="isSaving">
+        📝 Enregistrer comme brouillon
+      </button>
+      <button type="submit" class="btn-primary" [disabled]="isSaving">
+        <span *ngIf="!isSaving">{{ isEditMode ? '✓ Mettre à jour' : '🚀 Publier l\'offre' }}</span>
+        <span *ngIf="isSaving" class="btn-spinner"></span>
+      </button>
+    </div>
+  </form>
+</div>

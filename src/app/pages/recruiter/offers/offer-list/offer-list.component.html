@@ -1,0 +1,164 @@
+<div class="offer-list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Mes offres d'emploi</h1>
+    <button class="btn-primary" routerLink="/recruiter/offers/create">
+      + Nouvelle offre
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="filter-tabs">
+      <button
+        *ngFor="let filter of filters"
+        [class.active]="filterStatus === filter"
+        (click)="onFilterChange(filter)"
+      >
+        {{
+          filter === "all"
+            ? "Toutes"
+            : filter === "active"
+              ? "Actives"
+              : filter === "paused"
+                ? "Pausées"
+                : filter === "draft"
+                  ? "Brouillons"
+                  : "Fermées"
+        }}
+        <span class="count">{{ getStatusCount(filter) }}</span>
+      </button>
+    </div>
+
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        placeholder="Rechercher par titre, localisation, secteur..."
+        [(ngModel)]="searchTerm"
+        (input)="onSearchChange()"
+      />
+      <button *ngIf="searchTerm" class="clear-btn" (click)="clearFilters()">
+        ✕
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loader-container">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredOffers.length === 0" class="empty-state">
+    <div class="empty-icon">📋</div>
+    <h3>Aucune offre trouvée</h3>
+    <p *ngIf="filterStatus !== 'all' || searchTerm">
+      Modifiez vos filtres pour voir plus de résultats.
+    </p>
+    <p *ngIf="filterStatus === 'all' && !searchTerm">
+      Commencez par publier votre première offre d'emploi.
+    </p>
+    <button class="btn-primary" routerLink="/recruiter/offers/create">
+      + Créer une offre
+    </button>
+  </div>
+
+  <!-- Offers Grid -->
+  <div *ngIf="!isLoading && filteredOffers.length > 0" class="offers-grid">
+    <div class="offer-card" *ngFor="let offer of filteredOffers">
+      <div class="offer-header">
+        <div
+          class="offer-type"
+          [style.border-color]="getJobTypeColor(offer.type)"
+          [style.color]="getJobTypeColor(offer.type)"
+        >
+          {{ offer.type }}
+        </div>
+        <div class="offer-badge" [class]="offer.status">
+          {{
+            offer.status === "active"
+              ? "Active"
+              : offer.status === "paused"
+                ? "Pausée"
+                : offer.status === "draft"
+                  ? "Brouillon"
+                  : "Fermée"
+          }}
+        </div>
+        <div class="offer-urgent" *ngIf="offer.urgent">🔥 Urgent</div>
+      </div>
+
+      <h3 class="offer-title">{{ offer.title }}</h3>
+
+      <div class="offer-meta">
+        <span>📍 {{ offer.location || "Non spécifié" }}</span>
+        <span>•</span>
+        <span>{{ offer.experienceLevel || "Non spécifié" }}</span>
+      </div>
+
+      <div class="offer-salary" *ngIf="offer.salaryMin || offer.salaryMax">
+        💰
+        {{
+          formatSalary(offer.salaryMin, offer.salaryMax, offer.salaryCurrency)
+        }}
+      </div>
+
+      <div class="offer-skills" *ngIf="offer.skills.length">
+        <span *ngFor="let skill of offer.skills.slice(0, 4)" class="skill-chip">
+          {{ skill }}
+        </span>
+        <span *ngIf="offer.skills.length > 4" class="skill-chip more">
+          +{{ offer.skills.length - 4 }}
+        </span>
+      </div>
+
+      <div class="offer-footer">
+        <div class="offer-stats">
+          <span title="Candidatures">📬 {{ offer.applicationCount || 0 }}</span>
+          <span title="Vues">👁️ {{ offer.viewCount || 0 }}</span>
+          <span title="Date de création"
+            >📅 {{ formatDate(offer.createdAt) }}</span
+          >
+        </div>
+        <div class="offer-actions">
+          <button
+            class="action-btn"
+            (click)="viewApplications(offer.id!)"
+            title="Candidatures"
+          >
+            📬
+          </button>
+          <button
+            class="action-btn edit"
+            (click)="editOffer(offer.id!)"
+            title="Modifier"
+          >
+            ✏️
+          </button>
+          <button
+            class="action-btn duplicate"
+            (click)="duplicateOffer(offer)"
+            title="Dupliquer"
+          >
+            📋
+          </button>
+          <button
+            class="action-btn toggle"
+            (click)="toggleOfferStatus(offer)"
+            [title]="offer.status === 'active' ? 'Mettre en pause' : 'Activer'"
+          >
+            {{ offer.status === "active" ? "⏸️" : "▶️" }}
+          </button>
+          <button
+            class="action-btn delete"
+            (click)="deleteOffer(offer.id!)"
+            title="Supprimer"
+          >
+            🗑️
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

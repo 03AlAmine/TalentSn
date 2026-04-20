@@ -1,0 +1,240 @@
+<div class="profile-container">
+  <!-- Header -->
+  <div class="profile-header">
+    <h1>Mon profil</h1>
+    <p>Gérez vos informations personnelles</p>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="alert success">✓ {{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert error">⚠️ {{ errorMessage }}</div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loader-container">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!isLoading" class="profile-content">
+    <div class="profile-grid">
+      <!-- Left Column - Photo & Info -->
+      <div class="profile-sidebar">
+        <div class="photo-section">
+          <div class="photo-preview">
+            <img
+              *ngIf="photoPreview"
+              [src]="photoPreview"
+              [alt]="getFullName()"
+            />
+            <div class="photo-placeholder" *ngIf="!photoPreview">
+              <span>{{ getInitials() }}</span>
+            </div>
+            <button class="change-photo-btn" (click)="fileInput.click()">
+              📷
+            </button>
+            <input
+              #fileInput
+              type="file"
+              accept="image/*"
+              (change)="onPhotoSelected($event)"
+              hidden
+            />
+          </div>
+          <button
+            *ngIf="photoPreview"
+            class="remove-photo-btn"
+            (click)="removePhoto()"
+          >
+            Supprimer la photo
+          </button>
+        </div>
+
+        <div class="info-card">
+          <h3>Statistiques</h3>
+          <div class="stat-item">
+            <span class="stat-label">Membre depuis</span>
+            <span class="stat-value">
+              {{
+                userData?.createdAt
+                  ? (userData?.createdAt.toDate() | date: "MMMM yyyy")
+                  : "Nouveau"
+              }}
+            </span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Rôle</span>
+            <span class="stat-value">Recruteur</span>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h3>Sécurité</h3>
+          <button class="security-btn" (click)="showPasswordModal = true">
+            🔒 Changer le mot de passe
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Column - Form -->
+      <div class="profile-form">
+        <div class="form-section">
+          <h3>Informations personnelles</h3>
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Prénom *</label>
+              <input
+                type="text"
+                [(ngModel)]="profileData.firstName"
+                placeholder="Votre prénom"
+              />
+            </div>
+
+            <div class="form-field">
+              <label>Nom *</label>
+              <input
+                type="text"
+                [(ngModel)]="profileData.lastName"
+                placeholder="Votre nom"
+              />
+            </div>
+
+            <div class="form-field">
+              <label>Email</label>
+              <input type="email" [(ngModel)]="profileData.email" disabled />
+              <span class="field-hint">L'email ne peut pas être modifié</span>
+            </div>
+
+            <div class="form-field">
+              <label>Téléphone</label>
+              <input
+                type="tel"
+                [(ngModel)]="profileData.phone"
+                placeholder="+221 77 123 45 67"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Informations professionnelles</h3>
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Poste</label>
+              <input
+                type="text"
+                [(ngModel)]="profileData.position"
+                placeholder="ex: Responsable RH"
+              />
+            </div>
+
+            <div class="form-field">
+              <label>Département</label>
+              <input
+                type="text"
+                [(ngModel)]="profileData.department"
+                placeholder="ex: Ressources Humaines"
+              />
+            </div>
+
+            <div class="form-field full-width">
+              <label>Bio</label>
+              <textarea
+                [(ngModel)]="profileData.bio"
+                rows="4"
+                placeholder="Parlez de vous, votre expérience..."
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            class="btn-secondary"
+            (click)="router.navigate(['/recruiter/dashboard'])"
+          >
+            Annuler
+          </button>
+          <button
+            class="btn-primary"
+            (click)="saveProfile()"
+            [disabled]="isSaving"
+          >
+            <span *ngIf="!isSaving">💾 Enregistrer les modifications</span>
+            <span *ngIf="isSaving" class="btn-spinner"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Password Change Modal -->
+  <div
+    class="modal"
+    *ngIf="showPasswordModal"
+    (click)="showPasswordModal = false"
+  >
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Changer le mot de passe</h3>
+        <button class="modal-close" (click)="showPasswordModal = false">
+          ✕
+        </button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="passwordError" class="password-error">
+          ⚠️ {{ passwordError }}
+        </div>
+
+        <div class="form-group">
+          <label>Mot de passe actuel *</label>
+          <input
+            type="password"
+            [(ngModel)]="passwordData.currentPassword"
+            placeholder="Entrez votre mot de passe actuel"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Nouveau mot de passe *</label>
+          <input
+            type="password"
+            [(ngModel)]="passwordData.newPassword"
+            placeholder="Minimum 6 caractères"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Confirmer le nouveau mot de passe *</label>
+          <input
+            type="password"
+            [(ngModel)]="passwordData.confirmPassword"
+            placeholder="Répétez le nouveau mot de passe"
+          />
+        </div>
+
+        <div class="password-requirements">
+          <p>Le mot de passe doit contenir :</p>
+          <ul>
+            <li>Au moins 6 caractères</li>
+            <li>Au moins une lettre majuscule</li>
+            <li>Au moins un chiffre</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="showPasswordModal = false">
+          Annuler
+        </button>
+        <button
+          class="btn-primary"
+          (click)="changePassword()"
+          [disabled]="isChangingPassword"
+        >
+          {{
+            isChangingPassword ? "Modification..." : "Changer le mot de passe"
+          }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

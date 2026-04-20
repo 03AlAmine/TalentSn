@@ -1,0 +1,203 @@
+<div class="company-settings-container">
+  <!-- Header -->
+  <div class="settings-header">
+    <h1>Paramètres de l'entreprise</h1>
+    <p>Gérez les informations de votre entreprise</p>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="alert success">
+    ✓ {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert error">
+    ⚠️ {{ errorMessage }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loader-container">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!isLoading" class="settings-content">
+    <!-- Tabs -->
+    <div class="settings-tabs">
+      <button class="tab-btn" [class.active]="activeTab === 'general'" (click)="activeTab = 'general'">
+        🏢 Général
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'contact'" (click)="activeTab = 'contact'">
+        📞 Contact
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'social'" (click)="activeTab = 'social'">
+        🌐 Réseaux sociaux
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'branding'" (click)="activeTab = 'branding'">
+        🎨 Identité visuelle
+      </button>
+    </div>
+
+    <!-- General Tab -->
+    <div class="settings-panel" *ngIf="activeTab === 'general'">
+      <div class="form-section">
+        <h3>Informations générales</h3>
+        <div class="form-grid">
+          <div class="form-field full-width">
+            <label>Nom de l'entreprise *</label>
+            <input type="text" [(ngModel)]="companyData.companyName" placeholder="ex: TalentSn">
+          </div>
+
+          <div class="form-field">
+            <label>Secteur d'activité</label>
+            <select [(ngModel)]="companyData.companySector">
+              <option value="">Sélectionner un secteur</option>
+              <option *ngFor="let sector of sectors" [value]="sector">{{ sector }}</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label>Taille de l'entreprise</label>
+            <select [(ngModel)]="companyData.companySize">
+              <option value="">Sélectionner une taille</option>
+              <option *ngFor="let size of companySizes" [value]="size">{{ size }}</option>
+            </select>
+          </div>
+
+          <div class="form-field full-width">
+            <label>Description de l'entreprise</label>
+            <textarea [(ngModel)]="companyData.companyDescription" rows="5"
+              placeholder="Décrivez votre entreprise, sa mission, ses valeurs..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Tab -->
+    <div class="settings-panel" *ngIf="activeTab === 'contact'">
+      <div class="form-section">
+        <h3>Coordonnées</h3>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Email</label>
+            <input type="email" [(ngModel)]="companyData.companyEmail" placeholder="contact@entreprise.com">
+          </div>
+
+          <div class="form-field">
+            <label>Téléphone</label>
+            <input type="tel" [(ngModel)]="companyData.companyPhone" placeholder="+221 77 123 45 67">
+          </div>
+
+          <div class="form-field">
+            <label>Site web</label>
+            <input type="url" [(ngModel)]="companyData.companyWebsite" placeholder="https://www.entreprise.com">
+          </div>
+
+          <div class="form-field">
+            <label>Adresse</label>
+            <input type="text" [(ngModel)]="companyData.companyAddress" placeholder="Rue, numéro...">
+          </div>
+
+          <div class="form-field">
+            <label>Ville</label>
+            <input type="text" [(ngModel)]="companyData.companyCity" placeholder="ex: Dakar">
+          </div>
+
+          <div class="form-field">
+            <label>Pays</label>
+            <select [(ngModel)]="companyData.companyCountry">
+              <option *ngFor="let country of countries" [value]="country">{{ country }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Social Tab -->
+    <div class="settings-panel" *ngIf="activeTab === 'social'">
+      <div class="form-section">
+        <h3>Réseaux sociaux</h3>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>LinkedIn</label>
+            <div class="input-with-icon">
+              <span class="input-icon">in</span>
+              <input type="url" [(ngModel)]="companyData.companySocialLinkedin"
+                placeholder="https://linkedin.com/company/entreprise">
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label>Twitter / X</label>
+            <div class="input-with-icon">
+              <span class="input-icon">𝕏</span>
+              <input type="url" [(ngModel)]="companyData.companySocialTwitter"
+                placeholder="https://twitter.com/entreprise">
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label>Facebook</label>
+            <div class="input-with-icon">
+              <span class="input-icon">f</span>
+              <input type="url" [(ngModel)]="companyData.companySocialFacebook"
+                placeholder="https://facebook.com/entreprise">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Branding Tab -->
+    <div class="settings-panel" *ngIf="activeTab === 'branding'">
+      <div class="form-section">
+        <h3>Logo de l'entreprise</h3>
+        <div class="logo-upload">
+          <div class="logo-preview" *ngIf="logoPreview">
+            <img [src]="logoPreview" alt="Company logo">
+            <button class="remove-logo" (click)="removeLogo()">✕</button>
+          </div>
+          <div class="logo-placeholder" *ngIf="!logoPreview">
+            <span class="placeholder-icon">🏢</span>
+            <p>Aucun logo</p>
+          </div>
+          <div class="logo-actions">
+            <label class="upload-btn">
+              📁 Choisir un fichier
+              <input type="file" accept="image/*" (change)="onLogoSelected($event)" hidden>
+            </label>
+            <p class="upload-hint">PNG, JPG ou GIF. Max 2MB.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Aperçu de la carte entreprise</h3>
+        <div class="company-preview">
+          <div class="preview-card">
+            <div class="preview-logo" *ngIf="logoPreview">
+              <img [src]="logoPreview" alt="Logo">
+            </div>
+            <div class="preview-logo placeholder" *ngIf="!logoPreview">
+              <span>🏢</span>
+            </div>
+            <div class="preview-info">
+              <h4>{{ companyData.companyName || 'Nom de l\'entreprise' }}</h4>
+              <p>{{ companyData.companySector || 'Secteur d\'activité' }}</p>
+              <p class="preview-location">{{ companyData.companyCity || 'Ville' }}, {{ companyData.companyCountry || 'Pays' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button class="btn-secondary" (click)="router.navigate(['/recruiter/dashboard'])">
+        Annuler
+      </button>
+      <button class="btn-primary" (click)="saveSettings()" [disabled]="isSaving">
+        <span *ngIf="!isSaving">💾 Enregistrer les modifications</span>
+        <span *ngIf="isSaving" class="btn-spinner"></span>
+      </button>
+    </div>
+  </div>
+</div>

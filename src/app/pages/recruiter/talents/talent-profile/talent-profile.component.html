@@ -1,0 +1,236 @@
+<div class="talent-profile-container">
+  <!-- Header -->
+  <div class="page-header">
+    <button class="back-btn" (click)="goBack()">
+      ← Retour à la recherche
+    </button>
+    <div class="header-actions">
+      <button class="contact-btn" (click)="showContactModal = true">
+        💬 Contacter
+      </button>
+      <button class="cv-btn" (click)="viewCV()">
+        📄 Voir le CV complet
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loader-container">
+    <div class="spinner"></div>
+    <p>Chargement du profil...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="errorMessage" class="alert error">
+    ⚠️ {{ errorMessage }}
+  </div>
+
+  <!-- Profile Content -->
+  <div *ngIf="!isLoading && candidate" class="profile-content">
+    <!-- Profile Header -->
+    <div class="profile-header">
+      <div class="profile-avatar">
+        <img *ngIf="candidate.photoURL" [src]="candidate.photoURL" [alt]="getFullName()">
+        <span *ngIf="!candidate.photoURL">{{ getInitials() }}</span>
+      </div>
+      <div class="profile-info">
+        <h1>{{ getFullName() }}</h1>
+        <p class="profile-title">{{ candidate.title || 'Profil non renseigné' }}</p>
+        <div class="profile-meta">
+          <span *ngIf="candidate.city">📍 {{ candidate.city }}{{ candidate.country ? ', ' + candidate.country : '' }}</span>
+          <span *ngIf="candidate.sector">🏢 {{ candidate.sector }}</span>
+          <span *ngIf="candidate.experienceYears">📅 {{ getExperienceLevel() }}</span>
+          <span *ngIf="candidate.educationLevel">🎓 {{ candidate.educationLevel }}</span>
+        </div>
+        <div class="profile-stats">
+          <div class="stat">
+            <span class="stat-value">{{ candidate.cvData?.experiences?.length || 0 }}</span>
+            <span class="stat-label">Années d'expérience</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">{{ candidate.cvData?.technicalSkills?.length || 0 }}</span>
+            <span class="stat-label">Compétences</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">{{ candidate.cvData?.projects?.length || 0 }}</span>
+            <span class="stat-label">Projets</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn" [class.active]="activeTab === 'profile'" (click)="activeTab = 'profile'">
+        📝 Profil
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'experience'" (click)="activeTab = 'experience'">
+        💼 Expériences
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'education'" (click)="activeTab = 'education'">
+        🎓 Formation
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'skills'" (click)="activeTab = 'skills'">
+        ⚙️ Compétences
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'projects'" (click)="activeTab = 'projects'">
+        🚀 Projets
+      </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+      <!-- Profile Tab -->
+      <div *ngIf="activeTab === 'profile'" class="tab-pane">
+        <div class="info-card">
+          <h3>À propos</h3>
+          <p class="about-text">{{ candidate.cvData?.summary || candidate.about || 'Aucune information fournie.' }}</p>
+        </div>
+
+        <div class="info-card" *ngIf="candidate.cvData?.languages?.length">
+          <h3>Langues</h3>
+          <div class="languages-list">
+            <div class="language-item" *ngFor="let lang of candidate.cvData?.languages">
+              <span class="language-name">{{ lang.language }}</span>
+              <div class="language-level">
+                <div class="level-bar" [style.width]="getLevelWidth(lang.level)"></div>
+              </div>
+              <span class="level-text">{{ lang.level }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-card" *ngIf="candidate.cvData?.certifications?.length">
+          <h3>Certifications</h3>
+          <div class="certifications-list">
+            <div class="certification-item" *ngFor="let cert of candidate.cvData?.certifications">
+              <div class="cert-name">{{ cert.name }}</div>
+              <div class="cert-details">{{ cert.issuer }} • {{ formatDate(cert.date) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Experience Tab -->
+      <div *ngIf="activeTab === 'experience'" class="tab-pane">
+        <div *ngIf="candidate.cvData?.experiences?.length === 0" class="empty-tab">
+          <p>Aucune expérience professionnelle renseignée.</p>
+        </div>
+        <div class="timeline" *ngIf="candidate.cvData?.experiences?.length">
+          <div class="timeline-item" *ngFor="let exp of candidate.cvData?.experiences">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+              <div class="exp-header">
+                <h4>{{ exp.position }}</h4>
+                <span class="exp-date">{{ exp.startDate }} - {{ exp.endDate || 'Présent' }}</span>
+              </div>
+              <p class="exp-company">{{ exp.company }}</p>
+              <p class="exp-description" *ngIf="exp.description">{{ exp.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Education Tab -->
+      <div *ngIf="activeTab === 'education'" class="tab-pane">
+        <div *ngIf="candidate.cvData?.education?.length === 0" class="empty-tab">
+          <p>Aucune formation renseignée.</p>
+        </div>
+        <div class="timeline" *ngIf="candidate.cvData?.education?.length">
+          <div class="timeline-item" *ngFor="let edu of candidate.cvData?.education">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+              <div class="edu-header">
+                <h4>{{ edu.degree }} - {{ edu.field }}</h4>
+                <span class="edu-date">{{ edu.startDate }} - {{ edu.endDate || 'Présent' }}</span>
+              </div>
+              <p class="edu-institution">{{ edu.institution }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skills Tab -->
+      <div *ngIf="activeTab === 'skills'" class="tab-pane">
+        <div class="skills-section" *ngIf="candidate.cvData?.technicalSkills?.length">
+          <h3>Compétences techniques</h3>
+          <div class="skills-cloud">
+            <span class="skill-tag large" *ngFor="let skill of candidate.cvData?.technicalSkills">
+              {{ skill }}
+            </span>
+          </div>
+        </div>
+
+        <div class="skills-section" *ngIf="candidate.cvData?.softSkills?.length">
+          <h3>Soft skills</h3>
+          <div class="skills-cloud">
+            <span class="skill-tag soft" *ngFor="let skill of candidate.cvData?.softSkills">
+              {{ skill }}
+            </span>
+          </div>
+        </div>
+
+        <div class="skills-section" *ngIf="!candidate.cvData?.technicalSkills?.length && !candidate.cvData?.softSkills?.length">
+          <p>Aucune compétence renseignée.</p>
+        </div>
+      </div>
+
+      <!-- Projects Tab -->
+      <div *ngIf="activeTab === 'projects'" class="tab-pane">
+        <div *ngIf="candidate.cvData?.projects?.length === 0" class="empty-tab">
+          <p>Aucun projet renseigné.</p>
+        </div>
+        <div class="projects-grid" *ngIf="candidate.cvData?.projects?.length">
+          <div class="project-card" *ngFor="let project of candidate.cvData?.projects">
+            <h4>{{ project.name }}</h4>
+            <p class="project-description">{{ project.description }}</p>
+            <div class="project-techs">
+              <span class="tech-tag" *ngFor="let tech of project.technologies">
+                {{ tech }}
+              </span>
+            </div>
+            <a *ngIf="project.link" [href]="project.link" target="_blank" class="project-link">
+              Voir le projet →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Modal -->
+  <div class="modal" *ngIf="showContactModal" (click)="showContactModal = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Contacter {{ candidate?.firstName }}</h3>
+        <button class="modal-close" (click)="showContactModal = false">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Offre concernée (optionnel)</label>
+          <select [(ngModel)]="selectedOfferId">
+            <option value="">Sélectionner une offre</option>
+            <option *ngFor="let offer of jobOffers" [value]="offer.id">
+              {{ offer.title }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Message *</label>
+          <textarea
+            [(ngModel)]="contactMessage"
+            rows="6"
+            placeholder="Bonjour {{ candidate?.firstName }},&#10;&#10;Nous sommes intéressés par votre profil pour le poste de...&#10;&#10;Cordialement,"
+            required>
+          </textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="showContactModal = false">Annuler</button>
+        <button class="btn-primary" (click)="sendContactMessage()" [disabled]="!contactMessage.trim()">
+          Envoyer le message
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

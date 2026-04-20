@@ -1,0 +1,366 @@
+<div class="application-detail-container">
+  <!-- Header -->
+  <div class="page-header">
+    <button class="back-btn" (click)="goBack()">
+      ← Retour aux candidatures
+    </button>
+    <h1>Dossier candidat</h1>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loader-container">
+    <div class="spinner"></div>
+    <p>Chargement du dossier...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="errorMessage" class="alert error">
+    ⚠️ {{ errorMessage }}
+  </div>
+
+  <!-- Success -->
+  <div *ngIf="successMessage" class="alert success">
+    ✓ {{ successMessage }}
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!isLoading && application" class="detail-content">
+    <!-- Two Column Layout -->
+    <div class="two-columns">
+      <!-- Left Column: Candidate Info -->
+      <div class="left-column">
+        <!-- Candidate Header -->
+        <div class="candidate-header">
+          <div class="candidate-avatar">
+            <img *ngIf="application.candidatePhoto" [src]="application.candidatePhoto" alt="">
+            <span *ngIf="!application.candidatePhoto">{{ application?.candidateName?.[0] || '?' }}</span>
+          </div>
+          <div class="candidate-info">
+            <h2>{{ application.candidateName }}</h2>
+            <p class="candidate-title">{{ application.candidateTitle || 'Profil non renseigné' }}</p>
+            <div class="candidate-meta">
+              <span *ngIf="application.candidateCity">📍 {{ application.candidateCity }}</span>
+              <span *ngIf="application.candidateSector">🏢 {{ application.candidateSector }}</span>
+              <span *ngIf="application.candidateExperience">📅 {{ application.candidateExperience }}</span>
+              <span *ngIf="application.candidateEducation">🎓 {{ application.candidateEducation }}</span>
+            </div>
+          </div>
+          <button class="cv-btn" (click)="viewCV()">
+            📄 Voir le CV complet
+          </button>
+        </div>
+
+        <!-- Contact Info Card (Email only) -->
+        <div class="action-card" *ngIf="application.candidateEmail">
+          <div class="card-header">
+            <span class="card-icon">📞</span>
+            <h3>Contact</h3>
+          </div>
+          <div class="contact-info">
+            <p class="contact-item">
+              <span class="contact-icon">✉️</span>
+              <a [href]="'mailto:' + application.candidateEmail">{{ application.candidateEmail }}</a>
+            </p>
+          </div>
+        </div>
+
+        <!-- Job Info -->
+        <div class="info-card" *ngIf="jobOffer">
+          <div class="card-header">
+            <span class="card-icon">📋</span>
+            <h3>Offre postulée</h3>
+          </div>
+          <div class="job-details">
+            <div class="job-title">{{ jobOffer.title }}</div>
+            <div class="job-meta">
+              <span>{{ jobOffer.type }}</span>
+              <span>•</span>
+              <span>{{ jobOffer.location }}</span>
+            </div>
+            <div class="job-description" *ngIf="jobOffer.description">
+              {{ jobOffer.description | slice:0:200 }}...
+            </div>
+          </div>
+        </div>
+
+        <!-- Cover Letter -->
+        <div class="info-card" *ngIf="application.coverLetter">
+          <div class="card-header">
+            <span class="card-icon">💌</span>
+            <h3>Lettre de motivation</h3>
+          </div>
+          <div class="cover-letter">
+            {{ application.coverLetter }}
+          </div>
+        </div>
+
+        <!-- CV Data -->
+        <div class="info-card" *ngIf="application.cvData">
+          <div class="card-header">
+            <span class="card-icon">📄</span>
+            <h3>Résumé du profil</h3>
+          </div>
+
+          <div class="cv-summary" *ngIf="application.cvData.summary">
+            {{ application.cvData.summary }}
+          </div>
+
+          <div class="cv-section" *ngIf="application.cvData.technicalSkills?.length">
+            <h4>Compétences techniques</h4>
+            <div class="skills-list">
+              <span *ngFor="let skill of application.cvData.technicalSkills" class="skill-tag">
+                {{ skill }}
+              </span>
+            </div>
+          </div>
+
+          <div class="cv-section" *ngIf="application.cvData.experiences?.length">
+            <h4>Expériences professionnelles</h4>
+            <div class="experience-list">
+              <div class="experience-item" *ngFor="let exp of application.cvData.experiences">
+                <div class="exp-header">
+                  <span class="exp-title">{{ exp.position }}</span>
+                  <span class="exp-company">{{ exp.company }}</span>
+                </div>
+                <div class="exp-date" *ngIf="exp.startDate">
+                  {{ exp.startDate }} - {{ exp.endDate || 'Présent' }}
+                </div>
+                <div class="exp-description" *ngIf="exp.description">
+                  {{ exp.description }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cv-section" *ngIf="application.cvData.education?.length">
+            <h4>Formation</h4>
+            <div class="education-list">
+              <div class="education-item" *ngFor="let edu of application.cvData.education">
+                <div class="edu-title">{{ edu.degree }} - {{ edu.field }}</div>
+                <div class="edu-institution">{{ edu.institution }}</div>
+                <div class="edu-date">{{ edu.startDate }} - {{ edu.endDate || 'Présent' }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cv-section" *ngIf="application.cvData.languages?.length">
+            <h4>Langues</h4>
+            <div class="languages-list">
+              <span *ngFor="let lang of application.cvData.languages" class="language-tag">
+                {{ lang.language }}: {{ lang.level }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Actions -->
+      <div class="right-column">
+        <!-- Status Card -->
+        <div class="action-card">
+          <div class="card-header">
+            <span class="card-icon">📊</span>
+            <h3>Statut</h3>
+          </div>
+          <div class="status-badge large"
+            [style.color]="getStatusColor(application.status)"
+            [style.background]="getStatusBg(application.status)">
+            {{ getStatusLabel(application.status) }}
+          </div>
+          <div class="status-date" *ngIf="application.appliedAt">
+            Postulé le {{ formatDate(application.appliedAt) }}
+            <span class="relative-date">({{ getRelativeDate(application.appliedAt) }})</span>
+          </div>
+        </div>
+
+        <!-- Status Change Card -->
+        <div class="action-card">
+          <div class="card-header">
+            <span class="card-icon">🔄</span>
+            <h3>Changer le statut</h3>
+          </div>
+          <div class="status-buttons">
+            <button
+              *ngFor="let status of appStatusKeys"
+              class="status-btn"
+              [class.active]="application.status === status"
+              [style.border-color]="getStatusColor(status)"
+              [style.background]="application.status === status ? getStatusBg(status) : 'white'"
+              [style.color]="getStatusColor(status)"
+              (click)="updateStatus(status)">
+              {{ getStatusLabel(status) }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Rating Card -->
+        <div class="action-card">
+          <div class="card-header">
+            <span class="card-icon">⭐</span>
+            <h3>Évaluation</h3>
+          </div>
+          <div class="rating-stars">
+            <button
+              *ngFor="let s of stars(application.rating); let i=index"
+              class="star-btn"
+              [class.filled]="i < (application.rating || 0)"
+              (click)="rateApplication(i + 1)">
+              ★
+            </button>
+          </div>
+          <p class="rating-hint">Cliquez sur une étoile pour noter</p>
+        </div>
+
+        <!-- Notes Card -->
+        <div class="action-card">
+          <div class="card-header">
+            <span class="card-icon">📝</span>
+            <h3>Notes internes</h3>
+            <button class="edit-notes-btn" (click)="isEditingNotes = !isEditingNotes" *ngIf="!isEditingNotes">
+              ✏️ Modifier
+            </button>
+          </div>
+
+          <div *ngIf="!isEditingNotes" class="notes-display">
+            <p *ngIf="notes" class="notes-text">{{ notes }}</p>
+            <p *ngIf="!notes" class="notes-empty">Aucune note pour le moment.</p>
+          </div>
+
+          <div *ngIf="isEditingNotes" class="notes-edit">
+            <textarea
+              class="notes-textarea"
+              [(ngModel)]="notes"
+              placeholder="Ajoutez vos notes sur ce candidat..."
+              rows="5">
+            </textarea>
+            <div class="notes-actions">
+              <button class="btn-secondary" (click)="isEditingNotes = false">Annuler</button>
+              <button class="btn-primary" (click)="saveNotes()" [disabled]="isSaving">
+                {{ isSaving ? 'Enregistrement...' : 'Enregistrer' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <div class="action-card">
+          <div class="card-header">
+            <span class="card-icon">⚡</span>
+            <h3>Actions rapides</h3>
+          </div>
+          <div class="quick-actions">
+            <button class="quick-action-btn shortlist" (click)="updateStatus('shortlisted')">
+              ⭐ Sélectionner
+            </button>
+            <button class="quick-action-btn interview" (click)="showInterviewModal = true">
+              📅 Planifier entretien
+            </button>
+            <button class="quick-action-btn hire" (click)="updateStatus('offer')">
+              ✅ Envoyer offre
+            </button>
+            <button class="quick-action-btn reject" (click)="showFeedbackModal = true">
+              ❌ Rejeter
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interview Modal -->
+  <div class="modal" *ngIf="showInterviewModal" (click)="showInterviewModal = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Planifier un entretien</h3>
+        <button class="modal-close" (click)="showInterviewModal = false">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Date *</label>
+          <input type="date" [(ngModel)]="interviewData.date">
+        </div>
+        <div class="form-group">
+          <label>Heure *</label>
+          <input type="time" [(ngModel)]="interviewData.time">
+        </div>
+        <div class="form-group">
+          <label>Durée (minutes)</label>
+          <select [(ngModel)]="interviewData.duration">
+            <option [value]="30">30 minutes</option>
+            <option [value]="45">45 minutes</option>
+            <option [value]="60">1 heure</option>
+            <option [value]="90">1h30</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Type d'entretien</label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" value="video" [(ngModel)]="interviewData.type"> 📹 Visio
+            </label>
+            <label class="radio-option">
+              <input type="radio" value="phone" [(ngModel)]="interviewData.type"> 📞 Téléphone
+            </label>
+            <label class="radio-option">
+              <input type="radio" value="inperson" [(ngModel)]="interviewData.type"> 🏢 Présentiel
+            </label>
+          </div>
+        </div>
+        <div class="form-group" *ngIf="interviewData.type === 'inperson'">
+          <label>Lieu</label>
+          <input type="text" [(ngModel)]="interviewData.location" placeholder="Adresse du lieu">
+        </div>
+        <div class="form-group" *ngIf="interviewData.type === 'video'">
+          <label>Lien de visioconférence</label>
+          <input type="url" [(ngModel)]="interviewData.meetingLink" placeholder="https://meet.google.com/...">
+        </div>
+        <div class="form-group">
+          <label>Notes (optionnel)</label>
+          <textarea [(ngModel)]="interviewData.notes" rows="3" placeholder="Informations supplémentaires..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="showInterviewModal = false">Annuler</button>
+        <button class="btn-primary" (click)="sendInterviewInvitation()" [disabled]="isSaving">
+          {{ isSaving ? 'Envoi...' : 'Envoyer l\'invitation' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rejection Feedback Modal -->
+  <div class="modal" *ngIf="showFeedbackModal" (click)="showFeedbackModal = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Refuser la candidature</h3>
+        <button class="modal-close" (click)="showFeedbackModal = false">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-warning">
+          Êtes-vous sûr de vouloir refuser cette candidature ?
+        </p>
+        <div class="form-group">
+          <label>Message de refus (optionnel)</label>
+          <textarea [(ngModel)]="feedbackData.message" rows="4"
+            placeholder="Un message personnalisé sera envoyé au candidat..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Feedback (optionnel)</label>
+          <div class="feedback-stars">
+            <span *ngFor="let s of stars(feedbackData.rating); let i=index"
+              class="feedback-star" [class.active]="i < feedbackData.rating"
+              (click)="feedbackData.rating = i + 1">
+              ★
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="showFeedbackModal = false">Annuler</button>
+        <button class="btn-danger" (click)="sendRejectionFeedback()" [disabled]="isSaving">
+          {{ isSaving ? 'Envoi...' : 'Confirmer le refus' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

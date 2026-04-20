@@ -1,0 +1,292 @@
+<div class="application-list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Candidatures</h1>
+    <div class="header-stats">
+      <span class="stat-badge"> 📬 Total: {{ applications.length }} </span>
+      <span class="stat-badge new" *ngIf="getStatusCount('new') > 0">
+        🆕 Nouvelles: {{ getStatusCount("new") }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Filters Bar -->
+  <div class="filters-bar">
+    <!-- Status Tabs -->
+    <div class="filter-tabs">
+      <button
+        *ngFor="let status of statusList"
+        [class.active]="filterStatus === status"
+        (click)="filterStatus = status; onFilterChange()"
+      >
+        {{ status === "all" ? "Toutes" : getStatusLabel(status) }}
+        <span class="count">{{ getStatusCount(status) }}</span>
+      </button>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="search-filters">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          placeholder="Rechercher par nom, poste..."
+          [(ngModel)]="searchTerm"
+          (input)="onSearchChange()"
+        />
+      </div>
+
+      <select
+        class="offer-filter"
+        [(ngModel)]="filterOfferId"
+        (change)="onFilterChange()"
+      >
+        <option value="">Toutes les offres</option>
+        <option *ngFor="let offer of jobOffers" [value]="offer.id">
+          {{ offer.title }} ({{ offer.applicationCount || 0 }})
+        </option>
+      </select>
+
+      <select
+        class="date-filter"
+        [(ngModel)]="dateRange"
+        (change)="onDateRangeChange()"
+      >
+        <option value="all">Toutes les dates</option>
+        <option value="today">Aujourd'hui</option>
+        <option value="week">Cette semaine</option>
+        <option value="month">Ce mois</option>
+      </select>
+
+      <button
+        class="clear-btn"
+        (click)="clearFilters()"
+        *ngIf="
+          filterStatus !== 'all' ||
+          filterOfferId ||
+          searchTerm ||
+          dateRange !== 'all'
+        "
+      >
+        ✕ Réinitialiser
+      </button>
+    </div>
+  </div>
+
+  <!-- Selected Offer Banner -->
+  <div class="selected-offer-banner" *ngIf="selectedOffer">
+    <div class="banner-content">
+      <span class="banner-icon">📋</span>
+      <span class="banner-text"
+        >Offre: <strong>{{ selectedOffer.title }}</strong></span
+      >
+      <span class="banner-count"
+        >{{ filteredApplications.length }} candidature(s)</span
+      >
+    </div>
+    <button class="banner-close" (click)="clearFilters()">✕</button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loader-container">
+    <div class="spinner"></div>
+    <p>Chargement des candidatures...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div
+    *ngIf="!isLoading && filteredApplications.length === 0"
+    class="empty-state"
+  >
+    <div class="empty-icon">📬</div>
+    <h3>Aucune candidature trouvée</h3>
+    <p *ngIf="filterStatus !== 'all' || filterOfferId || searchTerm">
+      Modifiez vos filtres pour voir plus de résultats.
+    </p>
+    <p *ngIf="filterStatus === 'all' && !filterOfferId && !searchTerm">
+      Vous n'avez pas encore reçu de candidatures.
+    </p>
+    <button class="btn-primary" routerLink="/recruiter/offers/create">
+      + Publier une offre
+    </button>
+  </div>
+
+  <!-- Results Summary -->
+  <div
+    *ngIf="!isLoading && filteredApplications.length > 0"
+    class="results-summary"
+  >
+    <span>{{ filteredApplications.length }} candidature(s) trouvée(s)</span>
+    <span *ngIf="filterOfferId && selectedOffer">
+      pour "{{ selectedOffer.title }}"
+    </span>
+  </div>
+
+  <!-- Applications Table -->
+  <div
+    *ngIf="!isLoading && filteredApplications.length > 0"
+    class="applications-table-container"
+  >
+    <table class="applications-table">
+      <thead>
+        <tr>
+          <th>Candidat</th>
+          <th>Poste</th>
+          <th>Date de candidature</th>
+          <th>Statut</th>
+          <th>Évaluation</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let app of paginatedApplications"
+          class="application-row"
+          [class.new]="app.status === 'new'"
+        >
+          <td class="candidate-cell">
+            <div class="candidate-info">
+              <div class="candidate-avatar">
+                <img
+                  *ngIf="app.candidatePhoto"
+                  [src]="app.candidatePhoto"
+                  alt=""
+                />
+                <span *ngIf="!app.candidatePhoto">{{
+                  app?.candidateName?.[0] || "?"
+                }}</span>
+              </div>
+              <div class="candidate-details">
+                <div class="candidate-name">{{ app.candidateName }}</div>
+                <div class="candidate-title">
+                  {{ app.candidateTitle || "Profil non renseigné" }}
+                </div>
+                <div class="candidate-location" *ngIf="app.candidateCity">
+                  📍 {{ app.candidateCity }}
+                </div>
+              </div>
+            </div>
+          </td>
+          <td class="job-cell">
+            <div class="job-info">
+              <div class="job-title">{{ app.jobTitle }}</div>
+            </div>
+          </td>
+          <td class="date-cell">
+            <div class="date-info">
+              <div class="date-full">{{ formatDate(app.appliedAt) }}</div>
+              <div class="date-relative">
+                {{ getRelativeDate(app.appliedAt) }}
+              </div>
+            </div>
+          </td>
+          <td class="status-cell">
+            <div class="status-container">
+              <select
+                class="status-select"
+                [style.color]="getStatusColor(app.status)"
+                [style.border-color]="getStatusColor(app.status) + '40'"
+                [value]="app.status"
+                (change)="updateStatus(app, $any($event.target).value)"
+              >
+                <option *ngFor="let status of appStatusKeys" [value]="status">
+                  {{ getStatusLabel(status) }}
+                </option>
+              </select>
+            </div>
+          </td>
+          <td class="rating-cell">
+            <div class="stars" *ngIf="app.rating">
+              <span
+                *ngFor="let s of stars(app.rating); let i = index"
+                [class.filled]="i < (app.rating || 0)"
+              >
+                ★
+              </span>
+            </div>
+            <span *ngIf="!app.rating" class="no-rating">—</span>
+          </td>
+          <td class="actions-cell">
+            <div class="action-buttons">
+              <button
+                class="action-btn view"
+                (click)="viewApplication(app.id!)"
+                title="Voir le dossier"
+              >
+                👁️
+              </button>
+              <button
+                class="action-btn cv"
+                (click)="viewCandidateCV(app.candidateId)"
+                title="Voir le CV"
+              >
+                📄
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button
+        class="page-btn"
+        (click)="goToPage(currentPage - 1)"
+        [disabled]="currentPage === 1"
+      >
+        ← Précédent
+      </button>
+      <div class="page-numbers">
+        <button
+          *ngFor="let page of pages"
+          (click)="goToPage(page)"
+          [class.active]="currentPage === page"
+        >
+          {{ page }}
+        </button>
+      </div>
+      <button
+        class="page-btn"
+        (click)="goToPage(currentPage + 1)"
+        [disabled]="currentPage === totalPages"
+      >
+        Suivant →
+      </button>
+    </div>
+  </div>
+
+  <!-- Quick Stats Cards -->
+  <div class="stats-cards" *ngIf="!isLoading && applications.length > 0">
+    <div class="stat-card">
+      <div class="stat-icon">🆕</div>
+      <div class="stat-value">{{ getStatusCount("new") }}</div>
+      <div class="stat-label">Nouvelles</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👁️</div>
+      <div class="stat-value">{{ getStatusCount("viewed") }}</div>
+      <div class="stat-label">Consultées</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⭐</div>
+      <div class="stat-value">{{ getStatusCount("shortlisted") }}</div>
+      <div class="stat-label">Sélectionnées</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📅</div>
+      <div class="stat-value">{{ getStatusCount("interview") }}</div>
+      <div class="stat-label">En entretien</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-value">{{ getStatusCount("offer") }}</div>
+      <div class="stat-label">Offre envoyée</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">❌</div>
+      <div class="stat-value">{{ getStatusCount("rejected") }}</div>
+      <div class="stat-label">Refusées</div>
+    </div>
+  </div>
+</div>

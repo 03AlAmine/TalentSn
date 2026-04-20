@@ -1,16 +1,28 @@
 import { Injectable, inject } from '@angular/core';
 import {
-  Auth, user,
+  Auth,
+  user,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signOut, updateProfile,
-  GoogleAuthProvider, signInWithPopup, User
+  signOut,
+  updateProfile,
+  GoogleAuthProvider,
+  signInWithPopup,
+  User,
 } from '@angular/fire/auth';
 import {
-  Firestore, doc, docData, setDoc, getDoc, updateDoc
+  Firestore,
+  doc,
+  docData,
+  setDoc,
+  getDoc,
+  updateDoc,
 } from '@angular/fire/firestore';
 import {
-  Storage, ref, uploadBytes, getDownloadURL
+  Storage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
 } from '@angular/fire/storage';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, of } from 'rxjs';
@@ -33,6 +45,8 @@ export interface CvData {
 }
 
 export interface UserData {
+  department: string;
+  bio: string;
   uid: string;
   email: string;
   role: 'candidate' | 'recruiter';
@@ -61,6 +75,9 @@ export interface UserData {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  refreshUserData() {
+    throw new Error('Method not implemented.');
+  }
   private auth = inject(Auth);
   private firestore = inject(Firestore);
   private storage = inject(Storage);
@@ -69,10 +86,12 @@ export class AuthService {
   public authUser$ = user(this.auth);
 
   public userData$: Observable<UserData | null> = this.authUser$.pipe(
-    switchMap(u => {
+    switchMap((u) => {
       if (!u) return of(null);
-      return docData(doc(this.firestore, 'users', u.uid)) as Observable<UserData | null>;
-    })
+      return docData(
+        doc(this.firestore, 'users', u.uid),
+      ) as Observable<UserData | null>;
+    }),
   );
 
   private currentUserSubject = new BehaviorSubject<User | null>(null);
@@ -81,36 +100,70 @@ export class AuthService {
   public legacyUserData$ = this.userDataSubject.asObservable();
 
   constructor() {
-    this.authUser$.subscribe(u => this.currentUserSubject.next(u));
-    this.userData$.subscribe(ud => this.userDataSubject.next(ud));
+    this.authUser$.subscribe((u) => this.currentUserSubject.next(u));
+    this.userData$.subscribe((ud) => this.userDataSubject.next(ud));
   }
 
   async registerCandidate(data: any): Promise<any> {
-    const cred = await createUserWithEmailAndPassword(this.auth, data.email, data.password);
-    await updateProfile(cred.user, { displayName: `${data.firstName} ${data.lastName}` });
+    const cred = await createUserWithEmailAndPassword(
+      this.auth,
+      data.email,
+      data.password,
+    );
+    await updateProfile(cred.user, {
+      displayName: `${data.firstName} ${data.lastName}`,
+    });
     const userData: UserData = {
-      uid: cred.user.uid, email: data.email, role: 'candidate',
-      firstName: data.firstName, lastName: data.lastName,
-      phone: data.phone || '', city: data.city || '', country: data.country || '',
-      dateOfBirth: data.dateOfBirth || '', placeOfBirth: data.placeOfBirth || '',
-      title: data.title || '', educationLevel: data.educationLevel || '',
-      experienceYears: data.experienceYears || '', sector: data.sector || '',
-      createdAt: new Date(), onboardingCompleted: false
+      uid: cred.user.uid,
+      email: data.email,
+      role: 'candidate',
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone || '',
+      city: data.city || '',
+      country: data.country || '',
+      dateOfBirth: data.dateOfBirth || '',
+      placeOfBirth: data.placeOfBirth || '',
+      title: data.title || '',
+      educationLevel: data.educationLevel || '',
+      experienceYears: data.experienceYears || '',
+      sector: data.sector || '',
+      createdAt: new Date(),
+      onboardingCompleted: false,
+      department: '',
+      bio: '',
     };
     await setDoc(doc(this.firestore, 'users', cred.user.uid), userData);
     return cred.user;
   }
 
   async registerRecruiter(data: any): Promise<any> {
-    const cred = await createUserWithEmailAndPassword(this.auth, data.email, data.password);
-    await updateProfile(cred.user, { displayName: `${data.firstName} ${data.lastName}` });
+    const cred = await createUserWithEmailAndPassword(
+      this.auth,
+      data.email,
+      data.password,
+    );
+    await updateProfile(cred.user, {
+      displayName: `${data.firstName} ${data.lastName}`,
+    });
     const userData: UserData = {
-      uid: cred.user.uid, email: data.email, role: 'recruiter',
-      firstName: data.firstName, lastName: data.lastName,
-      phone: data.phone || '', city: data.city || '', country: data.country || '',
-      position: data.position || '', companyName: data.companyName || '',
-      companySector: data.companySector || '', employeeCount: data.employeeCount || '',
-      website: data.website || '', ninea: data.ninea || '', createdAt: new Date()
+      uid: cred.user.uid,
+      email: data.email,
+      role: 'recruiter',
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone || '',
+      city: data.city || '',
+      country: data.country || '',
+      position: data.position || '',
+      companyName: data.companyName || '',
+      companySector: data.companySector || '',
+      employeeCount: data.employeeCount || '',
+      website: data.website || '',
+      ninea: data.ninea || '',
+      createdAt: new Date(),
+      department: '',
+      bio: '',
     };
     await setDoc(doc(this.firestore, 'users', cred.user.uid), userData);
     return cred.user;
@@ -128,10 +181,16 @@ export class AuthService {
     const snap = await getDoc(doc(this.firestore, 'users', u.uid));
     if (!snap.exists()) {
       const userData: UserData = {
-        uid: u.uid, email: u.email!, role: 'candidate',
+        uid: u.uid,
+        email: u.email!,
+        role: 'candidate',
         firstName: u.displayName?.split(' ')[0] || '',
         lastName: u.displayName?.split(' ').slice(1).join(' ') || '',
-        photoURL: u.photoURL || '', createdAt: new Date(), onboardingCompleted: false
+        photoURL: u.photoURL || '',
+        createdAt: new Date(),
+        onboardingCompleted: false,
+        department: '',
+        bio: '',
       };
       await setDoc(doc(this.firestore, 'users', u.uid), userData);
     }
@@ -150,7 +209,9 @@ export class AuthService {
     try {
       const snap = await getDoc(doc(this.firestore, 'users', uid));
       return snap.exists() ? (snap.data() as UserData) : null;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   }
 
   async updateUserData(uid: string, data: Partial<UserData>): Promise<void> {
@@ -166,8 +227,12 @@ export class AuthService {
     this.router.navigate(['/']);
   }
 
-  getCurrentUser(): User | null { return this.auth.currentUser; }
-  isAuthenticated(): boolean { return !!this.auth.currentUser; }
+  getCurrentUser(): User | null {
+    return this.auth.currentUser;
+  }
+  isAuthenticated(): boolean {
+    return !!this.auth.currentUser;
+  }
 
   async getCurrentUserRole(): Promise<'candidate' | 'recruiter' | null> {
     const u = this.auth.currentUser;
@@ -180,8 +245,11 @@ export class AuthService {
     const u = this.auth.currentUser;
     if (!u) return;
     const ud = await this.getUserData(u.uid);
-    if (ud?.role === 'candidate') this.router.navigate(['/candidate/dashboard']);
-    else if (ud?.role === 'recruiter') this.router.navigate(['/recruiter/dashboard']);
+    if (ud?.role === 'candidate')
+      this.router.navigate(['/candidate/dashboard']);
+    else if (ud?.role === 'recruiter')
+      this.router.navigate(['/recruiter/dashboard']);
     else this.router.navigate(['/onboarding']);
   }
+
 }
