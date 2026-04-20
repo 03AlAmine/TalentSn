@@ -1,0 +1,166 @@
+<!-- ═════════════════════════════════════════ -->
+<!--  JOB DETAIL PAGE — TalentSn              -->
+<!-- ═════════════════════════════════════════ -->
+
+<div class="jd-page" *ngIf="!isLoading && !notFound && offer">
+
+  <!-- HERO -->
+  <div class="jd-hero">
+    <div class="jd-hero-inner">
+      <a class="jd-back" routerLink="/offres">← Toutes les offres</a>
+
+      <div class="jd-hero-header">
+        <div class="jd-company-logo">
+          <img *ngIf="offer.companyLogo" [src]="offer.companyLogo" alt="">
+          <span *ngIf="!offer.companyLogo">{{ offer?.companyName?.[0] || '?' }}</span>
+        </div>
+        <div class="jd-title-block">
+          <div class="jd-tags">
+            <span class="jd-type-tag">{{ offer.type }}</span>
+            <span class="jd-remote-tag">{{ getRemoteLabel(offer.remote) }}</span>
+            <span class="jd-urgent-tag" *ngIf="offer.urgent">🔥 Urgent</span>
+          </div>
+          <h1>{{ offer.title }}</h1>
+          <p class="jd-company">{{ offer.companyName }}</p>
+          <div class="jd-meta-chips">
+            <span>📍 {{ offer.location }}</span>
+            <span>🎓 {{ offer.educationLevel }}</span>
+            <span>⏱ {{ offer.experienceLevel }}</span>
+            <span>💰 {{ formattedSalary }}</span>
+          </div>
+          <p class="jd-date">Publié le {{ formatDate(offer.createdAt) }}</p>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="jd-hero-cta" *ngIf="!formSuccess">
+        <button class="jd-apply-btn" *ngIf="!alreadyApplied" (click)="openApply()">
+          Postuler maintenant →
+        </button>
+        <div class="jd-already" *ngIf="alreadyApplied">
+          ✓ Candidature envoyée
+        </div>
+      </div>
+      <div class="jd-success-msg" *ngIf="formSuccess">
+        🎉 Votre candidature a bien été envoyée !
+      </div>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="jd-body">
+    <div class="jd-main">
+
+      <!-- Description -->
+      <div class="jd-section">
+        <h2>Description du poste</h2>
+        <p class="jd-description">{{ offer.description }}</p>
+      </div>
+
+      <!-- Responsibilities -->
+      <div class="jd-section" *ngIf="offer.responsibilities.length">
+        <h2>Responsabilités</h2>
+        <ul class="jd-list">
+          <li *ngFor="let r of offer.responsibilities">{{ r }}</li>
+        </ul>
+      </div>
+
+      <!-- Requirements -->
+      <div class="jd-section" *ngIf="offer.requirements.length">
+        <h2>Prérequis indispensables</h2>
+        <ul class="jd-list req">
+          <li *ngFor="let r of offer.requirements">{{ r }}</li>
+        </ul>
+      </div>
+
+      <!-- Nice to have -->
+      <div class="jd-section" *ngIf="offer.niceToHave.length">
+        <h2>Atouts appréciés</h2>
+        <ul class="jd-list nice">
+          <li *ngFor="let r of offer.niceToHave">{{ r }}</li>
+        </ul>
+      </div>
+
+      <!-- Skills -->
+      <div class="jd-section" *ngIf="offer.skills.length">
+        <h2>Compétences recherchées</h2>
+        <div class="jd-skills">
+          <span *ngFor="let s of offer.skills" class="jd-skill-chip">{{ s }}</span>
+        </div>
+      </div>
+
+      <!-- Benefits -->
+      <div class="jd-section" *ngIf="offer.benefits.length">
+        <h2>Ce que nous offrons</h2>
+        <div class="jd-benefits-grid">
+          <div class="jd-benefit-item" *ngFor="let b of offer.benefits">
+            <span class="jd-benefit-icon">✓</span> {{ b }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="jd-sidebar">
+      <div class="jd-apply-box" *ngIf="!formSuccess">
+        <h3>Postuler</h3>
+        <p>{{ offer.applicationCount }} candidature{{ offer.applicationCount > 1 ? 's' : '' }} reçue{{ offer.applicationCount > 1 ? 's' : '' }}</p>
+
+        <!-- Application form -->
+        <div class="jd-form" *ngIf="showForm">
+          <div class="jd-form-error" *ngIf="formError">{{ formError }}</div>
+          <div class="jd-form-field">
+            <label>Lettre de motivation (optionnelle)</label>
+            <textarea [(ngModel)]="coverLetter" rows="6"
+              placeholder="Présentez-vous et expliquez pourquoi vous êtes intéressé(e) par ce poste…"></textarea>
+          </div>
+          <button class="jd-submit-btn" (click)="submitApplication()" [disabled]="formLoading">
+            <span *ngIf="!formLoading">Envoyer ma candidature</span>
+            <span *ngIf="formLoading" class="jd-spinner"></span>
+          </button>
+          <button class="jd-cancel-form" (click)="showForm=false">Annuler</button>
+        </div>
+
+        <div *ngIf="!showForm && !alreadyApplied">
+          <button class="jd-apply-btn-box" (click)="openApply()">
+            Postuler maintenant →
+          </button>
+          <p class="jd-disclaimer">Votre CV TalentSn sera automatiquement inclus.</p>
+        </div>
+
+        <div class="jd-already-box" *ngIf="alreadyApplied && !showForm">
+          <span>✓</span> Candidature envoyée
+        </div>
+      </div>
+
+      <div class="jd-info-box">
+        <h3>Détails du poste</h3>
+        <div class="jd-info-row"><span>Secteur</span><strong>{{ offer.sector }}</strong></div>
+        <div class="jd-info-row"><span>Contrat</span><strong>{{ offer.type }}</strong></div>
+        <div class="jd-info-row"><span>Lieu</span><strong>{{ offer.location }}</strong></div>
+        <div class="jd-info-row"><span>Télétravail</span><strong>{{ getRemoteLabel(offer.remote) }}</strong></div>
+        <div class="jd-info-row"><span>Expérience</span><strong>{{ offer.experienceLevel }}</strong></div>
+        <div class="jd-info-row"><span>Formation</span><strong>{{ offer.educationLevel }}</strong></div>
+        <div class="jd-info-row" *ngIf="offer.salaryMin || offer.salaryMax">
+          <span>Rémunération</span><strong>{{ formattedSalary }}</strong>
+        </div>
+        <div class="jd-info-row" *ngIf="offer.closingDate">
+          <span>Date limite</span><strong>{{ offer.closingDate }}</strong>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="jd-page-loader" *ngIf="isLoading">
+  <div class="jd-spin"></div>
+  <p>Chargement de l'offre…</p>
+</div>
+
+<!-- NOT FOUND -->
+<div class="jd-not-found" *ngIf="!isLoading && notFound">
+  <h2>Offre introuvable</h2>
+  <p>Cette offre n'existe plus ou a été supprimée.</p>
+  <a routerLink="/offres" class="jd-back-link">← Voir toutes les offres</a>
+</div>

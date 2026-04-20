@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { AuthService, UserData } from '../../../services/auth.service';
+import { AuthService, UserData } from '../../../core/services/auth.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -9,7 +9,7 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './candidate-dashboard.component.html',
-  styleUrls: ['./candidate-dashboard.component.css']
+  styleUrls: ['./candidate-dashboard.component.css'],
 })
 export class CandidateDashboardComponent implements OnInit, OnDestroy {
   userData: UserData | null = null;
@@ -19,29 +19,58 @@ export class CandidateDashboardComponent implements OnInit, OnDestroy {
   sidebarOpen = false;
   private sub!: Subscription;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+  ) {}
 
   ngOnInit() {
-    this.sub = this.authService.userData$.subscribe(data => {
+    this.sub = this.authService.userData$.subscribe((data) => {
       this.userData = data;
       this.isLoading = false;
     });
   }
 
-  ngOnDestroy() { this.sub?.unsubscribe(); }
+  ngOnDestroy() {
+    this.sub?.unsubscribe();
+  }
 
-  get firstName() { return this.userData?.firstName || ''; }
-  get lastName() { return this.userData?.lastName || ''; }
-  get fullName() { return `${this.firstName} ${this.lastName}`.trim() || 'Candidat'; }
-  get title() { return this.userData?.title || 'Titre professionnel non renseigné'; }
-  get city() { return this.userData?.city || ''; }
-  get country() { return this.userData?.country || ''; }
-  get sector() { return this.userData?.sector || ''; }
-  get photoURL() { return this.userData?.photoURL || ''; }
-  get email() { return this.userData?.email || ''; }
-  get phone() { return this.userData?.phone || ''; }
-  get hasCV() { return !!this.userData?.cvData; }
-  get cvTheme() { return this.userData?.cvData?.theme || 'green'; }
+  get firstName() {
+    return this.userData?.firstName || '';
+  }
+  get lastName() {
+    return this.userData?.lastName || '';
+  }
+  get fullName() {
+    return `${this.firstName} ${this.lastName}`.trim() || 'Candidat';
+  }
+  get title() {
+    return this.userData?.title || 'Titre professionnel non renseigné';
+  }
+  get city() {
+    return this.userData?.city || '';
+  }
+  get country() {
+    return this.userData?.country || '';
+  }
+  get sector() {
+    return this.userData?.sector || '';
+  }
+  get photoURL() {
+    return this.userData?.photoURL || '';
+  }
+  get email() {
+    return this.userData?.email || '';
+  }
+  get phone() {
+    return this.userData?.phone || '';
+  }
+  get hasCV() {
+    return !!this.userData?.cvData;
+  }
+  get cvTheme() {
+    return this.userData?.cvData?.theme || 'green';
+  }
 
   get profileCompletion(): number {
     if (!this.userData) return 0;
@@ -63,20 +92,26 @@ export class CandidateDashboardComponent implements OnInit, OnDestroy {
   get cvStats() {
     const cv = this.userData?.cvData;
     return {
-      skills: (cv?.technicalSkills?.length||0) + (cv?.softSkills?.length||0),
-      experiences: cv?.experiences?.length||0,
-      educations: cv?.educations?.length||0,
-      languages: cv?.languages?.length||0,
+      skills:
+        (cv?.technicalSkills?.length || 0) + (cv?.softSkills?.length || 0),
+      experiences: cv?.experiences?.length || 0,
+      educations: cv?.educations?.length || 0,
+      languages: cv?.languages?.length || 0,
     };
   }
 
   get suggestions(): string[] {
     const t: string[] = [];
-    if (!this.userData?.photoURL) t.push('Ajoutez une photo — +40% de visibilité');
-    if (!this.userData?.cvData?.summary) t.push('Rédigez votre résumé professionnel');
-    if (!this.userData?.cvData?.experiences?.length) t.push('Ajoutez vos expériences');
-    if ((this.userData?.cvData?.technicalSkills?.length||0) < 3) t.push('Ajoutez au moins 3 compétences techniques');
-    if (!this.userData?.cvData?.additionalInfo?.linkedin) t.push('Ajoutez votre profil LinkedIn');
+    if (!this.userData?.photoURL)
+      t.push('Ajoutez une photo — +40% de visibilité');
+    if (!this.userData?.cvData?.summary)
+      t.push('Rédigez votre résumé professionnel');
+    if (!this.userData?.cvData?.experiences?.length)
+      t.push('Ajoutez vos expériences');
+    if ((this.userData?.cvData?.technicalSkills?.length || 0) < 3)
+      t.push('Ajoutez au moins 3 compétences techniques');
+    if (!this.userData?.cvData?.additionalInfo?.linkedin)
+      t.push('Ajoutez votre profil LinkedIn');
     return t.slice(0, 3);
   }
 
@@ -88,7 +123,7 @@ export class CandidateDashboardComponent implements OnInit, OnDestroy {
   get completionDash(): string {
     const r = 44;
     const circ = 2 * Math.PI * r;
-    const offset = circ - (circ * this.profileCompletion / 100);
+    const offset = circ - (circ * this.profileCompletion) / 100;
     return `${circ} ${offset}`;
   }
 
@@ -97,8 +132,12 @@ export class CandidateDashboardComponent implements OnInit, OnDestroy {
     this.sidebarOpen = false;
   }
 
-  goToCV() { this.router.navigate(['/candidate/cv']); }
-  goToOnboarding() { this.router.navigate(['/onboarding']); }
+  goToCV() {
+    this.router.navigate(['/candidate/cv']);
+  }
+  goToOnboarding() {
+    this.router.navigate(['/onboarding']);
+  }
 
   async onPhotoSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
@@ -106,10 +145,16 @@ export class CandidateDashboardComponent implements OnInit, OnDestroy {
     const user = this.authService.getCurrentUser();
     if (!user) return;
     this.isUploadingPhoto = true;
-    try { await this.authService.uploadProfilePhoto(user.uid, file); }
-    catch (e) { console.error(e); }
-    finally { this.isUploadingPhoto = false; }
+    try {
+      await this.authService.uploadProfilePhoto(user.uid, file);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this.isUploadingPhoto = false;
+    }
   }
 
-  async logout() { await this.authService.logout(); }
+  async logout() {
+    await this.authService.logout();
+  }
 }

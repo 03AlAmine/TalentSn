@@ -1,0 +1,80 @@
+<!-- JOB LIST PAGE -->
+<div class="jl-page">
+
+  <!-- HERO HEADER -->
+  <div class="jl-hero">
+    <h1>Offres d'emploi</h1>
+    <p>{{ filteredOffers.length }} opportunité{{ filteredOffers.length > 1 ? 's' : '' }} disponible{{ filteredOffers.length > 1 ? 's' : '' }}</p>
+  </div>
+
+  <!-- SEARCH BAR -->
+  <div class="jl-search-wrap">
+    <div class="jl-search-main">
+      <span class="jl-search-icon">🔍</span>
+      <input type="text" [(ngModel)]="filters.keyword" (input)="applyFilters()"
+        placeholder="Titre, entreprise, compétence…" class="jl-search-input">
+    </div>
+    <input type="text" [(ngModel)]="filters.location" (input)="applyFilters()"
+      placeholder="📍 Ville" class="jl-filter-input">
+    <select [(ngModel)]="filters.sector" (change)="applyFilters()" class="jl-filter-select">
+      <option value="">Tous secteurs</option>
+      <option *ngFor="let s of sectors" [value]="s">{{ s }}</option>
+    </select>
+    <select [(ngModel)]="filters.type" (change)="applyFilters()" class="jl-filter-select">
+      <option value="">Type</option>
+      <option *ngFor="let t of jobTypes" [value]="t">{{ t }}</option>
+    </select>
+    <select [(ngModel)]="filters.remote" (change)="applyFilters()" class="jl-filter-select">
+      <option value="">Télétravail</option>
+      <option value="onsite">Présentiel</option>
+      <option value="hybrid">Hybride</option>
+      <option value="full-remote">Full Remote</option>
+    </select>
+    <button class="jl-reset-btn" (click)="reset()">✕</button>
+  </div>
+
+  <!-- LOADING -->
+  <div class="jl-loader" *ngIf="isLoading">
+    <div class="jl-spin"></div>
+  </div>
+
+  <!-- EMPTY -->
+  <div class="jl-empty" *ngIf="!isLoading && !filteredOffers.length">
+    <div>🔎</div>
+    <h3>Aucune offre trouvée</h3>
+    <p>Modifiez vos critères de recherche.</p>
+    <button (click)="reset()">Réinitialiser</button>
+  </div>
+
+  <!-- GRID -->
+  <div class="jl-grid" *ngIf="!isLoading && filteredOffers.length">
+    <a class="jl-card" *ngFor="let o of filteredOffers" [routerLink]="['/offres', o.id]">
+      <div class="jl-card-top">
+        <div class="jl-card-company-logo">{{ o?.companyName?.[0] || '?' }}</div>
+        <div class="jl-card-meta-right">
+          <span class="jl-type-tag" [style.color]="getTypeColor(o.type)" [style.background]="getTypeColor(o.type)+'18'">
+            {{ o.type }}
+          </span>
+          <span class="jl-date">{{ formatDate(o.createdAt) }}</span>
+        </div>
+      </div>
+      <h3 class="jl-card-title">{{ o.title }}</h3>
+      <p class="jl-card-company">{{ o.companyName }}</p>
+      <div class="jl-card-chips">
+        <span>📍 {{ o.location }}</span>
+        <span *ngIf="o.remote !== 'onsite'">🏠 {{ getRemoteLabel(o.remote) }}</span>
+        <span *ngIf="o.urgent" class="urgent">🔥 Urgent</span>
+      </div>
+      <p class="jl-card-salary" *ngIf="o.salaryMin || o.salaryMax">💰 {{ formatSalary(o) }}</p>
+      <div class="jl-card-skills" *ngIf="o.skills.length">
+        <span *ngFor="let s of o.skills.slice(0,3)" class="jl-skill">{{ s }}</span>
+        <span *ngIf="o.skills.length > 3" class="jl-skill more">+{{ o.skills.length - 3 }}</span>
+      </div>
+      <div class="jl-card-footer">
+        <span class="jl-exp">{{ o.experienceLevel }}</span>
+        <span class="jl-apps">{{ o.applicationCount }} candidature{{ o.applicationCount > 1 ? 's' : '' }}</span>
+      </div>
+    </a>
+  </div>
+
+</div>

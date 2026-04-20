@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AuthService, UserData, CvData } from '../../../services/auth.service';
+import { AuthService, UserData, CvData } from '../../../../core/services/auth.service';
 import { Subscription } from 'rxjs';
 
 @Component({

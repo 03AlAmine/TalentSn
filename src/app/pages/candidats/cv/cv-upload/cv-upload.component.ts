@@ -4,7 +4,7 @@ import {
   CvParserService,
   ExtractedProfile,
   ParseProgress,
-} from '../../../services/cv-parser.service';
+} from '../../../../core/services/cv-parser.service';
 
 export type UploadMode = 'idle' | 'dragging' | 'processing' | 'done' | 'error';
 

@@ -1,20 +1,640 @@
-<div class="dashboard-container">
-  <div class="dashboard-header">
-    <h1>Bienvenue cher recruteur 👋</h1>
-    <p>Votre espace professionnel TalentSn</p>
-  </div>
-  
-  <div class="dashboard-content">
-    <div class="info-card">
-      <div class="info-icon">⬡</div>
-      <div class="info-text">
-        <h3>Votre espace recruteur est prêt</h3>
-        <p>Vous pouvez maintenant publier des offres, rechercher des talents et gérer vos recrutements.</p>
+<!-- ═══════════════════════════════════════════════ -->
+<!--  RECRUITER DASHBOARD — TalentSn                -->
+<!-- ═══════════════════════════════════════════════ -->
+
+<div class="r-layout" *ngIf="!isLoading; else loader">
+
+  <!-- ░░░ SIDEBAR ░░░ -->
+  <aside class="r-sidebar" [class.open]="sidebarOpen">
+    <div class="r-logo">Talent<span>Sn</span></div>
+
+    <div class="r-company-block">
+      <div class="r-avatar">
+        <img *ngIf="photoURL" [src]="photoURL" alt="photo">
+        <span *ngIf="!photoURL">{{ initials }}</span>
+      </div>
+      <div class="r-company-info">
+        <p class="r-company-name">{{ companyName }}</p>
+        <p class="r-position">{{ position || 'Recruteur' }}</p>
       </div>
     </div>
-    
-    <button class="logout-btn" (click)="logout()">
-      Se déconnecter
+
+    <nav class="r-nav">
+      <button class="r-nav-item" [class.active]="activeSection==='dashboard'" (click)="navigate('dashboard')">
+        <span class="r-nav-icon">▦</span> Tableau de bord
+      </button>
+      <button class="r-nav-item" [class.active]="activeSection==='offres' || activeSection==='modifier-offre'" (click)="navigate('offres')">
+        <span class="r-nav-icon">◈</span> Mes offres
+        <span class="r-badge" *ngIf="stats.activeOffers">{{ stats.activeOffers }}</span>
+      </button>
+      <button class="r-nav-item" [class.active]="activeSection==='candidatures' || activeSection==='detail-candidature'" (click)="navigate('candidatures')">
+        <span class="r-nav-icon">◉</span> Candidatures
+        <span class="r-badge new" *ngIf="stats.newApplications">{{ stats.newApplications }}</span>
+      </button>
+      <button class="r-nav-item" [class.active]="activeSection==='candidats'" (click)="navigate('candidats')">
+        <span class="r-nav-icon">◎</span> Explorer talents
+      </button>
+
+      <div class="r-nav-sep"></div>
+
+      <button class="r-nav-item publish-btn" (click)="navigate('nouvelle-offre')">
+        <span class="r-nav-icon">＋</span> Publier une offre
+      </button>
+    </nav>
+
+    <button class="r-logout" (click)="logout()">
+      <span>⏻</span> Déconnexion
     </button>
-  </div>
+  </aside>
+  <div class="r-overlay" *ngIf="sidebarOpen" (click)="sidebarOpen=false"></div>
+
+  <!-- ░░░ MAIN ░░░ -->
+  <main class="r-main">
+
+    <!-- TOP BAR -->
+    <header class="r-topbar">
+      <button class="r-burger" (click)="sidebarOpen=!sidebarOpen">☰</button>
+      <div class="r-breadcrumb">
+        <span *ngIf="activeSection==='dashboard'">Tableau de bord</span>
+        <span *ngIf="activeSection==='offres'">Mes offres d'emploi</span>
+        <span *ngIf="activeSection==='candidatures'">Candidatures {{ selectedOffer ? '— '+selectedOffer.title : '' }}</span>
+        <span *ngIf="activeSection==='candidats'">Explorer les talents</span>
+        <span *ngIf="activeSection==='nouvelle-offre'">Nouvelle offre</span>
+        <span *ngIf="activeSection==='modifier-offre'">Modifier l'offre</span>
+        <span *ngIf="activeSection==='detail-candidature'">Dossier candidat</span>
+      </div>
+      <button class="r-topbar-cta" (click)="navigate('nouvelle-offre')">
+        <span>＋</span> Publier une offre
+      </button>
+      <div class="r-topbar-avatar">
+        <img *ngIf="photoURL" [src]="photoURL" alt="">
+        <span *ngIf="!photoURL">{{ initials }}</span>
+      </div>
+    </header>
+
+    <!-- ────────────── DASHBOARD ────────────── -->
+    <section class="r-section" *ngIf="activeSection==='dashboard'">
+
+      <div class="r-welcome">
+        <div>
+          <p class="r-welcome-greeting">Bonjour, <strong>{{ fullName }}</strong> 👋</p>
+          <p class="r-welcome-sub">{{ companyName }} · Votre tableau de bord recruteur</p>
+        </div>
+        <button class="r-cta-btn" (click)="navigate('nouvelle-offre')">＋ Nouvelle offre</button>
+      </div>
+
+      <!-- Stats grid -->
+      <div class="r-stats-grid">
+        <div class="r-stat-card accent">
+          <div class="r-stat-icon">◈</div>
+          <div class="r-stat-value">{{ stats.totalOffers }}</div>
+          <div class="r-stat-label">Offres publiées</div>
+          <div class="r-stat-sub">{{ stats.activeOffers }} actives</div>
+        </div>
+        <div class="r-stat-card">
+          <div class="r-stat-icon">◉</div>
+          <div class="r-stat-value">{{ stats.totalApplications }}</div>
+          <div class="r-stat-label">Candidatures</div>
+          <div class="r-stat-sub">{{ stats.newApplications }} nouvelles</div>
+        </div>
+        <div class="r-stat-card">
+          <div class="r-stat-icon">★</div>
+          <div class="r-stat-value">{{ stats.shortlisted }}</div>
+          <div class="r-stat-label">Sélectionnés</div>
+          <div class="r-stat-sub">profils retenus</div>
+        </div>
+        <div class="r-stat-card">
+          <div class="r-stat-icon">◷</div>
+          <div class="r-stat-value">{{ stats.interviews }}</div>
+          <div class="r-stat-label">Entretiens</div>
+          <div class="r-stat-sub">à venir</div>
+        </div>
+      </div>
+
+      <!-- Recent offers -->
+      <div class="r-panel">
+        <div class="r-panel-header">
+          <h3>Offres récentes</h3>
+          <button class="r-link-btn" (click)="navigate('offres')">Voir tout →</button>
+        </div>
+        <div *ngIf="offersLoading" class="r-loader-sm"></div>
+        <div *ngIf="!offersLoading && !jobOffers.length" class="r-empty-sm">
+          <p>Aucune offre publiée. <button (click)="navigate('nouvelle-offre')" class="r-inline-link">Créer votre première offre →</button></p>
+        </div>
+        <div class="r-offer-list" *ngIf="!offersLoading && jobOffers.length">
+          <div class="r-offer-row" *ngFor="let o of jobOffers.slice(0,4)">
+            <div class="r-offer-row-left">
+              <div class="r-job-type-dot" [style.background]="getJobTypeColor(o.type)"></div>
+              <div>
+                <p class="r-offer-row-title">{{ o.title }}</p>
+                <p class="r-offer-row-meta">{{ o.type }} · {{ o.location }}</p>
+              </div>
+            </div>
+            <div class="r-offer-row-right">
+              <span class="r-status-badge" [class]="o.status">{{ o.status }}</span>
+              <span class="r-app-count">{{ o.applicationCount }} candidature{{ o.applicationCount > 1 ? 's' : '' }}</span>
+              <button class="r-icon-btn" (click)="openOfferApplications(o)" title="Voir candidatures">◉</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ────────────── OFFRES ────────────── -->
+    <section class="r-section" *ngIf="activeSection==='offres'">
+
+      <div class="r-section-header">
+        <div class="r-filter-tabs">
+          <button [class.active]="offersFilter==='all'" (click)="offersFilter='all'">Toutes</button>
+          <button [class.active]="offersFilter==='active'" (click)="offersFilter='active'">Actives</button>
+          <button [class.active]="offersFilter==='paused'" (click)="offersFilter='paused'">Pausées</button>
+          <button [class.active]="offersFilter==='draft'" (click)="offersFilter='draft'">Brouillons</button>
+          <button [class.active]="offersFilter==='closed'" (click)="offersFilter='closed'">Fermées</button>
+        </div>
+        <button class="r-cta-btn" (click)="navigate('nouvelle-offre')">＋ Nouvelle offre</button>
+      </div>
+
+      <div *ngIf="offersLoading" class="r-full-loader"><div class="r-spin"></div></div>
+
+      <div *ngIf="!offersLoading && !filteredOffers.length" class="r-empty-state">
+        <div class="r-empty-icon">◈</div>
+        <h3>Aucune offre</h3>
+        <p>Publiez votre première offre d'emploi et trouvez vos talents.</p>
+        <button class="r-cta-btn" (click)="navigate('nouvelle-offre')">Créer une offre</button>
+      </div>
+
+      <div class="r-offers-grid" *ngIf="!offersLoading && filteredOffers.length">
+        <div class="r-offer-card" *ngFor="let o of filteredOffers">
+          <div class="r-offer-card-top">
+            <div class="r-offer-type-tag" [style.color]="getJobTypeColor(o.type)" [style.border-color]="getJobTypeColor(o.type)+'44'">{{ o.type }}</div>
+            <div class="r-offer-urgent" *ngIf="o.urgent">🔥 Urgent</div>
+            <span class="r-status-badge" [class]="o.status">{{ o.status }}</span>
+          </div>
+          <h3 class="r-offer-card-title">{{ o.title }}</h3>
+          <p class="r-offer-card-meta">
+            <span>📍 {{ o.location }}</span>
+            <span>·</span>
+            <span>{{ o.experienceLevel }}</span>
+          </p>
+          <p class="r-offer-card-salary">{{ formatSalary(o.salaryMin, o.salaryMax, o.salaryCurrency) }}</p>
+          <div class="r-offer-skills" *ngIf="o.skills.length">
+            <span *ngFor="let s of o.skills.slice(0,3)" class="r-skill-chip">{{ s }}</span>
+            <span *ngIf="o.skills.length>3" class="r-skill-chip more">+{{ o.skills.length-3 }}</span>
+          </div>
+          <div class="r-offer-card-footer">
+            <div class="r-offer-card-stats">
+              <span title="Candidatures">◉ {{ o.applicationCount }}</span>
+              <span title="Vues">👁 {{ o.viewCount }}</span>
+              <span>{{ formatDate(o.createdAt) }}</span>
+            </div>
+            <div class="r-offer-card-actions">
+              <button class="r-icon-btn" title="Candidatures" (click)="openOfferApplications(o)">Candidatures</button>
+              <button class="r-icon-btn edit" title="Modifier" (click)="editOffer(o)">✎</button>
+              <button class="r-icon-btn toggle" [title]="o.status==='active'?'Mettre en pause':'Activer'" (click)="toggleOfferStatus(o)">
+                {{ o.status==='active' ? '⏸' : '▶' }}
+              </button>
+              <button class="r-icon-btn del" title="Supprimer" (click)="deleteOffer(o.id!)">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ────────────── CANDIDATURES ────────────── -->
+    <section class="r-section" *ngIf="activeSection==='candidatures'">
+
+      <div class="r-section-header">
+        <div class="r-filter-tabs">
+          <button [class.active]="appsFilter==='all'" (click)="appsFilter='all'">
+            Toutes <span class="r-count-chip">{{ applications.length }}</span>
+          </button>
+          <button *ngFor="let s of appStatusKeys"
+            [class.active]="appsFilter===s" (click)="appsFilter=s">
+            {{ getAppStatusConf(s).label }}
+            <span class="r-count-chip">{{ countByStatus(s) }}</span>
+          </button>
+        </div>
+        <button class="r-link-btn" *ngIf="selectedOffer" (click)="navigate('offres')">← Retour aux offres</button>
+      </div>
+
+      <div *ngIf="appsLoading" class="r-full-loader"><div class="r-spin"></div></div>
+
+      <div *ngIf="!appsLoading && !filteredApplications.length" class="r-empty-state">
+        <div class="r-empty-icon">◉</div>
+        <h3>Aucune candidature</h3>
+        <p *ngIf="selectedOffer">Aucune candidature reçue pour « {{ selectedOffer.title }} ».</p>
+        <p *ngIf="!selectedOffer">Aucune candidature reçue pour le moment.</p>
+      </div>
+
+      <div class="r-apps-list" *ngIf="!appsLoading && filteredApplications.length">
+        <div class="r-app-row" *ngFor="let app of filteredApplications" (click)="openApplication(app)">
+          <div class="r-app-avatar">
+            <img *ngIf="app.candidatePhoto" [src]="app.candidatePhoto" alt="">
+            <span *ngIf="!app.candidatePhoto">{{ app.candidateName?.[0] || '?' }}</span>
+          </div>
+          <div class="r-app-info">
+            <p class="r-app-name">{{ app.candidateName }}</p>
+            <p class="r-app-title">{{ app.candidateTitle || app.candidateSector || '' }}</p>
+            <p class="r-app-meta">{{ app.candidateCity }} · Postulé {{ formatDate(app.appliedAt) }}</p>
+          </div>
+          <div class="r-app-job" *ngIf="!selectedOffer">
+            <span class="r-app-job-label">{{ app.jobTitle }}</span>
+          </div>
+          <div class="r-app-rating" *ngIf="app.rating">
+            <span *ngFor="let s of stars(app.rating); let i=index" [class.filled]="i<(app.rating||0)">★</span>
+          </div>
+          <div class="r-app-status">
+            <span class="r-app-badge"
+              [style.color]="getAppStatusConf(app.status).color"
+              [style.background]="getAppStatusConf(app.status).bg">
+              {{ getAppStatusConf(app.status).label }}
+            </span>
+          </div>
+          <button class="r-icon-btn view-btn">→</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ────────────── DETAIL CANDIDATURE ────────────── -->
+    <section class="r-section" *ngIf="activeSection==='detail-candidature' && selectedApplication">
+      <div class="r-detail-layout">
+
+        <!-- Left: candidate info -->
+        <div class="r-detail-main">
+          <button class="r-back-btn" (click)="navigate('candidatures')">← Retour</button>
+
+          <div class="r-cand-header">
+            <div class="r-cand-avatar">
+              <img *ngIf="selectedApplication.candidatePhoto" [src]="selectedApplication.candidatePhoto" alt="">
+              <span *ngIf="!selectedApplication.candidatePhoto">{{ selectedApplication.candidateName?.[0] || '?' }}</span>
+            </div>
+            <div class="r-cand-meta">
+              <h2>{{ selectedApplication.candidateName }}</h2>
+              <p class="r-cand-title">{{ selectedApplication.candidateTitle }}</p>
+              <p class="r-cand-loc">📍 {{ selectedApplication.candidateCity }}</p>
+              <div class="r-cand-tags">
+                <span *ngIf="selectedApplication.candidateSector">{{ selectedApplication.candidateSector }}</span>
+                <span *ngIf="selectedApplication.candidateExperience">{{ selectedApplication.candidateExperience }}</span>
+                <span *ngIf="selectedApplication.candidateEducation">{{ selectedApplication.candidateEducation }}</span>
+              </div>
+            </div>
+            <button class="r-cv-btn" (click)="viewCandidateCV(selectedApplication.candidateId)">
+              Voir le CV →
+            </button>
+          </div>
+
+          <!-- Cover letter -->
+          <div class="r-detail-section" *ngIf="selectedApplication.coverLetter">
+            <h4>Lettre de motivation</h4>
+            <div class="r-cover-letter">{{ selectedApplication.coverLetter }}</div>
+          </div>
+
+          <!-- CV Summary -->
+          <div class="r-detail-section" *ngIf="selectedApplication.cvData">
+            <h4>Résumé du profil</h4>
+            <p class="r-cv-summary">{{ selectedApplication.cvData?.summary }}</p>
+
+            <div class="r-cv-skills" *ngIf="selectedApplication.cvData?.technicalSkills?.length">
+              <h5>Compétences</h5>
+              <div class="r-skill-tags">
+                <span *ngFor="let sk of selectedApplication.cvData.technicalSkills" class="r-skill-chip">{{ sk }}</span>
+              </div>
+            </div>
+
+            <div class="r-cv-xp" *ngIf="selectedApplication.cvData?.experiences?.length">
+              <h5>Expériences</h5>
+              <div class="r-xp-item" *ngFor="let xp of selectedApplication.cvData.experiences.slice(0,3)">
+                <p class="r-xp-title">{{ xp.position }} <span>— {{ xp.company }}</span></p>
+                <p class="r-xp-dates">{{ xp.startDate }} – {{ xp.endDate || 'En cours' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: actions -->
+        <div class="r-detail-sidebar">
+          <div class="r-detail-panel">
+            <h4>Statut</h4>
+            <div class="r-status-selector">
+              <button *ngFor="let s of appStatusKeys" class="r-status-opt"
+                [class.selected]="selectedApplication.status===s"
+                [style.border-color]="getAppStatusConf(s).color"
+                [style.background]="selectedApplication.status===s ? getAppStatusConf(s).bg : ''"
+                [style.color]="getAppStatusConf(s).color"
+                (click)="updateStatus(selectedApplication, s)">
+                {{ getAppStatusConf(s).label }}
+              </button>
+            </div>
+          </div>
+
+          <div class="r-detail-panel">
+            <h4>Évaluation</h4>
+            <div class="r-star-rating">
+              <button *ngFor="let s of stars(selectedApplication.rating); let i=index"
+                class="r-star" [class.filled]="i<(selectedApplication.rating||0)"
+                (click)="rateApp(selectedApplication, i+1)">★</button>
+            </div>
+          </div>
+
+          <div class="r-detail-panel">
+            <h4>Notes internes</h4>
+            <textarea class="r-notes-input" [(ngModel)]="selectedApplication.notes"
+              placeholder="Ajoutez vos notes…" rows="5"
+              (blur)="recruiterService.updateApplicationStatus(selectedApplication.id!, selectedApplication.status, selectedApplication.notes)">
+            </textarea>
+          </div>
+
+          <div class="r-detail-actions">
+            <button class="r-action-btn shortlist" (click)="updateStatus(selectedApplication, 'shortlisted')">
+              ★ Sélectionner
+            </button>
+            <button class="r-action-btn interview" (click)="updateStatus(selectedApplication, 'interview')">
+              ◷ Planifier entretien
+            </button>
+            <button class="r-action-btn reject" (click)="updateStatus(selectedApplication, 'rejected')">
+              ✕ Rejeter
+            </button>
+            <button class="r-cv-btn full" (click)="viewCandidateCV(selectedApplication.candidateId)">
+              Voir le CV complet →
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ────────────── CANDIDATS (explorer) ────────────── -->
+    <section class="r-section" *ngIf="activeSection==='candidats'">
+
+      <div class="r-search-bar">
+        <div class="r-search-input-wrap">
+          <span class="r-search-icon">🔍</span>
+          <input type="text" placeholder="Rechercher par nom, titre, compétence…"
+            [(ngModel)]="candidateFilters.keyword" (input)="searchCandidates()">
+        </div>
+        <select [(ngModel)]="candidateFilters.sector" (change)="searchCandidates()">
+          <option value="">Tous les secteurs</option>
+          <option *ngFor="let s of sectors" [value]="s">{{ s }}</option>
+        </select>
+        <input type="text" placeholder="Ville" [(ngModel)]="candidateFilters.city" (input)="searchCandidates()">
+        <select [(ngModel)]="candidateFilters.experienceYears" (change)="searchCandidates()">
+          <option value="">Expérience</option>
+          <option value="0-1 an">0-1 an</option>
+          <option value="1-3 ans">1-3 ans</option>
+          <option value="3-5 ans">3-5 ans</option>
+          <option value="5-10 ans">5-10 ans</option>
+          <option value="10+ ans">10+ ans</option>
+        </select>
+        <button class="r-clear-btn" (click)="clearCandidateFilters()">✕ Réinitialiser</button>
+      </div>
+
+      <p class="r-results-count">{{ candidates.length }} talent{{ candidates.length>1?'s':'' }} trouvé{{ candidates.length>1?'s':'' }}</p>
+
+      <div *ngIf="candidatesLoading" class="r-full-loader"><div class="r-spin"></div></div>
+
+      <div *ngIf="!candidatesLoading && !candidates.length" class="r-empty-state">
+        <div class="r-empty-icon">◎</div>
+        <h3>Aucun talent trouvé</h3>
+        <p>Modifiez vos critères de recherche.</p>
+      </div>
+
+      <div class="r-candidates-grid" *ngIf="!candidatesLoading && candidates.length">
+        <div class="r-cand-card" *ngFor="let c of candidates">
+          <div class="r-cand-card-avatar">
+            <img *ngIf="c.photoURL" [src]="c.photoURL" alt="">
+            <span *ngIf="!c.photoURL">{{ (c.firstName?.[0]||'') + (c.lastName?.[0]||'') }}</span>
+          </div>
+          <div class="r-cand-card-body">
+            <h4>{{ c.firstName }} {{ c.lastName }}</h4>
+            <p class="r-cand-card-title">{{ c.title || 'Profil non renseigné' }}</p>
+            <p class="r-cand-card-loc">📍 {{ c.city }}{{ c.country ? ', '+c.country : '' }}</p>
+            <div class="r-cand-card-tags">
+              <span *ngIf="c.sector">{{ c.sector }}</span>
+              <span *ngIf="c.experienceYears">{{ c.experienceYears }}</span>
+              <span *ngIf="c.educationLevel">{{ c.educationLevel }}</span>
+            </div>
+            <div class="r-cand-skills" *ngIf="c.cvData?.technicalSkills?.length">
+              <span *ngFor="let sk of c.cvData.technicalSkills.slice(0,4)" class="r-skill-chip">{{ sk }}</span>
+            </div>
+          </div>
+          <button class="r-cv-btn" (click)="viewCandidateCV(c.uid||c.id)">Voir CV →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ────────────── FORM (Nouvelle / Modifier offre) ────────────── -->
+    <section class="r-section" *ngIf="activeSection==='nouvelle-offre' || activeSection==='modifier-offre'">
+
+      <div class="r-form-wrap" *ngIf="editingOffer">
+
+        <div class="r-form-success" *ngIf="formSuccess">
+          <span>✓</span> Offre {{ editingOffer.id ? 'mise à jour' : 'publiée' }} avec succès !
+        </div>
+        <div class="r-form-error" *ngIf="formError">{{ formError }}</div>
+
+        <!-- ─ Section 1: Infos essentielles ─ -->
+        <div class="r-form-section">
+          <div class="r-form-section-title">
+            <span class="r-step-num">1</span> Informations essentielles
+          </div>
+          <div class="r-form-grid-2">
+            <div class="r-field full">
+              <label>Titre du poste *</label>
+              <input type="text" [(ngModel)]="editingOffer.title" placeholder="ex: Développeur Full Stack Angular">
+            </div>
+            <div class="r-field">
+              <label>Secteur *</label>
+              <select [(ngModel)]="editingOffer.sector">
+                <option value="">Choisir…</option>
+                <option *ngFor="let s of sectors" [value]="s">{{ s }}</option>
+              </select>
+            </div>
+            <div class="r-field">
+              <label>Type de contrat</label>
+              <div class="r-type-grid">
+                <button *ngFor="let t of jobTypes" class="r-type-btn"
+                  [class.active]="editingOffer.type===t"
+                  [style.border-color]="editingOffer.type===t ? getJobTypeColor(t) : ''"
+                  [style.color]="editingOffer.type===t ? getJobTypeColor(t) : ''"
+                  (click)="editingOffer.type=t">{{ t }}</button>
+              </div>
+            </div>
+            <div class="r-field">
+              <label>Localisation</label>
+              <input type="text" [(ngModel)]="editingOffer.location" placeholder="ex: Dakar, Sénégal">
+            </div>
+            <div class="r-field">
+              <label>Télétravail</label>
+              <div class="r-radio-group">
+                <label *ngFor="let r of remoteOptions" class="r-radio-opt" [class.active]="editingOffer.remote===r.value">
+                  <input type="radio" [value]="r.value" [(ngModel)]="editingOffer.remote" hidden>
+                  {{ r.label }}
+                </label>
+              </div>
+            </div>
+            <div class="r-field">
+              <label>Niveau d'expérience</label>
+              <select [(ngModel)]="editingOffer.experienceLevel">
+                <option *ngFor="let l of experienceLevels" [value]="l">{{ l }}</option>
+              </select>
+            </div>
+            <div class="r-field">
+              <label>Niveau d'études</label>
+              <select [(ngModel)]="editingOffer.educationLevel">
+                <option *ngFor="let l of educationLevels" [value]="l">{{ l }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Salary -->
+          <div class="r-salary-row">
+            <div class="r-field">
+              <label>Salaire min (optionnel)</label>
+              <input type="number" [(ngModel)]="editingOffer.salaryMin" placeholder="ex: 400000">
+            </div>
+            <div class="r-salary-dash">—</div>
+            <div class="r-field">
+              <label>Salaire max (optionnel)</label>
+              <input type="number" [(ngModel)]="editingOffer.salaryMax" placeholder="ex: 700000">
+            </div>
+            <div class="r-field narrow">
+              <label>Devise</label>
+              <select [(ngModel)]="editingOffer.salaryCurrency">
+                <option value="XOF">XOF</option>
+                <option value="EUR">EUR</option>
+                <option value="USD">USD</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="r-field">
+            <label>Options</label>
+            <div class="r-checkbox-row">
+              <label class="r-checkbox-opt" [class.active]="editingOffer.urgent" (click)="editingOffer.urgent=!editingOffer.urgent">
+                🔥 Offre urgente
+              </label>
+              <label class="r-checkbox-opt" [class.active]="editingOffer.status==='draft'"
+                (click)="editingOffer.status = editingOffer.status==='draft' ? 'active' : 'draft'">
+                📝 Enregistrer comme brouillon
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─ Section 2: Description ─ -->
+        <div class="r-form-section">
+          <div class="r-form-section-title">
+            <span class="r-step-num">2</span> Description du poste *
+          </div>
+          <textarea class="r-textarea" [(ngModel)]="editingOffer.description" rows="6"
+            placeholder="Décrivez le poste, le contexte de l'entreprise, les missions générales…"></textarea>
+        </div>
+
+        <!-- ─ Section 3: Listes ─ -->
+        <div class="r-form-section">
+          <div class="r-form-section-title">
+            <span class="r-step-num">3</span> Détails du poste
+          </div>
+
+          <!-- Responsibilities -->
+          <div class="r-tag-field">
+            <label>Responsabilités</label>
+            <div class="r-tag-input-row">
+              <input type="text" [(ngModel)]="newResp" placeholder="Ajouter une responsabilité…"
+                (keydown)="onTagKeydown($event, 'responsibilities', newResp)">
+              <button (click)="addItem('responsibilities', newResp)">Ajouter</button>
+            </div>
+            <div class="r-tag-list" *ngIf="editingOffer.responsibilities?.length">
+              <span *ngFor="let r of editingOffer.responsibilities; let i=index" class="r-tag-item">
+                {{ r }} <button (click)="removeItem('responsibilities', i)">×</button>
+              </span>
+            </div>
+          </div>
+
+          <!-- Requirements -->
+          <div class="r-tag-field">
+            <label>Prérequis indispensables</label>
+            <div class="r-tag-input-row">
+              <input type="text" [(ngModel)]="newReq" placeholder="Ajouter un prérequis…"
+                (keydown)="onTagKeydown($event, 'requirements', newReq)">
+              <button (click)="addItem('requirements', newReq)">Ajouter</button>
+            </div>
+            <div class="r-tag-list" *ngIf="editingOffer.requirements?.length">
+              <span *ngFor="let r of editingOffer.requirements; let i=index" class="r-tag-item req">
+                {{ r }} <button (click)="removeItem('requirements', i)">×</button>
+              </span>
+            </div>
+          </div>
+
+          <!-- Nice to have -->
+          <div class="r-tag-field">
+            <label>Atouts appréciés (optionnel)</label>
+            <div class="r-tag-input-row">
+              <input type="text" [(ngModel)]="newNice" placeholder="ex: Expérience en startup…"
+                (keydown)="onTagKeydown($event, 'niceToHave', newNice)">
+              <button (click)="addItem('niceToHave', newNice)">Ajouter</button>
+            </div>
+            <div class="r-tag-list" *ngIf="editingOffer.niceToHave?.length">
+              <span *ngFor="let r of editingOffer.niceToHave; let i=index" class="r-tag-item nice">
+                {{ r }} <button (click)="removeItem('niceToHave', i)">×</button>
+              </span>
+            </div>
+          </div>
+
+          <!-- Benefits -->
+          <div class="r-tag-field">
+            <label>Avantages proposés</label>
+            <div class="r-tag-input-row">
+              <input type="text" [(ngModel)]="newBenefit" placeholder="ex: Assurance santé, tickets repas…"
+                (keydown)="onTagKeydown($event, 'benefits', newBenefit)">
+              <button (click)="addItem('benefits', newBenefit)">Ajouter</button>
+            </div>
+            <div class="r-tag-list" *ngIf="editingOffer.benefits?.length">
+              <span *ngFor="let r of editingOffer.benefits; let i=index" class="r-tag-item benefit">
+                {{ r }} <button (click)="removeItem('benefits', i)">×</button>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─ Section 4: Compétences ─ -->
+        <div class="r-form-section">
+          <div class="r-form-section-title">
+            <span class="r-step-num">4</span> Compétences recherchées
+          </div>
+          <div class="r-tag-field">
+            <div class="r-tag-input-row">
+              <input type="text" [(ngModel)]="newSkill" placeholder="ex: Angular, Python, Gestion de projet…"
+                (keydown)="onTagKeydown($event, 'skills', newSkill)">
+              <button (click)="addItem('skills', newSkill)">Ajouter</button>
+            </div>
+            <div class="r-tag-list skill-cloud" *ngIf="editingOffer.skills?.length">
+              <span *ngFor="let s of editingOffer.skills; let i=index" class="r-skill-chip removable">
+                {{ s }} <button (click)="removeItem('skills', i)">×</button>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="r-form-actions">
+          <button class="r-cancel-btn" (click)="navigate('offres')">Annuler</button>
+          <button class="r-submit-btn" (click)="saveOffer()" [disabled]="formLoading">
+            <span *ngIf="!formLoading">{{ editingOffer.id ? '✓ Mettre à jour' : '🚀 Publier l\'offre' }}</span>
+            <span *ngIf="formLoading" class="r-btn-spin"></span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
 </div>
+
+<!-- LOADING SCREEN -->
+<ng-template #loader>
+  <div class="r-page-loader">
+    <div class="r-spin large"></div>
+    <p>Chargement…</p>
+  </div>
+</ng-template>
