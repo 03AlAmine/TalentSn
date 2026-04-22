@@ -1,0 +1,191 @@
+<!-- applications.component.html -->
+<div class="applications-page">
+  <!-- Header -->
+  <div class="applications-header">
+    <div>
+      <h1>Mes candidatures</h1>
+      <p>Suivez l'évolution de vos candidatures</p>
+    </div>
+    <button class="btn-browse" (click)="navigateToOffers()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="16"/>
+        <line x1="8" y1="12" x2="16" y2="12"/>
+      </svg>
+      Explorer les offres
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loader"></div>
+    <p>Chargement de vos candidatures...</p>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!isLoading" class="applications-content">
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card" *ngFor="let status of statusOptions">
+        <div class="stat-icon">{{ status.icon }}</div>
+        <div class="stat-value">{{ getStatusCount(status.value) }}</div>
+        <div class="stat-label">{{ status.label }}</div>
+      </div>
+    </div>
+
+    <!-- Status Tabs -->
+    <div class="status-tabs">
+      <button *ngFor="let status of statusOptions"
+              class="status-tab"
+              [class.active]="selectedStatus === status.value"
+              (click)="onStatusChange(status.value)">
+        <span class="tab-icon">{{ status.icon }}</span>
+        <span class="tab-label">{{ status.label }}</span>
+        <span class="tab-count">{{ getStatusCount(status.value) }}</span>
+      </button>
+    </div>
+
+    <!-- Applications List -->
+    <div *ngIf="filteredApplications.length === 0" class="empty-state">
+      <div class="empty-icon">📭</div>
+      <h3>Aucune candidature</h3>
+      <p>Vous n'avez pas encore postulé à des offres</p>
+      <button class="btn-primary" (click)="navigateToOffers()">Découvrir les offres</button>
+    </div>
+
+    <div class="applications-list" *ngIf="filteredApplications.length > 0">
+      <div class="application-card" *ngFor="let app of filteredApplications" (click)="openApplicationDetail(app)">
+        <div class="application-status-badge" [style.background]="getStatusConfig(app.status).bg">
+          <span class="status-dot" [style.background]="getStatusConfig(app.status).color"></span>
+          <span [style.color]="getStatusConfig(app.status).color">{{ getStatusConfig(app.status).label }}</span>
+        </div>
+
+        <div class="application-header">
+          <div class="application-logo">
+            <span>{{ app.companyName.charAt(0) }}</span>
+          </div>
+          <div class="application-info">
+            <h3>{{ app.jobTitle }}</h3>
+            <p class="application-company">{{ app.companyName }}</p>
+            <div class="application-meta">
+              <span class="meta-location">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                {{ app.location }}
+              </span>
+              <span class="meta-date">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                Postulée le {{ formatDate(app.appliedDate) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="application-progress">
+          <div class="progress-steps">
+            <div class="step" [class.completed]="app.status !== 'pending'">
+              <div class="step-icon">📝</div>
+              <div class="step-label">Candidature</div>
+            </div>
+            <div class="step-line" [class.completed]="app.status === 'reviewed' || app.status === 'interview' || app.status === 'accepted' || app.status === 'rejected'"></div>
+            <div class="step" [class.completed]="app.status === 'reviewed' || app.status === 'interview' || app.status === 'accepted'">
+              <div class="step-icon">👁️</div>
+              <div class="step-label">Consultation</div>
+            </div>
+            <div class="step-line" [class.completed]="app.status === 'interview' || app.status === 'accepted'"></div>
+            <div class="step" [class.completed]="app.status === 'interview' || app.status === 'accepted'">
+              <div class="step-icon">🎯</div>
+              <div class="step-label">Entretien</div>
+            </div>
+            <div class="step-line" [class.completed]="app.status === 'accepted'"></div>
+            <div class="step" [class.completed]="app.status === 'accepted'">
+              <div class="step-icon">✅</div>
+              <div class="step-label">Finalisation</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="application-footer">
+          <p class="status-message">{{ app.statusMessage }}</p>
+          <button class="btn-detail">Voir détails →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div class="modal" *ngIf="showDetailModal && selectedApp" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Détail de la candidature</h3>
+        <button class="modal-close" (click)="closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-header">
+          <div class="detail-logo">
+            <span>{{ selectedApp.companyName.charAt(0) }}</span>
+          </div>
+          <div class="detail-info">
+            <h4>{{ selectedApp.jobTitle }}</h4>
+            <p>{{ selectedApp.companyName }} • {{ selectedApp.location }}</p>
+          </div>
+          <div class="detail-status" [style.background]="getStatusConfig(selectedApp.status).bg" [style.color]="getStatusConfig(selectedApp.status).color">
+            {{ getStatusConfig(selectedApp.status).label }}
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Chronologie</h4>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-title">Candidature envoyée</div>
+                <div class="timeline-date">{{ formatDate(selectedApp.appliedDate) }}</div>
+              </div>
+            </div>
+            <div class="timeline-item" *ngIf="selectedApp.status !== 'pending'">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-title">CV consulté</div>
+                <div class="timeline-date">Le {{ formatDate(selectedApp.appliedDate) }}</div>
+              </div>
+            </div>
+            <div class="timeline-item" *ngIf="selectedApp.status === 'interview'">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-title">Entretien programmé</div>
+                <div class="timeline-date" *ngIf="selectedApp.interviewDate">
+                  {{ formatDate(selectedApp.interviewDate) }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section" *ngIf="selectedApp.nextStep">
+          <h4>Prochaines étapes</h4>
+          <p>{{ selectedApp.nextStep }}</p>
+        </div>
+
+        <div class="detail-section">
+          <h4>Message du recruteur</h4>
+          <p>{{ selectedApp.statusMessage }}</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeModal()">Fermer</button>
+        <button class="btn-primary" *ngIf="selectedApp.status === 'interview'" (click)="closeModal()">
+          Confirmer ma disponibilité
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

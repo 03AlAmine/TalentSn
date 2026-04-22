@@ -218,10 +218,12 @@ export class AuthService {
     await updateDoc(doc(this.firestore, 'users', uid), data as any);
   }
 
-  async saveCvData(uid: string, cvData: CvData): Promise<void> {
-    await updateDoc(doc(this.firestore, 'users', uid), { cvData } as any);
-  }
+  // Dans auth.service.ts, ajoute cette méthode si elle n'existe pas:
 
+  async saveCvData(uid: string, cvData: CvData): Promise<void> {
+    const userRef = doc(this.firestore, 'users', uid);
+    await updateDoc(userRef, { cvData } as any);
+  }
   async logout(): Promise<void> {
     await signOut(this.auth);
     this.router.navigate(['/']);
@@ -251,5 +253,4 @@ export class AuthService {
       this.router.navigate(['/recruiter/dashboard']);
     else this.router.navigate(['/onboarding']);
   }
-
 }

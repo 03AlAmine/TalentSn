@@ -1,0 +1,202 @@
+<!-- offers.component.html (COMPLET CORRIGÉ) -->
+<div class="offers-page">
+  <!-- Header -->
+  <div class="offers-header">
+    <div>
+      <h1>Offres d'emploi</h1>
+      <p>Découvrez les offres qui correspondent à votre profil</p>
+    </div>
+    <button class="btn-filter-mobile" (click)="showFilters = !showFilters">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="22 3 2 3 10 13 10 21 14 18 14 13 22 3"/>
+      </svg>
+      Filtres
+    </button>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <div class="search-input">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" [(ngModel)]="filters.keyword" (input)="applyFilters()"
+             placeholder="Titre, entreprise, compétences...">
+    </div>
+  </div>
+
+  <div class="offers-layout">
+    <!-- Filters Sidebar -->
+    <aside class="filters-sidebar" [class.open]="showFilters">
+      <div class="filters-header">
+        <h3>Filtres</h3>
+        <button class="close-filters" (click)="showFilters = false">×</button>
+      </div>
+
+      <div class="filter-group">
+        <label>Type de contrat</label>
+        <select [(ngModel)]="filters.contractType" (change)="applyFilters()">
+          <option value="">Tous les types</option>
+          <option *ngFor="let type of contractTypes" [value]="type">{{ type }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Localisation</label>
+        <select [(ngModel)]="filters.location" (change)="applyFilters()">
+          <option value="">Toutes les villes</option>
+          <option *ngFor="let location of locations" [value]="location">{{ location }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Mode de travail</label>
+        <select [(ngModel)]="filters.remote" (change)="applyFilters()">
+          <option value="">Tous</option>
+          <option *ngFor="let option of remoteOptions" [value]="option.value">{{ option.label }}</option>
+        </select>
+      </div>
+
+      <button class="btn-reset" (click)="resetFilters()">Réinitialiser</button>
+    </aside>
+
+    <!-- Offers List -->
+    <div class="offers-list">
+      <div class="results-count">
+        {{ filteredOffers.length }} offre(s) trouvée(s)
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="loading-state">
+        <div class="loader"></div>
+        <p>Chargement des offres...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && filteredOffers.length === 0" class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h3>Aucune offre trouvée</h3>
+        <p>Essayez de modifier vos filtres</p>
+        <button class="btn-primary" (click)="resetFilters()">Réinitialiser les filtres</button>
+      </div>
+
+      <!-- Offers Grid -->
+      <div class="offers-grid" *ngIf="!isLoading && filteredOffers.length > 0">
+        <div class="offer-card" *ngFor="let offer of filteredOffers" (click)="openOfferDetail(offer)">
+          <div class="offer-badge" *ngIf="offer.urgent">
+            <span>Urgent</span>
+          </div>
+          <button class="offer-favorite" (click)="toggleFavorite(offer.id, $event)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                    [attr.fill]="favoriteIds.has(offer.id) ? '#ef4444' : 'none'"
+                    [attr.stroke]="favoriteIds.has(offer.id) ? '#ef4444' : 'currentColor'"/>
+            </svg>
+          </button>
+
+          <div class="offer-header">
+            <div class="offer-logo">
+              <span>{{ offer.companyName.charAt(0) }}</span>
+            </div>
+            <div class="offer-info">
+              <h3>{{ offer.title }}</h3>
+              <p class="offer-company">{{ offer.companyName }}</p>
+            </div>
+          </div>
+
+          <div class="offer-details">
+            <span class="offer-tag">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 7h-4.18A3 3 0 0 0 16 5.18V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v1.18A3 3 0 0 0 8.18 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+              </svg>
+              {{ offer.type }}
+            </span>
+            <span class="offer-tag">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              {{ offer.location }}
+            </span>
+            <span class="offer-tag">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+              {{ getRemoteLabel(offer.remote) }}
+            </span>
+          </div>
+
+          <p class="offer-description">{{ offer.description | slice:0:100 }}...</p>
+
+          <div class="offer-skills">
+            <span class="skill" *ngFor="let skill of offer.skills.slice(0, 3)">{{ skill }}</span>
+            <span class="skill-more" *ngIf="offer.skills.length > 3">+{{ offer.skills.length - 3 }}</span>
+          </div>
+
+          <div class="offer-footer">
+            <div class="offer-salary">
+              {{ formatSalary(offer.salaryMin, offer.salaryMax) }}
+            </div>
+            <div class="offer-actions">
+              <span class="offer-date">{{ formatRelativeDate(offer.postedAt) }}</span>
+              <button class="btn-apply" (click)="openApplyModal(offer, $event)">Postuler</button>
+            </div>
+          </div>
+
+          <div class="offer-match" *ngIf="offer.matchScore">
+            <div class="match-bar">
+              <div class="match-fill" [style.width.%]="offer.matchScore" [class]="getMatchScoreClass(offer.matchScore)"></div>
+            </div>
+            <span class="match-score">{{ offer.matchScore }}% match</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Apply Modal -->
+  <div class="modal" *ngIf="showApplyModal" (click)="showApplyModal = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Postuler à l'offre</h3>
+        <button class="modal-close" (click)="showApplyModal = false">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="apply-offer-info">
+          <h4>{{ selectedOffer?.title }}</h4>
+          <p>{{ selectedOffer?.companyName }} • {{ selectedOffer?.location }}</p>
+        </div>
+
+        <div class="apply-message">
+          <label>Message de motivation (optionnel)</label>
+          <textarea rows="4" placeholder="Dites-nous pourquoi vous êtes le candidat idéal..."></textarea>
+        </div>
+
+        <div class="apply-cv">
+          <label>CV utilisé</label>
+          <div class="cv-selector">
+            <span>📄 Mon CV TalentSn</span>
+            <button class="btn-change">Changer</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="showApplyModal = false">Annuler</button>
+        <button class="btn-primary" (click)="applyForJob()" [disabled]="isApplying">
+          {{ isApplying ? 'Envoi en cours...' : 'Confirmer ma candidature' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Toast -->
+  <div class="toast-success" *ngIf="applyMessage">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    {{ applyMessage }}
+  </div>
+</div>

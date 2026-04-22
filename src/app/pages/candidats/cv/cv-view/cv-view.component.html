@@ -151,7 +151,7 @@
                 {{ s }}
                 <button *ngIf="!isSharedView" class="skill-remove" (click)="removeTechSkill(i)" title="Supprimer">×</button>
               </span>
-              <span *ngIf="!cvData.technicalSkills?.length" class="empty-field">Non renseigné</span>
+              <span *ngIf="!cvData.technicalSkills.length" class="empty-field">Non renseigné</span>
             </div>
             <div class="skill-add-row no-print" *ngIf="!isSharedView">
               <ng-container *ngIf="!showTechSkillInput">
@@ -174,7 +174,7 @@
                 <span class="exec-soft-dot"></span>{{ s }}
                 <button *ngIf="!isSharedView" class="skill-remove soft" (click)="removeSoftSkill(i)">×</button>
               </div>
-              <span *ngIf="!cvData.softSkills?.length" class="empty-field">Non renseigné</span>
+              <span *ngIf="!cvData.softSkills.length" class="empty-field">Non renseigné</span>
             </div>
             <div class="skill-add-row no-print" *ngIf="!isSharedView">
               <ng-container *ngIf="!showSoftSkillInput">
@@ -190,7 +190,7 @@
           </div>
 
           <!-- Langues -->
-          <div class="exec-section" *ngIf="cvData.languages?.length">
+          <div class="exec-section" *ngIf="cvData.languages.length">
             <h3 class="exec-section-title">Langues</h3>
             <div *ngFor="let lang of cvData.languages" class="exec-lang-item">
               <span class="exec-lang-name">{{ lang.name }}</span>
@@ -199,7 +199,7 @@
           </div>
 
           <!-- Certifications -->
-          <div class="exec-section" *ngIf="cvData.certifications?.length && cvData.certifications[0]?.name">
+          <div class="exec-section" *ngIf="cvData.certifications.length && cvData.certifications[0]?.name">
             <h3 class="exec-section-title">Certifications</h3>
             <div *ngFor="let cert of cvData.certifications" class="exec-cert-item">
               <div class="exec-cert-name">{{ cert.name }}</div>
@@ -235,7 +235,7 @@
           </div>
 
           <!-- Expériences -->
-          <div class="exec-section" *ngIf="cvData.experiences?.length">
+          <div class="exec-section" *ngIf="cvData.experiences.length">
             <h3 class="exec-section-title">Expériences professionnelles</h3>
             <div *ngFor="let exp of cvData.experiences; let ei=index; let last=last" class="exec-exp-block">
               <div class="exec-exp-header">
@@ -264,14 +264,14 @@
                 </div>
               </div>
 
-              <ul class="exec-exp-bullets" *ngIf="exp.bulletPoints?.length">
+              <ul class="exec-exp-bullets" *ngIf="exp.bulletPoints.length">
                 <li *ngFor="let bp of exp.bulletPoints; let bi=index" class="bullet-item">
                   <span [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
                         (blur)="onBulletBlur($event, ei, bi)">{{ bp }}</span>
                   <button *ngIf="!isSharedView" class="bullet-remove no-print" (click)="removeBullet(ei, bi)" title="Supprimer">×</button>
                 </li>
               </ul>
-              <p class="exec-exp-desc" *ngIf="!exp.bulletPoints?.length && exp.description"
+              <p class="exec-exp-desc" *ngIf="!exp.bulletPoints.length && exp.description"
                  [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
                  (blur)="onFieldBlur($event, 'experiences', ei, 'description')">{{ exp.description }}</p>
 
@@ -281,7 +281,7 @@
           </div>
 
           <!-- Formations -->
-          <div class="exec-section" *ngIf="cvData.educations?.length">
+          <div class="exec-section" *ngIf="cvData.educations.length">
             <h3 class="exec-section-title">Formation</h3>
             <div *ngFor="let edu of cvData.educations; let ei=index; let last=last" class="exec-edu-block">
               <div class="exec-edu-header">
@@ -400,7 +400,7 @@
             </div>
           </div>
 
-          <div class="side-section" *ngIf="cvData.languages?.length">
+          <div class="side-section" *ngIf="cvData.languages.length">
             <h4 class="side-section-title">Langues</h4>
             <div *ngFor="let lang of cvData.languages" class="side-lang-item">
               <span>{{ lang.name }}</span><span class="side-lang-level">{{ lang.level }}</span>
@@ -417,7 +417,7 @@
                (blur)="onFieldBlur($event, 'summary')">{{ cvData.summary }}</p>
           </div>
 
-          <div class="side-main-section" *ngIf="cvData.experiences?.length">
+          <div class="side-main-section" *ngIf="cvData.experiences.length">
             <h3 class="side-main-title">Expériences</h3>
             <div *ngFor="let exp of cvData.experiences; let ei=index" class="side-exp-block">
               <div class="side-exp-dot"></div>
@@ -435,14 +435,14 @@
                   </div>
                   <div class="side-exp-dates">{{ exp.startDate }} – {{ exp.isCurrent ? 'Présent' : exp.endDate }}</div>
                 </div>
-                <ul class="side-exp-bullets" *ngIf="exp.bulletPoints?.length">
+                <ul class="side-exp-bullets" *ngIf="exp.bulletPoints.length">
                   <li *ngFor="let bp of exp.bulletPoints; let bi=index" class="bullet-item">
                     <span [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
                           (blur)="onBulletBlur($event, ei, bi)">{{ bp }}</span>
                     <button *ngIf="!isSharedView" class="bullet-remove no-print" (click)="removeBullet(ei, bi)">×</button>
                   </li>
                 </ul>
-                <p class="side-exp-desc" *ngIf="!exp.bulletPoints?.length && exp.description"
+                <p class="side-exp-desc" *ngIf="!exp.bulletPoints.length && exp.description"
                    [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
                    (blur)="onFieldBlur($event, 'experiences', ei, 'description')">{{ exp.description }}</p>
                 <button *ngIf="!isSharedView" class="add-bullet-btn no-print" (click)="addBullet(ei)">+ Ajouter une réalisation</button>
@@ -450,7 +450,7 @@
             </div>
           </div>
 
-          <div class="side-main-section" *ngIf="cvData.educations?.length">
+          <div class="side-main-section" *ngIf="cvData.educations.length">
             <h3 class="side-main-title">Formation</h3>
             <div *ngFor="let edu of cvData.educations; let ei=index" class="side-exp-block">
               <div class="side-exp-dot"></div>
@@ -527,7 +527,7 @@
                (blur)="onFieldBlur($event, 'summary')">{{ cvData.summary }}</p>
           </div>
 
-          <div class="min-section" *ngIf="cvData.experiences?.length">
+          <div class="min-section" *ngIf="cvData.experiences.length">
             <h3 class="min-section-title">Expériences professionnelles</h3>
             <div *ngFor="let exp of cvData.experiences; let ei=index" class="min-entry">
               <div class="min-entry-header">
@@ -543,21 +543,21 @@
                 </div>
                 <div class="min-entry-dates">{{ exp.startDate }} – {{ exp.isCurrent ? 'Présent' : exp.endDate }}</div>
               </div>
-              <ul class="min-bullets" *ngIf="exp.bulletPoints?.length">
+              <ul class="min-bullets" *ngIf="exp.bulletPoints.length">
                 <li *ngFor="let bp of exp.bulletPoints; let bi=index" class="bullet-item">
                   <span [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
                         (blur)="onBulletBlur($event, ei, bi)">{{ bp }}</span>
                   <button *ngIf="!isSharedView" class="bullet-remove no-print" (click)="removeBullet(ei, bi)">×</button>
                 </li>
               </ul>
-              <p class="min-desc" *ngIf="!exp.bulletPoints?.length && exp.description"
+              <p class="min-desc" *ngIf="!exp.bulletPoints.length && exp.description"
                  [contentEditable]="!isSharedView" [class.ce-field]="!isSharedView" spellcheck="false"
                  (blur)="onFieldBlur($event, 'experiences', ei, 'description')">{{ exp.description }}</p>
               <button *ngIf="!isSharedView" class="add-bullet-btn no-print" (click)="addBullet(ei)">+ Ajouter une réalisation</button>
             </div>
           </div>
 
-          <div class="min-section" *ngIf="cvData.educations?.length">
+          <div class="min-section" *ngIf="cvData.educations.length">
             <h3 class="min-section-title">Formation</h3>
             <div *ngFor="let edu of cvData.educations; let ei=index" class="min-entry">
               <div class="min-entry-header">
@@ -618,7 +618,7 @@
               </div>
             </div>
             <div>
-              <div class="min-section" *ngIf="cvData.languages?.length">
+              <div class="min-section" *ngIf="cvData.languages.length">
                 <h3 class="min-section-title">Langues</h3>
                 <div *ngFor="let lang of cvData.languages" class="min-lang">
                   <span>{{ lang.name }}</span><span class="min-lang-level">{{ lang.level }}</span>

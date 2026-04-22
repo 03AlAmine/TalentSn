@@ -1,441 +1,127 @@
-<div class="dash-layout" *ngIf="!isLoading; else loadingTpl">
-  <!-- SIDEBAR -->
-  <aside class="sidebar" [class.open]="sidebarOpen">
-    <div class="sidebar-logo">Talent<span>Sn</span></div>
-
-    <div class="sidebar-user">
-      <div class="avatar-wrap" (click)="photoInput.click()">
-        <img *ngIf="photoURL" [src]="photoURL" class="avatar-img" alt="Photo" />
-        <div *ngIf="!photoURL" class="avatar-initials">
-          {{ firstName.charAt(0) }}{{ lastName.charAt(0) }}
-        </div>
-        <div class="avatar-overlay">
-          <span *ngIf="!isUploadingPhoto">📷</span>
-          <div *ngIf="isUploadingPhoto" class="spin-sm"></div>
-        </div>
-      </div>
-      <input
-        #photoInput
-        type="file"
-        accept="image/*"
-        style="display: none"
-        (change)="onPhotoSelected($event)"
-      />
-      <div class="sidebar-user-name">{{ fullName }}</div>
-      <div class="sidebar-user-title">{{ title }}</div>
-      <div class="profile-bar-wrap">
-        <div class="profile-bar">
-          <div
-            class="profile-bar-fill"
-            [style.width]="profileCompletion + '%'"
-          ></div>
-        </div>
-        <div class="profile-bar-label">
-          Profil complété à {{ profileCompletion }}%
-        </div>
-      </div>
-    </div>
-
-    <nav class="sidebar-nav">
-      <button
-        class="nav-item"
-        [class.active]="activeSection === 'tableau-de-bord'"
-        (click)="navigate('tableau-de-bord')"
-      >
-        <span class="nav-icon">⊞</span><span>Tableau de bord</span>
-      </button>
-      <button
-        class="nav-item"
-        [class.active]="activeSection === 'mon-cv'"
-        (click)="navigate('mon-cv')"
-      >
-        <span class="nav-icon">📄</span><span>Mon CV</span>
-      </button>
-      <button
-        class="nav-item"
-        [class.active]="activeSection === 'ia-coach'"
-        (click)="navigate('ia-coach')"
-      >
-        <span class="nav-icon">🤖</span><span>IA Coach</span>
-      </button>
-      <button
-        class="nav-item"
-        [class.active]="activeSection === 'offres'"
-        (click)="navigate('offres')"
-      >
-        <span class="nav-icon">💼</span><span>Offres d'emploi</span>
-      </button>
-      <button
-        class="nav-item"
-        [class.active]="activeSection === 'candidatures'"
-        (click)="navigate('candidatures')"
-      >
-        <span class="nav-icon">📋</span><span>Mes candidatures</span>
-      </button>
-      <button
-        class="nav-item"
-        [class.active]="activeSection === 'messages'"
-        (click)="navigate('messages')"
-      >
-        <span class="nav-icon">💬</span><span>Messages</span>
-      </button>
-      <button
-        class="nav-item"
-        [class.active]="activeSection === 'rendez-vous'"
-        (click)="navigate('rendez-vous')"
-      >
-        <span class="nav-icon">📅</span><span>Rendez-vous</span>
-      </button>
-      <!--    <button class="nav-item" [class.active]="activeSection==='blockchain'" (click)="navigate('blockchain')">
-        <span class="nav-icon">🔗</span><span>Documents Blockchain</span>
-      </button>-->
-    </nav>
-
-    <button class="sidebar-logout" (click)="logout()">
-      <span>⏻</span> Déconnexion
-    </button>
-  </aside>
-
-  <!-- OVERLAY mobile -->
-  <div
-    class="sidebar-overlay"
-    *ngIf="sidebarOpen"
-    (click)="sidebarOpen = false"
-  ></div>
-
-  <!-- MAIN -->
-  <main class="dash-main">
-    <!-- TOP BAR -->
-    <div class="topbar">
-      <button class="burger" (click)="sidebarOpen = !sidebarOpen">☰</button>
-      <div class="topbar-title">
-        {{
-          activeSection === "tableau-de-bord"
-            ? "Tableau de bord"
-            : activeSection === "mon-cv"
-              ? "Mon CV"
-              : activeSection === "blockchain"
-                ? "Documents Blockchain"
-                : activeSection === "ia-coach"
-                  ? "IA Coach"
-                  : activeSection === "offres"
-                    ? "Offres d'emploi"
-                    : activeSection === "candidatures"
-                      ? "Mes candidatures"
-                      : activeSection === "messages"
-                        ? "Messages"
-                        : "Rendez-vous"
-        }}
-      </div>
-      <div class="topbar-right">
-        <div class="topbar-avatar" (click)="photoInput2.click()">
-          <img *ngIf="photoURL" [src]="photoURL" alt="Photo" />
-          <span *ngIf="!photoURL">{{ firstName.charAt(0) }}</span>
-        </div>
-        <input
-          #photoInput2
-          type="file"
-          accept="image/*"
-          style="display: none"
-          (change)="onPhotoSelected($event)"
-        />
-      </div>
-    </div>
-
-    <!-- ══ TABLEAU DE BORD ══ -->
-    <div class="section-content" *ngIf="activeSection === 'tableau-de-bord'">
-      <div class="welcome-banner">
-        <div class="welcome-left">
-          <div class="welcome-greeting">
-            {{ greetingTime }}, <strong>{{ firstName }}</strong> 👋
-          </div>
-          <div class="welcome-sub">
-            {{ title }} · {{ city }}<span *ngIf="city && country">, </span
-            >{{ country }}
-          </div>
-        </div>
-        <div class="welcome-right">
-          <div class="completion-circle">
-            <svg width="100" height="100" viewBox="0 0 100 100">
-              <circle
-                cx="50"
-                cy="50"
-                r="44"
-                fill="none"
-                stroke="#f0f0f0"
-                stroke-width="8"
-              />
-              <circle
-                cx="50"
-                cy="50"
-                r="44"
-                fill="none"
-                stroke="#00D68F"
-                stroke-width="8"
-                stroke-linecap="round"
-                [attr.stroke-dasharray]="276.5"
-                [attr.stroke-dashoffset]="
-                  276.5 - (276.5 * profileCompletion) / 100
-                "
-                transform="rotate(-90 50 50)"
-                style="transition: 0.5s"
-              />
-            </svg>
-            <div class="completion-pct">{{ profileCompletion }}%</div>
-          </div>
-          <div class="completion-label">Profil complété</div>
-        </div>
-      </div>
-
-      <!-- Suggestions IA -->
-      <div *ngIf="suggestions.length" class="suggestions-card">
-        <div class="suggestions-header">
-          💡 Suggestions IA pour améliorer votre profil
-        </div>
-        <div class="suggestions-list">
-          <div class="suggestion-item" *ngFor="let tip of suggestions">
-            <span class="sug-dot"></span> {{ tip }}
-          </div>
-        </div>
-      </div>
-
-      <!-- Stats -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-num">{{ cvStats.experiences }}</div>
-          <div class="stat-lbl">Expériences</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num">{{ cvStats.skills }}</div>
-          <div class="stat-lbl">Compétences</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num">{{ cvStats.educations }}</div>
-          <div class="stat-lbl">Formations</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num">{{ cvStats.languages }}</div>
-          <div class="stat-lbl">Langues</div>
-        </div>
-      </div>
-
-      <!-- Infos profil -->
-      <div class="info-cards-row">
-        <div class="info-card-sm">
-          <div class="info-card-label">Email</div>
-          <div class="info-card-val">{{ email || "—" }}</div>
-        </div>
-        <div class="info-card-sm">
-          <div class="info-card-label">Téléphone</div>
-          <div class="info-card-val">{{ phone || "—" }}</div>
-        </div>
-        <div class="info-card-sm">
-          <div class="info-card-label">Secteur</div>
-          <div class="info-card-val">{{ sector || "—" }}</div>
-        </div>
-        <div class="info-card-sm">
-          <div class="info-card-label">Disponibilité</div>
-          <div class="info-card-val">
-            {{ userData?.cvData?.additionalInfo?.availability || "—" }}
-          </div>
-        </div>
-        <div class="info-card-sm">
-          <div class="info-card-label">Contrat recherché</div>
-          <div class="info-card-val">
-            {{ userData?.cvData?.additionalInfo?.contractType || "—" }}
-          </div>
-        </div>
-        <div class="info-card-sm">
-          <div class="info-card-label">Niveau d'études</div>
-          <div class="info-card-val">{{ userData?.educationLevel || "—" }}</div>
-        </div>
-      </div>
-
-      <!-- CV rapide -->
-      <div class="cv-quick-card" *ngIf="hasCV" (click)="navigate('mon-cv')">
-        <div class="cv-quick-left">
-          <div class="cv-quick-icon">📄</div>
-          <div>
-            <div class="cv-quick-name">CV de {{ fullName }}</div>
-            <div class="cv-quick-sub">
-              Généré par l'IA · Cliquez pour voir, modifier ou exporter
-            </div>
-          </div>
-        </div>
-        <span class="cv-quick-arrow">→</span>
-      </div>
-
-      <div class="cv-empty-card" *ngIf="!hasCV">
-        <div class="cv-empty-icon">✨</div>
-        <div class="cv-empty-title">Votre CV IA vous attend</div>
-        <div class="cv-empty-sub">
-          Complétez l'onboarding pour que l'IA génère votre CV professionnel
-        </div>
-        <button class="btn-primary" (click)="goToOnboarding()">
-          Compléter mon profil →
-        </button>
-      </div>
-    </div>
-
-    <!-- ══ MON CV ══ -->
-    <div class="section-content" *ngIf="activeSection === 'mon-cv'">
-      <div *ngIf="hasCV" class="cv-section-wrap">
-        <div class="cv-actions-bar">
-          <button class="btn-primary" (click)="goToCV()">
-            ✏️ Voir & Modifier mon CV
-          </button>
-        </div>
-        <div class="cv-preview-card" (click)="goToCV()">
-          <div class="cv-preview-header" [class]="'theme-' + cvTheme">
-            <div class="cv-preview-name">{{ fullName }}</div>
-            <div class="cv-preview-title">{{ title }}</div>
-            <div class="cv-preview-contact">
-              {{ email }} · {{ city }}, {{ country }}
-            </div>
-          </div>
-          <div class="cv-preview-body">
-            <div class="cv-preview-section" *ngIf="userData?.cvData?.summary">
-              <div class="cv-preview-section-title">Résumé</div>
-              <div class="cv-preview-text">{{ userData?.cvData?.summary }}</div>
-            </div>
-            <div
-              class="cv-preview-section"
-              *ngIf="userData?.cvData?.technicalSkills?.length"
-            >
-              <div class="cv-preview-section-title">Compétences</div>
-              <div class="cv-preview-skills">
-                <span
-                  class="cv-skill-chip"
-                  *ngFor="
-                    let s of (userData?.cvData?.technicalSkills || []).slice(
-                      0,
-                      6
-                    )
-                  "
-                  >{{ s }}</span
-                >
-              </div>
-            </div>
-            <div
-              class="cv-preview-section"
-              *ngIf="userData?.cvData?.experiences?.length"
-            >
-              <div class="cv-preview-section-title">Expériences</div>
-              <div
-                *ngFor="
-                  let exp of (userData?.cvData?.experiences || []).slice(0, 2)
-                "
-                class="cv-preview-exp"
-              >
-                <div class="cv-exp-title">
-                  {{ exp.title }} · {{ exp.company }}
-                </div>
-                <div class="cv-exp-date">
-                  {{ exp.startDate }} —
-                  {{ exp.isCurrent ? "Présent" : exp.endDate }}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="cv-preview-overlay">Cliquez pour voir le CV complet</div>
-        </div>
-      </div>
-      <div *ngIf="!hasCV" class="cv-empty-card">
-        <div class="cv-empty-icon">✨</div>
-        <div class="cv-empty-title">Aucun CV généré pour l'instant</div>
-        <button class="btn-primary" (click)="goToOnboarding()">
-          Compléter l'onboarding →
-        </button>
-      </div>
-    </div>
-
-    <!-- ══ BLOCKCHAIN ══ -->
-    <div class="section-content" *ngIf="activeSection === 'blockchain'">
-      <div class="coming-soon-card">
-        <div class="cs-icon">🔗</div>
-        <div class="cs-title">Documents Blockchain</div>
-        <div class="cs-sub">
-          La certification blockchain de vos diplômes et expériences est en
-          cours de déploiement. Cette fonctionnalité sera disponible très
-          prochainement.
-        </div>
-        <div class="cs-badge">Bientôt disponible</div>
-      </div>
-    </div>
-
-    <!-- ══ IA COACH ══ -->
-    <div class="section-content" *ngIf="activeSection === 'ia-coach'">
-      <div class="coming-soon-card">
-        <div class="cs-icon">🤖</div>
-        <div class="cs-title">IA Coach Carrière</div>
-        <div class="cs-sub">
-          Votre coach IA personnel analysera votre profil, vous suggèrera des
-          améliorations, vous préparera aux entretiens et vous conseillera sur
-          votre évolution de carrière.
-        </div>
-        <div class="cs-badge">Bientôt disponible</div>
-      </div>
-    </div>
-
-    <!-- ══ OFFRES ══ -->
-    <div class="section-content" *ngIf="activeSection === 'offres'">
-      <div class="coming-soon-card">
-        <div class="cs-icon">💼</div>
-        <div class="cs-title">Offres d'emploi</div>
-        <div class="cs-sub">
-          L'IA matchera automatiquement votre profil avec les meilleures offres
-          disponibles au Sénégal et en Afrique de l'Ouest, selon vos compétences
-          et préférences.
-        </div>
-        <div class="cs-badge">Bientôt disponible</div>
-      </div>
-    </div>
-
-    <!-- ══ CANDIDATURES ══ -->
-    <div class="section-content" *ngIf="activeSection === 'candidatures'">
-      <div class="coming-soon-card">
-        <div class="cs-icon">📋</div>
-        <div class="cs-title">Mes candidatures</div>
-        <div class="cs-sub">
-          Suivez l'état de toutes vos candidatures en temps réel. Vous recevrez
-          des notifications à chaque mise à jour de votre dossier par un
-          recruteur.
-        </div>
-        <div class="cs-badge">Bientôt disponible</div>
-      </div>
-    </div>
-
-    <!-- ══ MESSAGES ══ -->
-    <div class="section-content" *ngIf="activeSection === 'messages'">
-      <div class="coming-soon-card">
-        <div class="cs-icon">💬</div>
-        <div class="cs-title">Messages</div>
-        <div class="cs-sub">
-          Communiquez directement avec les recruteurs qui ont consulté votre
-          profil. Toutes vos conversations en un seul endroit.
-        </div>
-        <div class="cs-badge">Bientôt disponible</div>
-      </div>
-    </div>
-
-    <!-- ══ RENDEZ-VOUS ══ -->
-    <div class="section-content" *ngIf="activeSection === 'rendez-vous'">
-      <div class="coming-soon-card">
-        <div class="cs-icon">📅</div>
-        <div class="cs-title">Rendez-vous</div>
-        <div class="cs-sub">
-          Gérez vos rendez-vous d'entretien, recevez des rappels automatiques et
-          préparez-vous grâce à l'IA Coach avant chaque entretien.
-        </div>
-        <div class="cs-badge">Bientôt disponible</div>
-      </div>
-    </div>
-  </main>
-</div>
-
-<ng-template #loadingTpl>
-  <div class="loading-screen">
-    <div class="loading-spin"></div>
-    <div>Chargement de votre profil…</div>
+<!-- candidate-dashboard.component.html (CORRIGÉ) -->
+<div class="dashboard">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loader"></div>
   </div>
-</ng-template>
+
+  <!-- Dashboard Content -->
+  <ng-container *ngIf="!isLoading">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+      <div class="welcome-content">
+        <h1>{{ greeting }}, <span>{{ userData?.firstName || 'Candidat' }}</span> 👋</h1>
+        <p>{{ title }} • {{ location || 'Localisation non renseignée' }}</p>
+      </div>
+      <div class="profile-completion">
+        <div class="completion-circle">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="4"/>
+            <circle cx="40" cy="40" r="36" fill="none" stroke="#00b894" stroke-width="4"
+                    [attr.stroke-dasharray]="226.2" [attr.stroke-dashoffset]="226.2 - (226.2 * profileCompletion / 100)"
+                    stroke-linecap="round"/>
+          </svg>
+          <div class="completion-percent">{{ profileCompletion }}%</div>
+        </div>
+        <div class="completion-label">Profil complété</div>
+      </div>
+    </div>
+
+    <!-- AI Suggestions -->
+    <div class="suggestions-card" *ngIf="suggestions.length">
+      <div class="suggestions-content">
+        <span class="suggestions-icon">💡</span>
+        <span class="suggestions-text">
+          <strong>Suggestions IA :</strong> {{ suggestions[0].message }}
+        </span>
+      </div>
+      <button class="btn-suggestion" [routerLink]="suggestions[0].actionLink">
+        {{ suggestions[0].action }} →
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card" *ngFor="let stat of stats">
+        <div class="stat-icon" [style.background]="stat.color + '15'">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" [style.color]="stat.color" stroke="currentColor" stroke-width="1.5">
+            <path [attr.d]="stat.icon" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="stat-value">{{ stat.value }}</div>
+        <div class="stat-label">{{ stat.label }}</div>
+      </div>
+    </div>
+
+    <!-- CV Quick Access -->
+    <div class="cv-quick-card" *ngIf="hasCV" (click)="navigateToCV()">
+      <div class="cv-quick-left">
+        <div class="cv-quick-icon">📄</div>
+        <div>
+          <div class="cv-quick-title">Mon CV</div>
+          <div class="cv-quick-subtitle">Cliquez pour voir, modifier ou exporter</div>
+        </div>
+      </div>
+      <span class="cv-quick-arrow">→</span>
+    </div>
+
+    <div class="cv-empty-card" *ngIf="!hasCV">
+      <div class="cv-empty-icon">✨</div>
+      <div class="cv-empty-title">Créez votre CV intelligent</div>
+      <div class="cv-empty-subtitle">Notre IA vous aide à générer un CV professionnel</div>
+      <button class="btn-primary" (click)="navigateToCV()">
+        Commencer →
+      </button>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+      <!-- Recent Activity -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Activité récente</h3>
+          <a class="card-link" routerLink="/candidate/applications">Voir tout</a>
+        </div>
+        <div class="activity-list" *ngIf="recentActivities.length">
+          <div class="activity-item" *ngFor="let activity of recentActivities">
+            <div class="activity-icon" [style.background]="getActivityColor(activity.type) + '15'">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" [style.color]="getActivityColor(activity.type)" stroke="currentColor" stroke-width="1.5">
+                <path [attr.d]="getActivityIcon(activity.type)" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="activity-content">
+              <div class="activity-message">{{ activity.message }}</div>
+              <div class="activity-date">{{ formatRelativeDate(activity.date) }}</div>
+            </div>
+            <span class="activity-status" [class.status-pending]="activity.status === 'pending'" [class.status-viewed]="activity.status === 'viewed'">
+              {{ activity.status === 'pending' ? 'En cours' : 'Consulté' }}
+            </span>
+          </div>
+        </div>
+        <div class="empty-state" *ngIf="!recentActivities.length">
+          <div class="empty-icon">📭</div>
+          <div class="empty-title">Aucune activité</div>
+          <div class="empty-subtitle">Vos candidatures apparaîtront ici</div>
+        </div>
+      </div>
+
+      <!-- Top Skills -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Compétences clés</h3>
+          <a class="card-link" (click)="navigateToCV()">Modifier</a>
+        </div>
+        <div class="skill-tags" *ngIf="userData?.cvData?.technicalSkills?.length">
+          <span class="skill-tag" *ngFor="let skill of userData?.cvData?.technicalSkills | slice:0:8">
+            {{ skill }}
+          </span>
+        </div>
+        <div class="empty-state" *ngIf="!userData?.cvData?.technicalSkills?.length">
+          <div class="empty-icon">⚙️</div>
+          <div class="empty-title">Aucune compétence</div>
+          <div class="empty-subtitle">Ajoutez vos compétences techniques</div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

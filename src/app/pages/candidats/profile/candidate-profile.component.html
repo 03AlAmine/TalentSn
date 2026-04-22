@@ -1,0 +1,280 @@
+<!-- candidate-profile.component.html (AMÉLIORÉ) -->
+<div class="profile-container">
+  <!-- Header -->
+  <div class="profile-header">
+    <h1>Mon profil</h1>
+    <p>Gérez vos informations personnelles et professionnelles</p>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="profile-progress">
+    <div class="progress-info">
+      <span>Complétion du profil</span>
+      <span class="progress-value">{{ profileCompletion }}%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="profileCompletion"></div>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="alert success">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert error">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loader-container">
+    <div class="loader"></div>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!isLoading" class="profile-content">
+    <div class="profile-grid">
+      <!-- Left Column - Photo & Info -->
+      <div class="profile-sidebar">
+        <div class="photo-section">
+          <div class="photo-preview">
+            <img *ngIf="photoPreview" [src]="photoPreview" [alt]="fullName" />
+            <div class="photo-placeholder" *ngIf="!photoPreview">
+              <span>{{ getInitials() }}</span>
+            </div>
+            <button class="change-photo-btn" (click)="fileInput.click()" title="Changer la photo">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </button>
+            <input #fileInput type="file" accept="image/*" (change)="onPhotoSelected($event)" hidden />
+          </div>
+          <button *ngIf="photoPreview" class="remove-photo-btn" (click)="removePhoto()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+            Supprimer
+          </button>
+        </div>
+
+        <div class="info-card">
+          <h3>Informations</h3>
+          <div class="stat-item">
+            <span class="stat-label">Membre depuis</span>
+            <span class="stat-value">{{ formatDate(userData?.createdAt) }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Rôle</span>
+            <span class="stat-value">Candidat</span>
+          </div>
+          <div class="stat-item" *ngIf="userData?.uid">
+            <span class="stat-label">ID utilisateur</span>
+            <span class="stat-value">{{ userData?.uid | slice:0:8 }}...</span>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h3>Sécurité</h3>
+          <button class="security-btn" (click)="showPasswordModal = true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            Changer le mot de passe
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Column - Form -->
+      <div class="profile-form">
+        <form (ngSubmit)="saveProfile()">
+          <div class="form-section">
+            <h3>Informations personnelles</h3>
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Prénom <span class="required">*</span></label>
+                <input type="text" [(ngModel)]="profileForm.firstName" name="firstName"
+                       placeholder="Votre prénom" (change)="onFieldChange()" />
+              </div>
+
+              <div class="form-field">
+                <label>Nom <span class="required">*</span></label>
+                <input type="text" [(ngModel)]="profileForm.lastName" name="lastName"
+                       placeholder="Votre nom" (change)="onFieldChange()" />
+              </div>
+
+              <div class="form-field">
+                <label>Email</label>
+                <input type="email" [(ngModel)]="profileForm.email" name="email" disabled />
+                <span class="field-hint">L'email ne peut pas être modifié</span>
+              </div>
+
+              <div class="form-field">
+                <label>Téléphone</label>
+                <input type="tel" [(ngModel)]="profileForm.phone" name="phone"
+                       placeholder="+221 77 123 45 67" (change)="onFieldChange()" />
+              </div>
+
+              <div class="form-field">
+                <label>Ville</label>
+                <select [(ngModel)]="profileForm.city" name="city" (change)="onFieldChange()">
+                  <option value="">Sélectionnez une ville</option>
+                  <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label>Pays</label>
+                <select [(ngModel)]="profileForm.country" name="country" (change)="onFieldChange()">
+                  <option value="">Sélectionnez un pays</option>
+                  <option *ngFor="let country of countries" [value]="country">{{ country }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Informations professionnelles</h3>
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Titre / Poste</label>
+                <input type="text" [(ngModel)]="profileForm.title" name="title"
+                       placeholder="ex: Développeur Full Stack" (change)="onFieldChange()" />
+              </div>
+
+              <div class="form-field">
+                <label>Secteur d'activité</label>
+                <select [(ngModel)]="profileForm.sector" name="sector" (change)="onFieldChange()">
+                  <option value="">Sélectionnez un secteur</option>
+                  <option *ngFor="let sector of sectors" [value]="sector">{{ sector }}</option>
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label>Expérience</label>
+                <select [(ngModel)]="profileForm.experienceYears" name="experienceYears" (change)="onFieldChange()">
+                  <option value="">Sélectionnez</option>
+                  <option *ngFor="let level of experienceLevels" [value]="level">{{ level }}</option>
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label>Niveau d'études</label>
+                <select [(ngModel)]="profileForm.educationLevel" name="educationLevel" (change)="onFieldChange()">
+                  <option value="">Sélectionnez</option>
+                  <option *ngFor="let level of educationLevels" [value]="level">{{ level }}</option>
+                </select>
+              </div>
+
+              <div class="form-field full-width">
+                <label>Bio / Présentation</label>
+                <textarea [(ngModel)]="profileForm.bio" name="bio" rows="4"
+                          placeholder="Parlez de vous, votre parcours, vos objectifs..."
+                          (change)="onFieldChange()"></textarea>
+                <span class="field-hint">Minimum 50 caractères recommandé</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="goBack()">Annuler</button>
+            <button type="submit" class="btn-primary" [disabled]="isSaving">
+              <span *ngIf="!isSaving">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                  <polyline points="17 21 17 13 7 13 7 21"/>
+                  <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                Enregistrer
+              </span>
+              <span *ngIf="isSaving" class="btn-spinner"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Password Change Modal -->
+  <div class="modal" *ngIf="showPasswordModal" (click)="showPasswordModal = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Changer le mot de passe</h3>
+        <button class="modal-close" (click)="showPasswordModal = false">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="passwordError" class="password-error">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          {{ passwordError }}
+        </div>
+
+        <div class="form-group">
+          <label>Mot de passe actuel <span class="required">*</span></label>
+          <input type="password" [(ngModel)]="passwordData.currentPassword"
+                 placeholder="Entrez votre mot de passe actuel" />
+        </div>
+
+        <div class="form-group">
+          <label>Nouveau mot de passe <span class="required">*</span></label>
+          <input type="password" [(ngModel)]="passwordData.newPassword"
+                 (input)="onNewPasswordChange($any($event.target).value)"
+                 placeholder="Minimum 6 caractères" />
+          <div class="password-strength" *ngIf="passwordData.newPassword">
+            <div class="strength-bar">
+              <div class="strength-fill" [style.width.%]="(passwordStrength / 5) * 100"
+                   [style.background]="getPasswordStrengthColor()"></div>
+            </div>
+            <span class="strength-label" [style.color]="getPasswordStrengthColor()">
+              {{ getPasswordStrengthLabel() }}
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Confirmer le nouveau mot de passe <span class="required">*</span></label>
+          <input type="password" [(ngModel)]="passwordData.confirmPassword"
+                 placeholder="Répétez le nouveau mot de passe" />
+          <div *ngIf="passwordData.confirmPassword && passwordData.newPassword !== passwordData.confirmPassword"
+               class="password-match-error">
+            Les mots de passe ne correspondent pas
+          </div>
+        </div>
+
+        <div class="password-requirements">
+          <p>Le mot de passe doit contenir :</p>
+          <ul>
+            <li>Au moins 6 caractères</li>
+            <li>Au moins une lettre majuscule</li>
+            <li>Au moins une lettre minuscule</li>
+            <li>Au moins un chiffre</li>
+            <li>Au moins un caractère spécial (optionnel)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="showPasswordModal = false">Annuler</button>
+        <button class="btn-primary" (click)="changePassword()" [disabled]="isChangingPassword">
+          {{ isChangingPassword ? 'Modification...' : 'Changer' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

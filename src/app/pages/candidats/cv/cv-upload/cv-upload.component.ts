@@ -1,178 +1,115 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+// cv-upload.component.ts (REFACTORISÉ - simplifié)
+import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  CvParserService,
-  ExtractedProfile,
-  ParseProgress,
-} from '../../../../core/services/cv-parser.service';
-
-export type UploadMode = 'idle' | 'dragging' | 'processing' | 'done' | 'error';
+import { Router } from '@angular/router';
+import { CvParserService, ExtractedProfile, ParseProgress } from '../../../../core/services/cv-parser.service';
 
 @Component({
   selector: 'app-cv-upload',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './cv-upload.component.html',
-  styleUrls: ['./cv-upload.component.css'],
+  styleUrls: ['./cv-upload.component.css']
 })
 export class CvUploadComponent {
   @Output() profileExtracted = new EventEmitter<ExtractedProfile>();
-  @Output() skipUpload = new EventEmitter<void>();
+  @Output() skip = new EventEmitter<void>();
 
-  mode: UploadMode = 'idle';
-  progress: ParseProgress = { stage: 'reading', progress: 0, message: '' };
-  errorMsg: string = '';
+  isDragging = false;
+  isProcessing = false;
+  isDone = false;
+  isError = false;
+
+  progress = { stage: 'reading', progress: 0, message: '' };
   extractedProfile: ExtractedProfile | null = null;
-  fileName: string = '';
+  fileName = '';
+  errorMessage = '';
 
-  constructor(private cvParser: CvParserService) {}
+  constructor(
+    private cvParser: CvParserService,
+    private router: Router
+  ) {}
 
-  // ──────────────────────────────────────────
-  // GETTERS (remplacent les computed signals)
-  // ──────────────────────────────────────────
-
-  get isDragging(): boolean {
-    return this.mode === 'dragging';
-  }
-  get isProcessing(): boolean {
-    return this.mode === 'processing';
-  }
-  get isDone(): boolean {
-    return this.mode === 'done';
-  }
-  get isError(): boolean {
-    return this.mode === 'error';
-  }
-
-  // ──────────────────────────────────────────
-  // DRAG & DROP
-  // ──────────────────────────────────────────
-
-  onDragOver(event: DragEvent): void {
+  onDragOver(event: DragEvent) {
     event.preventDefault();
-    event.stopPropagation();
-    this.mode = 'dragging';
+    this.isDragging = true;
   }
 
-  onDragLeave(event: DragEvent): void {
+  onDragLeave(event: DragEvent) {
     event.preventDefault();
-    this.mode = 'idle';
+    this.isDragging = false;
   }
 
-  onDrop(event: DragEvent): void {
+  onDrop(event: DragEvent) {
     event.preventDefault();
-    event.stopPropagation();
-    this.mode = 'idle';
+    this.isDragging = false;
     const files = event.dataTransfer?.files;
-    if (files && files.length > 0) {
-      this.processFile(files[0]);
-    }
+    if (files?.length) this.processFile(files[0]);
   }
 
-  // ──────────────────────────────────────────
-  // INPUT FILE
-  // ──────────────────────────────────────────
-
-  onFileInputChange(event: Event): void {
+  onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.processFile(input.files[0]);
-    }
+    if (input.files?.length) this.processFile(input.files[0]);
   }
 
-  triggerFileInput(): void {
-    document.getElementById('cv-file-input')?.click();
-  }
-
-  // ──────────────────────────────────────────
-  // TRAITEMENT DU FICHIER
-  // ──────────────────────────────────────────
-
-  private async processFile(file: File): Promise<void> {
-    const allowed = [
-      'application/pdf',
-      'image/jpeg',
-      'image/jpg',
-      'image/png',
-      'image/webp',
-    ];
-    const maxSize = 10 * 1024 * 1024; // 10 MB
-
-    if (
-      !allowed.includes(file.type) &&
-      !file.name.match(/\.(pdf|jpg|jpeg|png|webp)$/i)
-    ) {
-      this.errorMsg = 'Format non supporté. Utilisez PDF, JPG ou PNG.';
-      this.mode = 'error';
+  private async processFile(file: File) {
+    const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+    if (!validTypes.includes(file.type) && !file.name.match(/\.(pdf|jpg|jpeg|png)$/i)) {
+      this.errorMessage = 'Format non supporté. Utilisez PDF, JPG ou PNG.';
+      this.isError = true;
       return;
     }
 
-    if (file.size > maxSize) {
-      this.errorMsg = 'Fichier trop lourd (max 10 MB).';
-      this.mode = 'error';
+    if (file.size > 10 * 1024 * 1024) {
+      this.errorMessage = 'Fichier trop volumineux (max 10 Mo).';
+      this.isError = true;
       return;
     }
 
     this.fileName = file.name;
-    this.mode = 'processing';
-    this.errorMsg = '';
+    this.isProcessing = true;
+    this.isError = false;
 
     try {
-      const profile = await this.cvParser.parseFile(
-        file,
-        (p: ParseProgress) => {
-          this.progress = { ...p }; // spread pour forcer la détection de changement
-        },
-      );
-
+      const profile = await this.cvParser.parseFile(file, (progress) => {
+        this.progress = progress;
+      });
       this.extractedProfile = profile;
-      this.mode = 'done';
-    } catch (err: any) {
-      console.error('CV parsing error:', err);
-      this.errorMsg = err.message || "Erreur lors de l'analyse du document.";
-      this.mode = 'error';
+      this.isProcessing = false;
+      this.isDone = true;
+    } catch (error) {
+      this.errorMessage = 'Erreur lors de l\'analyse du document.';
+      this.isError = true;
+      this.isProcessing = false;
     }
   }
 
-  // ──────────────────────────────────────────
-  // ACTIONS UTILISATEUR
-  // ──────────────────────────────────────────
-
-  confirmProfile(): void {
+  confirmProfile() {
     if (this.extractedProfile) {
       this.profileExtracted.emit(this.extractedProfile);
     }
   }
 
-  retryUpload(): void {
-    this.mode = 'idle';
-    this.errorMsg = '';
+  retry() {
+    this.isError = false;
+    this.isDone = false;
     this.extractedProfile = null;
     this.fileName = '';
     this.progress = { stage: 'reading', progress: 0, message: '' };
   }
 
-  skip(): void {
-    this.skipUpload.emit();
+  skipUpload() {
+    this.skip.emit();
   }
 
-  // ──────────────────────────────────────────
-  // HELPERS TEMPLATE
-  // ──────────────────────────────────────────
+  goBack() {
+    this.router.navigate(['/candidate/cv']);
+  }
 
   getConfidenceLabel(score: number): string {
-    if (score >= 80) return '🟢 Excellent';
-    if (score >= 60) return '🟡 Bon';
-    if (score >= 40) return '🟠 Partiel';
-    return '🔴 Limité';
-  }
-
-  isStageCompleted(targetStage: string): boolean {
-    const order = ['reading', 'ocr', 'parsing', 'done'];
-    return order.indexOf(this.progress.stage) > order.indexOf(targetStage);
-  }
-
-  isStageActive(targetStage: string): boolean {
-    return this.progress.stage === targetStage;
+    if (score >= 80) return 'Excellent';
+    if (score >= 60) return 'Bon';
+    if (score >= 40) return 'Correct';
+    return 'Partiel';
   }
 }

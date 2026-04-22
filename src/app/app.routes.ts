@@ -1,7 +1,8 @@
-// app.routes.ts
+// app.routes.ts (CORRIGÉ)
 import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
 import { RecruiterLayoutComponent } from './pages/layouts/recruiter-layout/recruiter-layout.component';
+import { CandidateLayoutComponent } from './pages/layouts/candidat-layout/candidate-layout.component';
 
 export const routes: Routes = [
   // ─── PUBLIC ──────────────────────────────────────────────
@@ -36,6 +37,7 @@ export const routes: Routes = [
   // ─── CANDIDAT ────────────────────────────────────────────
   {
     path: 'candidate',
+    component: CandidateLayoutComponent,
     children: [
       {
         path: 'dashboard',
@@ -45,26 +47,30 @@ export const routes: Routes = [
         path: 'cv',
         loadComponent: () => import('./pages/candidats/cv/cv-view/cv-view.component').then(m => m.CvViewComponent)
       },
-     /* {
+      {
+        path: 'cv/upload',
+        loadComponent: () => import('./pages/candidats/cv/cv-upload/cv-upload.component').then(m => m.CvUploadComponent)
+      },
+    {
+        path: 'offers',
+        loadComponent: () => import('./pages/candidats/offers/offers.component').then(m => m.OffersComponent)
+      },
+      {
         path: 'applications',
         loadComponent: () => import('./pages/candidats/applications/applications.component').then(m => m.ApplicationsComponent)
       },
-      {
+      /*  {
         path: 'messages',
         loadComponent: () => import('./pages/candidats/messages/messages.component').then(m => m.MessagesComponent)
       },
       {
-        path: 'appointments',
-        loadComponent: () => import('./pages/candidats/appointments/appointments.component').then(m => m.AppointmentsComponent)
-      },
-      {
-        path: 'ia-coach',
-        loadComponent: () => import('./pages/candidats/ia-coach/ia-coach.component').then(m => m.IaCoachComponent)
-      },
+        path: 'interviews',
+        loadComponent: () => import('./pages/candidats/interviews/interviews.component').then(m => m.InterviewsComponent)
+      },*/
       {
         path: 'profile',
-        loadComponent: () => import('./pages/candidats/profile/profile.component').then(m => m.ProfileComponent)
-      },*/
+        loadComponent: () => import('./pages/candidats/profile/candidate-profile.component').then(m => m.CandidateProfileComponent)
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
@@ -82,8 +88,6 @@ export const routes: Routes = [
       { path: 'applications/:id', loadComponent: () => import('./pages/recruiter/applications/application-detail/application-detail.component').then(m => m.ApplicationDetailComponent) },
       { path: 'talents', loadComponent: () => import('./pages/recruiter/talents/talent-search/talent-search.component').then(m => m.TalentSearchComponent) },
       { path: 'talents/:id', loadComponent: () => import('./pages/recruiter/talents/talent-profile/talent-profile.component').then(m => m.TalentProfileComponent) },
-      /*  { path: 'messages', loadComponent: () => import('./pages/recruiter/messages/messages.component').then(m => m.MessagesComponent) },
-      { path: 'interviews', loadComponent: () => import('./pages/recruiter/interviews/interviews.component').then(m => m.InterviewsComponent) }, */
       { path: 'company', loadComponent: () => import('./pages/recruiter/company/company-settings.component').then(m => m.CompanySettingsComponent) },
       { path: 'profile', loadComponent: () => import('./pages/recruiter/profile/profile.component').then(m => m.ProfileComponent) },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
